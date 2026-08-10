@@ -1,0 +1,212 @@
+/* PescaPro - Tema oscuro marino, mobile-first */
+:root {
+  --fondo: #0d1620;
+  --panel: #16222f;
+  --panel2: #1c2b3a;
+  --borde: #24374a;
+  --texto: #e8f0f7;
+  --texto2: #9fb3c4;
+  --acento: #ffb020;
+  --azul: #4dabf7;
+  --verde: #2fb344;
+  --ambar: #f59f00;
+  --rojo: #e03131;
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; padding: 0; background: var(--fondo); color: var(--texto);
+  font-family: -apple-system, 'Segoe UI', Roboto, sans-serif; font-size: 15px; height: 100%; }
+
+/* Cabecera */
+.pp-header { position: sticky; top: 0; z-index: 1000; background: linear-gradient(180deg, #0e1c2b, #12202e);
+  border-bottom: 1px solid var(--borde); padding: 10px 12px calc(8px);
+  padding-top: calc(10px + env(safe-area-inset-top)); display: flex; align-items: center; gap: 8px; }
+.pp-logo { font-size: 20px; font-weight: 800; color: var(--acento); letter-spacing: .5px; }
+#hdr-spot { flex: 1; min-width: 0; cursor: pointer; background: var(--panel2); border: 1px solid var(--borde);
+  border-radius: 10px; padding: 6px 10px; }
+#hdr-spot-nombre { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+.pp-update { font-size: 11px; color: var(--texto2); }
+.pp-update.viejo { color: var(--ambar); }
+.pp-hbtn { background: var(--panel2); color: var(--texto); border: 1px solid var(--borde); border-radius: 10px;
+  min-width: 38px; height: 38px; font-size: 17px; cursor: pointer; }
+
+/* Banner seguridad */
+.pp-banner { padding: 8px 12px; font-weight: 600; font-size: 13.5px; text-align: center; }
+.pp-banner-rojo { background: #58151c; color: #ffb4ab; border-bottom: 1px solid var(--rojo); }
+.pp-banner-amarillo { background: #4d3800; color: #ffd66e; border-bottom: 1px solid var(--ambar); }
+
+/* Vistas */
+main { padding-bottom: calc(70px + env(safe-area-inset-bottom)); }
+.pp-vista { display: none; padding: 10px; }
+.pp-vista.activa { display: block; }
+#vista-mapa { padding: 0; }
+.pp-cargando { text-align: center; color: var(--texto2); padding: 40px 0; }
+.pp-error { text-align: center; color: var(--texto2); }
+.pp-pad { padding: 0 10px; }
+
+/* Tarjetas */
+.pp-card { background: var(--panel); border: 1px solid var(--borde); border-radius: 14px;
+  padding: 12px 14px; margin-bottom: 10px; }
+.pp-card h3 { margin: 0 0 10px; font-size: 15px; color: var(--texto); }
+.pp-nota { font-size: 12px; color: var(--texto2); margin: 8px 0 0; line-height: 1.45; }
+
+/* Chips / modos */
+.pp-modos { display: flex; gap: 8px; margin-bottom: 10px; overflow-x: auto; padding-bottom: 2px; }
+.pp-chip { background: var(--panel2); border: 1px solid var(--borde); color: var(--texto);
+  border-radius: 20px; padding: 8px 14px; font-size: 13.5px; cursor: pointer; white-space: nowrap; }
+.pp-chip.activo { background: var(--acento); border-color: var(--acento); color: #14202d; font-weight: 700; }
+
+/* Gauge */
+.pp-card-indice { display: flex; align-items: center; gap: 14px; }
+.pp-gauge { width: 128px; flex: 0 0 128px; }
+.pp-gauge-num { font-size: 34px; font-weight: 800; }
+.pp-gauge-lbl { font-size: 11px; fill: var(--texto2); }
+.pp-indice-etiqueta { font-size: 24px; font-weight: 800; }
+.pp-indice-sub { color: var(--texto2); margin-top: 4px; }
+
+/* Factores */
+.pp-factor { display: flex; align-items: center; gap: 8px; margin: 6px 0; }
+.pp-factor-nombre { flex: 0 0 118px; font-size: 13px; color: var(--texto2); }
+.pp-barra { flex: 1; height: 8px; background: var(--panel2); border-radius: 6px; overflow: hidden; }
+.pp-barra-rel { height: 100%; border-radius: 6px; transition: width .3s; }
+.pp-factor-peso { flex: 0 0 34px; text-align: right; font-size: 11.5px; color: var(--texto2); }
+
+/* Condiciones grid */
+.pp-cond-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.pp-cond { background: var(--panel2); border-radius: 10px; padding: 8px 10px; }
+.pp-cond-ico { font-size: 18px; }
+.pp-cond-lbl { font-size: 11.5px; color: var(--texto2); margin-top: 2px; }
+.pp-cond-val { font-size: 14px; font-weight: 650; margin-top: 1px; }
+
+/* Marea */
+.pp-marea-linea { font-size: 14.5px; margin-bottom: 6px; }
+.pp-marea-amp { font-size: 13px; color: var(--texto2); margin-bottom: 6px; }
+.pp-curva svg { width: 100%; height: auto; display: block; }
+.pp-svg-txt { font-size: 9.5px; fill: var(--texto2); }
+.pp-mareas-prox { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 8px; }
+.pp-marea-item { background: var(--panel2); border-radius: 8px; padding: 6px 8px; font-size: 12px; color: var(--texto2); }
+
+/* Solunar */
+.pp-solunar { font-size: 13px; margin-top: 10px; line-height: 2; }
+.pp-tag { background: var(--panel2); border: 1px solid var(--borde); border-radius: 8px; padding: 3px 8px; font-size: 12px; }
+.pp-tag-mayor { border-color: var(--acento); color: var(--acento); }
+
+/* Especies */
+.pp-esp-fila { display: flex; align-items: center; gap: 8px; padding: 7px 0; cursor: pointer; border-bottom: 1px solid var(--borde); }
+.pp-esp-fila:last-of-type { border-bottom: none; }
+.pp-esp-ico { font-size: 18px; }
+.pp-esp-nombre { flex: 0 0 128px; font-size: 13.5px; }
+.pp-barra-esp { flex: 1; }
+.pp-esp-val { flex: 0 0 28px; text-align: right; font-weight: 700; font-size: 13px; }
+.pp-esp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 10px; }
+.pp-esp-card { background: var(--panel); border: 1px solid var(--borde); border-radius: 14px; padding: 12px; cursor: pointer; text-align: center; }
+.pp-esp-card-ico { font-size: 30px; }
+.pp-esp-card-nombre { font-weight: 700; margin-top: 4px; }
+.pp-esp-card-val { font-size: 26px; font-weight: 800; margin-top: 2px; }
+.pp-esp-card-motivo { font-size: 11.5px; color: var(--texto2); margin-top: 3px; min-height: 28px; }
+.pp-heat { display: grid; grid-template-columns: repeat(12, 1fr); gap: 3px; margin: 6px 0 10px; }
+.pp-heat-celda { border-radius: 5px; text-align: center; font-size: 10.5px; padding: 6px 0; color: #fff; background: var(--panel2); }
+.pp-heat-actual { outline: 2px solid var(--acento); }
+.pp-campo { margin: 7px 0; font-size: 13.5px; line-height: 1.45; }
+.pp-mejor-hora { font-size: 13px; padding: 3px 0; }
+
+/* Previsión */
+.pp-ventana { display: flex; gap: 10px; align-items: center; padding: 7px 0; border-bottom: 1px solid var(--borde); }
+.pp-ventana:last-child { border-bottom: none; }
+.pp-vent-idx { flex: 0 0 44px; height: 44px; border-radius: 10px; color: #14202d; font-weight: 800; font-size: 17px;
+  display: flex; align-items: center; justify-content: center; }
+.pp-vent-info { display: flex; flex-direction: column; gap: 2px; font-size: 13.5px; }
+.pp-vent-info span { color: var(--texto2); font-size: 12px; }
+.pp-grafico-scroll { overflow-x: auto; }
+.pp-grafico { display: flex; align-items: flex-end; gap: 2px; height: 130px; min-width: max-content; padding-top: 4px; }
+.pp-graf-col { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; width: 16px; cursor: pointer; }
+.pp-graf-barra { width: 12px; border-radius: 3px 3px 0 0; }
+.pp-graf-hora { font-size: 9px; color: var(--texto2); margin-top: 3px; }
+.pp-graf-dia { writing-mode: vertical-rl; transform: rotate(180deg); font-size: 10.5px; color: var(--acento);
+  font-weight: 700; padding: 0 2px; align-self: stretch; display: flex; align-items: center; }
+
+/* Mapa */
+#mapa { width: 100%; height: calc(100vh - 235px); min-height: 320px; background: #0a141e; }
+.pp-mapa-controles { padding: 10px 12px; background: var(--panel); border-top: 1px solid var(--borde); }
+.pp-mapa-fila { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; font-size: 13px; }
+.pp-mapa-fila input[type=range] { flex: 1; accent-color: var(--acento); }
+#mapa-hora { font-weight: 700; min-width: 92px; }
+#mapa-estado { font-size: 12px; color: var(--texto2); }
+.pp-leyenda { display: flex; gap: 10px; font-size: 11px; color: var(--texto2); flex-wrap: wrap; }
+.pp-pin { font-size: 26px; filter: drop-shadow(0 2px 3px rgba(0,0,0,.5)); }
+.pp-viento { font-size: 34px; color: var(--acento); text-shadow: 0 1px 4px rgba(0,0,0,.7); text-align: center; }
+.pp-viento-txt { font-size: 11px; font-weight: 700; color: var(--acento); text-align: center; text-shadow: 0 1px 3px #000; }
+.pp-fav-icon { font-size: 16px; }
+.leaflet-container { font: inherit; }
+
+/* Cuaderno */
+.pp-boton-principal { width: 100%; background: var(--acento); color: #14202d; border: none; border-radius: 12px;
+  padding: 13px; font-size: 15.5px; font-weight: 800; cursor: pointer; margin-bottom: 10px; }
+.pp-captura { border-bottom: 1px solid var(--borde); padding: 9px 0; }
+.pp-captura:last-child { border-bottom: none; }
+.pp-captura-cab { display: flex; align-items: center; gap: 6px; }
+.pp-captura-cab .pp-borrar { margin-left: auto; }
+.pp-borrar { background: none; border: none; color: var(--texto2); cursor: pointer; font-size: 13px; }
+.pp-captura-sub, .pp-captura-cond { font-size: 12px; color: var(--texto2); margin-top: 2px; }
+.pp-captura-notas { font-size: 12.5px; margin-top: 3px; font-style: italic; }
+.pp-stats { margin: 10px 0; }
+.pp-stats-titulo { font-size: 12.5px; font-weight: 700; color: var(--texto2); text-transform: uppercase; letter-spacing: .4px; }
+
+/* Formularios y modal */
+.pp-form { display: flex; flex-direction: column; gap: 8px; }
+.pp-input { background: var(--panel2); border: 1px solid var(--borde); color: var(--texto); border-radius: 10px;
+  padding: 11px 12px; font-size: 14.5px; width: 100%; }
+.pp-modal-fondo { position: fixed; inset: 0; background: rgba(0, 0, 0, .6); z-index: 2000;
+  display: flex; align-items: flex-end; justify-content: center; }
+.pp-modal { background: var(--panel); border: 1px solid var(--borde); border-radius: 18px 18px 0 0;
+  width: 100%; max-width: 560px; max-height: 86vh; overflow-y: auto; padding: 16px;
+  padding-bottom: calc(16px + env(safe-area-inset-bottom)); position: relative; }
+.pp-modal h3 { margin-top: 2px; }
+.pp-modal-x { position: absolute; right: 10px; top: 10px; background: var(--panel2); color: var(--texto);
+  border: 1px solid var(--borde); border-radius: 50%; width: 32px; height: 32px; cursor: pointer; }
+.pp-lugar { padding: 10px 8px; border-bottom: 1px solid var(--borde); cursor: pointer; display: flex;
+  align-items: center; justify-content: space-between; gap: 8px; }
+.pp-lugar small { color: var(--texto2); }
+
+/* Fotos y galería */
+.pp-galeria { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.pp-galeria-celda { aspect-ratio: 1; border-radius: 10px; overflow: hidden; background: var(--panel2); cursor: pointer; }
+.pp-galeria-celda img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.pp-captura-flex { display: flex; gap: 10px; align-items: flex-start; }
+.pp-captura-thumb { flex: 0 0 56px; width: 56px; height: 56px; border-radius: 10px; overflow: hidden;
+  background: var(--panel2); cursor: pointer; }
+.pp-captura-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.pp-captura-cuerpo { flex: 1; min-width: 0; }
+.pp-foto-preview { width: 100%; max-height: 240px; object-fit: cover; border-radius: 12px; border: 1px solid var(--borde); }
+.pp-foto-grande { width: 100%; max-height: 60vh; object-fit: contain; border-radius: 12px; background: var(--panel2); min-height: 120px; }
+
+/* Trofeos: récords, logros y competiciones */
+.pp-mt { margin-top: 10px; }
+.pp-record-fila { font-size: 13px; padding: 5px 0; border-bottom: 1px solid var(--borde); }
+.pp-record-fila:last-child { border-bottom: none; }
+.pp-logros { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.pp-logro { background: var(--panel2); border: 1px solid var(--borde); border-radius: 12px; padding: 8px 4px;
+  text-align: center; cursor: pointer; opacity: .45; filter: grayscale(.9); }
+.pp-logro.conseguido { opacity: 1; filter: none; border-color: var(--acento); }
+.pp-logro-ico { font-size: 22px; }
+.pp-logro-nombre { font-size: 9.5px; color: var(--texto2); margin-top: 3px; line-height: 1.2; }
+.pp-logro-prog { font-size: 9px; color: var(--acento); margin-top: 2px; }
+.pp-liga-item { border: 1px solid var(--borde); border-radius: 12px; padding: 10px; margin-top: 8px;
+  cursor: pointer; background: var(--panel2); }
+.pp-liga-cab { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.pp-liga-activa { color: var(--verde); border-color: var(--verde); }
+.pp-liga-finalizada { color: var(--texto2); }
+.pp-liga-próxima { color: var(--azul); border-color: var(--azul); }
+.pp-rank-fila { display: flex; align-items: center; gap: 8px; padding: 8px 6px; border-bottom: 1px solid var(--borde); font-size: 14px; }
+.pp-rank-fila.yo { background: rgba(255, 176, 32, .08); border-radius: 8px; }
+.pp-rank-pos { flex: 0 0 34px; font-size: 16px; }
+.pp-rank-nombre { flex: 1; font-weight: 650; }
+.pp-rank-detalle { color: var(--texto2); font-size: 12.5px; text-align: right; }
+.pp-area { resize: vertical; font-family: monospace; font-size: 12px; }
+
+/* Nav inferior */
+.pp-nav { position: fixed; bottom: 0; left: 0; right: 0; z-index: 1500; display: flex;
+  background: #0e1a26; border-top: 1px solid var(--borde); padding-bottom: env(safe-area-inset-bottom); }
+.pp-nav button { flex: 1; background: none; border: none; color: var(--texto2); padding: 8px 0 7px;
+  font-size: 10.5px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.pp-nav button span { font-size: 19px; }
+.pp-nav button.activo { color: var(--acento); }

@@ -1,0 +1,7 @@
+node_modules/
+android/
+dist/
+.gradle/
+*.keystore
+*.jks
+.DS_Store

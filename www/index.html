@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#0d1620">
+  <title>PescaPro — Condiciones de pesca</title>
+  <link rel="stylesheet" href="lib/leaflet/leaflet.css">
+  <link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+
+  <header class="pp-header">
+    <div class="pp-logo">🐟</div>
+    <div id="hdr-spot" title="Cambiar spot">
+      <span id="hdr-spot-nombre">—</span>
+      <span id="hdr-update" class="pp-update"></span>
+    </div>
+    <button id="btn-fav" class="pp-hbtn" title="Guardar spot en favoritos">☆</button>
+    <button id="btn-refrescar" class="pp-hbtn" title="Actualizar datos">⟳</button>
+  </header>
+
+  <div id="aviso-seguridad" class="pp-banner" style="display:none"></div>
+
+  <main>
+    <section id="vista-ahora" class="pp-vista activa"></section>
+
+    <section id="vista-prevision" class="pp-vista"></section>
+
+    <section id="vista-mapa" class="pp-vista">
+      <div id="mapa"></div>
+      <div class="pp-mapa-controles">
+        <div class="pp-mapa-fila">
+          <span>🕐</span>
+          <input type="range" id="mapa-slider" min="0" max="71" value="0" step="1">
+          <span id="mapa-hora">—</span>
+        </div>
+        <div class="pp-mapa-fila">
+          <label><input type="checkbox" id="mapa-viento" checked> 💨 Viento</label>
+          <label><input type="checkbox" id="mapa-seamark"> ⚓ Carta náutica</label>
+          <span id="mapa-estado"></span>
+        </div>
+        <div class="pp-leyenda">
+          <span>Corriente:</span>
+          <span style="color:#7f8fa0">— débil</span>
+          <span style="color:#4dabf7">— moderada</span>
+          <span style="color:#f59f00">— fuerte</span>
+          <span style="color:#e03131">— muy fuerte</span>
+          <span>· Desliza la hora para ver el patrón con la marea</span>
+        </div>
+      </div>
+    </section>
+
+    <section id="vista-especies" class="pp-vista"></section>
+
+    <section id="vista-cuaderno" class="pp-vista"></section>
+
+    <section id="vista-trofeos" class="pp-vista"></section>
+  </main>
+
+  <nav class="pp-nav">
+    <button data-vista="ahora" class="activo"><span>🎣</span>Ahora</button>
+    <button data-vista="prevision"><span>📈</span>Previsión</button>
+    <button data-vista="mapa"><span>🗺️</span>Mapa</button>
+    <button data-vista="especies"><span>🐟</span>Especies</button>
+    <button data-vista="cuaderno"><span>📓</span>Cuaderno</button>
+    <button data-vista="trofeos"><span>🏆</span>Trofeos</button>
+  </nav>
+
+  <script src="lib/leaflet/leaflet.js"></script>
+  <script src="lib/suncalc.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/especies.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/mareas.js"></script>
+  <script src="js/solunar.js"></script>
+  <script src="js/indice.js"></script>
+  <script src="js/fotos.js"></script>
+  <script src="js/cuaderno.js"></script>
+  <script src="js/records.js"></script>
+  <script src="js/trofeos.js"></script>
+  <script src="js/mapa.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

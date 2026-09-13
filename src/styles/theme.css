@@ -54,3 +54,20 @@ html, body { background: var(--ion-background-color); font-variant-numeric: tabu
 ion-tab-bar { position: fixed; bottom: 0; left: 0; right: 0; z-index: 1500; }
 
 .pp-contenido { padding-bottom: calc(56px + env(safe-area-inset-bottom)); }
+
+.pp-pad { padding: 0 10px; }
+.pp-cargando { text-align: center; color: var(--pp-texto2); padding: 40px 0; }
+.pp-nota { font-size: 12px; color: var(--pp-texto2); margin: 8px 0 0; line-height: 1.45; }
+
+/* Vista Especies: grid de tarjetas + ficha en modal (ver vista-especies.js) */
+.pp-esp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 10px; }
+.pp-esp-card { --background: var(--pp-panel); border-radius: 14px; margin: 0; text-align: center; }
+.pp-esp-card-ico { font-size: 30px; }
+.pp-esp-card-nombre { font-weight: 700; margin-top: 4px; }
+.pp-esp-card-val { font-size: 26px; font-weight: 800; margin-top: 2px; }
+.pp-esp-card-motivo { font-size: 11.5px; color: var(--pp-texto2); margin-top: 3px; min-height: 28px; }
+.pp-heat { display: grid; grid-template-columns: repeat(12, 1fr); gap: 3px; margin: 6px 0 10px; }
+.pp-heat-celda { border-radius: 5px; text-align: center; font-size: 10.5px; padding: 6px 0; color: #fff; background: var(--pp-panel2); }
+.pp-heat-actual { outline: 2px solid var(--ion-color-primary); }
+.pp-campo { margin: 7px 0; font-size: 13.5px; line-height: 1.45; }
+.pp-mejor-hora { font-size: 13px; padding: 3px 0; }

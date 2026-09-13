@@ -8,6 +8,10 @@ export const CONFIG = {
   REFRESH_MS: 30 * 60 * 1000,
   // Si los datos en caché son más viejos que esto al abrir, se refrescan
   STALE_MS: 15 * 60 * 1000,
+  // Timeout de peticiones a Open-Meteo (ms) -- fix HIGH de auditoria:
+  // getJSON() no tenia limite y podia colgar el refresco indefinidamente
+  // con conexion intermitente (uso tipico: sin cobertura en el pesquero).
+  FETCH_TIMEOUT_MS: 15 * 1000,
   DIAS_PREVISION: 5,
   DIAS_PASADOS: 1, // para calcular tendencia de presión
   // Rejilla de corrientes en el mapa (NxN puntos, separación en grados)

@@ -1,0 +1,56 @@
+/* PescaPro -- paleta oscura marina mapeada a las variables de tema de
+   Ionic (--ion-color-*, --ion-background-color, --ion-text-color), para
+   que ion-app/ion-header/ion-tab-bar/ion-button... hereden el mismo
+   look que ya tenia la app (ver www/css/app.css :root, valores
+   originales conservados). Solo tema oscuro: uso nocturno/exterior. */
+:root {
+  --ion-background-color: #0d1620;
+  --ion-background-color-rgb: 13, 22, 32;
+  --ion-text-color: #e8f0f7;
+  --ion-text-color-rgb: 232, 240, 247;
+
+  --ion-color-primary: #ffb020;
+  --ion-color-primary-rgb: 255, 176, 32;
+  --ion-color-primary-contrast: #14202d;
+  --ion-color-primary-contrast-rgb: 20, 32, 45;
+  --ion-color-primary-shade: #e09c1c;
+  --ion-color-primary-tint: #ffb936;
+
+  --ion-color-secondary: #4dabf7;
+  --ion-color-secondary-contrast: #14202d;
+
+  --ion-color-success: #2fb344;
+  --ion-color-success-contrast: #ffffff;
+
+  --ion-color-warning: #f59f00;
+  --ion-color-warning-contrast: #14202d;
+
+  --ion-color-danger: #e03131;
+  --ion-color-danger-contrast: #ffffff;
+
+  --ion-toolbar-background: #12202e;
+  --ion-item-background: #16222f;
+  --ion-border-color: #24374a;
+
+  --pp-panel: #16222f;
+  --pp-panel2: #1c2b3a;
+  --pp-texto2: #9fb3c4;
+}
+
+html, body { background: var(--ion-background-color); font-variant-numeric: tabular-nums; }
+
+/* La cabecera custom (logo/spot/acciones) vive dentro de ion-toolbar */
+.pp-logo { font-size: 20px; padding: 0 4px; }
+.pp-spot-selector { display: flex; flex-direction: column; cursor: pointer; padding: 2px 8px; }
+.pp-spot-selector small { color: var(--pp-texto2); font-size: 11px; }
+
+/* Banner de seguridad: persistente mientras dure el peligro (no es un
+   toast que se autooculte) */
+.pp-banner { padding: 8px 12px; font-weight: 600; font-size: 13.5px; text-align: center; }
+.pp-banner-rojo { background: #58151c; color: #ffb4ab; }
+.pp-banner-amarillo { background: #4d3800; color: #ffd66e; }
+
+/* Nav inferior fijo (no se usa ion-tabs/router, ver app-shell.js) */
+ion-tab-bar { position: fixed; bottom: 0; left: 0; right: 0; z-index: 1500; }
+
+.pp-contenido { padding-bottom: calc(56px + env(safe-area-inset-bottom)); }

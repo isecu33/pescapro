@@ -1,7 +1,7 @@
 /* Bootstrap de la app: registra los Custom Elements de Ionic (loader lazy,
    cada ion-* se carga bajo demanda -- minimiza el peso final en el APK),
-   registra los iconos usados de forma local (sin CDN, offline-first) y
-   monta el shell. Las vistas se cablean en app.js (Fase 4). */
+   registra los iconos usados de forma local (sin CDN, offline-first),
+   monta el shell y arranca la orquestacion (src/app.js, Fase 4). */
 import { defineCustomElements } from '@ionic/core/loader';
 import { addIcons } from 'ionicons';
 import {
@@ -18,6 +18,7 @@ import '@ionic/core/css/palettes/dark.always.css'; // solo tema oscuro (uso noct
 import './styles/theme.css';
 
 import './ui/shell/app-shell.js';
+import { crearApp } from './app.js';
 
 addIcons({
   'speedometer-outline': speedometerOutline,
@@ -41,5 +42,7 @@ defineCustomElements(window);
 
 document.addEventListener('DOMContentLoaded', () => {
   const raiz = document.getElementById('app');
-  raiz.appendChild(document.createElement('pp-app-shell'));
+  const shell = document.createElement('pp-app-shell');
+  raiz.appendChild(shell);
+  crearApp(shell); // se engancha a su propio DOMContentLoaded (once) para arrancar
 });

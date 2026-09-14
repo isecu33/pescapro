@@ -15,9 +15,22 @@
    bindPopup() -- aqui crearPopupFavorito() construye el popup con
    document.createElement/textContent, eliminando tambien el hack de
    'popupopen' + querySelector que el original necesitaba para
-   enganchar el click del enlace. */
+   enganchar el click del enlace.
+
+   Fix de bug real (detectado con Playwright, no por los tests happy-dom:
+   L.map() no se comporta igual en happy-dom, asi que esto no fallaba en
+   la suite): `import 'leaflet/dist/leaflet.css'` sin `?inline` hace que
+   Vite inyecte esa hoja de estilos en <head> del documento PRINCIPAL --
+   pero el mapa vive dentro de un Shadow Root (ver constructor), y el
+   CSS del documento NO atraviesa el limite de encapsulacion de Shadow
+   DOM. Sin las reglas de Leaflet (sobre todo `.leaflet-container {
+   overflow: hidden }`), los tiles posicionados con transform quedaban
+   sin recortar y el contenedor crecia a miles de px de alto -- por eso
+   la vista Mapa se veia completamente en blanco. Con `?inline` se
+   importa el CSS como texto y se inyecta a mano dentro del propio
+   Shadow Root. */
 import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
+import leafletCss from 'leaflet/dist/leaflet.css?inline';
 import { util } from '../../domain/config.js';
 
 export function colorPorVelocidad(vel) {
@@ -66,7 +79,7 @@ export class PpMapa extends HTMLElement {
     super();
     const shadow = this.attachShadow({ mode: 'open' });
     const style = document.createElement('style');
-    style.textContent = `
+    style.textContent = leafletCss + `
       :host { display: block; width: 100%; height: 100%; }
       .mapa { width: 100%; height: 100%; }
     `;

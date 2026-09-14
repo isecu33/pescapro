@@ -53,7 +53,20 @@ html, body { background: var(--ion-background-color); font-variant-numeric: tabu
 /* Nav inferior fijo (no se usa ion-tabs/router, ver app-shell.js) */
 ion-tab-bar { position: fixed; bottom: 0; left: 0; right: 0; z-index: 1500; }
 
-.pp-contenido { padding-bottom: calc(56px + env(safe-area-inset-bottom)); }
+/* Fix bug real (detectado con Playwright, no por los tests happy-dom):
+   ion-app aplica `justify-content: space-between` de fabrica -- pensado
+   para que ion-content (flex:1) absorba todo el espacio libre entre la
+   cabecera y el nav inferior. Nuestro <main> no es ion-content y sin
+   flex:1 el espacio libre se repartia como un hueco enorme en cualquier
+   vista cuyo contenido fuera mas bajo que la pantalla (Prevision,
+   Cuaderno...). overflow-y/min-height:0 permiten que sea este elemento
+   el que haga scroll, no la pagina entera. */
+.pp-contenido {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding-bottom: calc(56px + env(safe-area-inset-bottom));
+}
 
 /* Genericos de contenido (vistas): tarjeta, estado de carga, nota al pie.
    Portados de www/css/app.css -- se van anadiendo aqui a medida que cada

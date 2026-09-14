@@ -32,10 +32,19 @@ export class PpAppShell extends HTMLElement {
     super();
     this._vistaActiva = 'ahora';
     this._botones = {};
-    this._build();
+    // El spec de Custom Elements prohibe anadir hijos de luz (light DOM)
+    // dentro del constructor -- los navegadores reales lo hacen cumplir
+    // (Chrome: "NotSupportedError: ... must not have children"; happy-dom,
+    // usado en los tests, NO lo valida, asi que este bug paso los tests
+    // pero rompia la app real). _build() se difiere a connectedCallback(),
+    // que si permite mutar el propio elemento.
   }
 
   connectedCallback() {
+    if (!this._construido) {
+      this._construido = true;
+      this._build();
+    }
     this._actualizarTabSeleccionado();
   }
 

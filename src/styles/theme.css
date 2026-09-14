@@ -54,3 +54,31 @@ html, body { background: var(--ion-background-color); font-variant-numeric: tabu
 ion-tab-bar { position: fixed; bottom: 0; left: 0; right: 0; z-index: 1500; }
 
 .pp-contenido { padding-bottom: calc(56px + env(safe-area-inset-bottom)); }
+
+/* Vista Cuaderno (src/ui/views/vista-cuaderno.js): tarjetas, estadisticas,
+   galeria y visor de foto. El listado de capturas usa <pp-captura-card>,
+   que trae su propio Shadow DOM y no necesita clases de aqui. */
+.pp-card { background: var(--pp-panel); border: 1px solid var(--ion-border-color); border-radius: 14px;
+  padding: 12px 14px; margin-bottom: 10px; }
+.pp-card h3 { margin: 0 0 10px; font-size: 15px; color: var(--ion-text-color); }
+.pp-nota { font-size: 12px; color: var(--pp-texto2); margin: 8px 0 0; line-height: 1.45; }
+
+.pp-stats { margin: 10px 0; }
+.pp-stats-titulo { font-size: 12.5px; font-weight: 700; color: var(--pp-texto2); text-transform: uppercase; letter-spacing: .4px; }
+.pp-factor { display: flex; align-items: center; gap: 8px; margin: 6px 0; }
+.pp-factor-nombre { flex: 0 0 118px; font-size: 13px; color: var(--pp-texto2); }
+.pp-barra { flex: 1; height: 8px; background: var(--pp-panel2); border-radius: 6px; overflow: hidden; }
+.pp-barra-rel { height: 100%; border-radius: 6px; transition: width .3s; }
+.pp-factor-peso { flex: 0 0 34px; text-align: right; font-size: 11.5px; color: var(--pp-texto2); }
+
+.pp-galeria { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.pp-galeria-celda { aspect-ratio: 1; border-radius: 10px; overflow: hidden; background: var(--pp-panel2); cursor: pointer; }
+.pp-galeria-celda img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.pp-form { display: flex; flex-direction: column; gap: 8px; }
+.pp-foto-preview { width: 100%; max-height: 240px; object-fit: cover; border-radius: 12px; border: 1px solid var(--ion-border-color); }
+.pp-foto-grande { width: 100%; max-height: 60vh; object-fit: contain; border-radius: 12px; background: var(--pp-panel2); min-height: 120px; }
+
+.pp-campo { margin: 7px 0; font-size: 13.5px; line-height: 1.45; }
+.pp-captura-sub, .pp-captura-cond { font-size: 12px; color: var(--pp-texto2); margin-top: 2px; }
+.pp-captura-notas { font-size: 12.5px; margin-top: 3px; font-style: italic; }

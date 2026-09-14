@@ -399,6 +399,9 @@ export function crearApp(shell) {
     shell.spot = st.spot;
     shell.actualizado = textoActualizado();
     shell.refrescando = st.cargando;
+    shell.esFavorito = st.spot
+      ? favoritos.leer().some(f => Math.abs(f.lat - st.spot.lat) < 1e-4 && Math.abs(f.lon - st.spot.lon) < 1e-4)
+      : false;
     if (st.ctx && st.datos) {
       const h = horaMasCercana(st.datos.horas, new Date());
       if (h) shell.seguridad = indiceHora(h, st.modo, st.ctx).seguridad;

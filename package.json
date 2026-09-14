@@ -26,6 +26,7 @@
     "@capacitor/android": "^7.0.0",
     "@capacitor/core": "^7.0.0",
     "@ionic/core": "^9.0.3",
+    "chart.js": "^4.5.1",
     "ionicons": "^8.1.0",
     "leaflet": "^1.9.4",
     "uplot": "^1.6.32"

@@ -4,55 +4,64 @@
    look que ya tenia la app (ver www/css/app.css :root, valores
    originales conservados). Solo tema oscuro: uso nocturno/exterior. */
 :root {
-  --ion-background-color: #0d1620;
-  --ion-background-color-rgb: 13, 22, 32;
-  --ion-text-color: #e8f0f7;
-  --ion-text-color-rgb: 232, 240, 247;
+  --ion-background-color: #0a1520;
+  --ion-background-color-rgb: 10, 21, 32;
+  --ion-text-color: #dde8f2;
+  --ion-text-color-rgb: 221, 232, 242;
 
-  --ion-color-primary: #ffb020;
-  --ion-color-primary-rgb: 255, 176, 32;
-  --ion-color-primary-contrast: #14202d;
-  --ion-color-primary-contrast-rgb: 20, 32, 45;
-  --ion-color-primary-shade: #e09c1c;
-  --ion-color-primary-tint: #ffb936;
+  --ion-color-primary: #ffa500;
+  --ion-color-primary-rgb: 255, 165, 0;
+  --ion-color-primary-contrast: #0a1520;
+  --ion-color-primary-contrast-rgb: 10, 21, 32;
+  --ion-color-primary-shade: #e09400;
+  --ion-color-primary-tint: #ffb833;
 
-  --ion-color-secondary: #4dabf7;
-  --ion-color-secondary-contrast: #14202d;
+  --ion-color-secondary: #3d9be8;
+  --ion-color-secondary-contrast: #0a1520;
 
-  --ion-color-success: #2fb344;
+  --ion-color-success: #27a83c;
   --ion-color-success-contrast: #ffffff;
 
-  --ion-color-warning: #f59f00;
-  --ion-color-warning-contrast: #14202d;
+  --ion-color-warning: #e89a00;
+  --ion-color-warning-contrast: #0a1520;
 
-  --ion-color-danger: #e03131;
+  --ion-color-danger: #d42b2b;
   --ion-color-danger-contrast: #ffffff;
 
-  --ion-toolbar-background: #12202e;
-  --ion-item-background: #16222f;
-  --ion-border-color: #24374a;
+  --ion-toolbar-background: #0e1d2c;
+  --ion-item-background: #132030;
+  --ion-border-color: #1e3347;
 
-  --pp-panel: #16222f;
-  --pp-panel2: #1c2b3a;
-  --pp-texto2: #9fb3c4;
+  --pp-panel: #132030;
+  --pp-panel2: #192a3a;
+  --pp-texto2: #7a96aa;
 
-  /* Fix bug real: nombres de color "clasicos" de www/css/app.css que
-     varias vistas/componentes siguen usando tal cual en JS (vista-
-     ahora.js, pp-curva-marea.js: `var(--verde)`, `var(--azul)`...).
-     Nunca se definieron aqui -- una custom property sin definir usada
-     en `background`/`stroke`/`fill` cae al valor inicial (transparent),
-     asi que las barras de factores y la curva de marea se veian
-     invisibles (solo el fondo de la barra, sin relleno de color).
-     Alias 1:1 sobre las --ion-color-* ya definidas, para que ambos
-     nombres queden siempre sincronizados. */
+  /* Tokens de diseño propios */
+  --pp-shadow-card: 0 2px 12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.04);
+  --pp-shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  --pp-radius: 16px;
+  --pp-radius-sm: 10px;
+  --pp-ease: cubic-bezier(.25, .8, .25, 1);
+  --pp-font: 'SF Pro Text', 'Helvetica Neue', system-ui, -apple-system, sans-serif;
+  --pp-font-mono: 'SF Mono', 'Roboto Mono', 'Fira Mono', monospace;
+
+  /* Aliases para nombres clasicos usados en Shadow DOM y componentes portados */
   --acento: var(--ion-color-primary);
   --azul: var(--ion-color-secondary);
   --verde: var(--ion-color-success);
   --ambar: var(--ion-color-warning);
   --rojo: var(--ion-color-danger);
+  --borde: var(--ion-border-color);
+  --texto2: var(--pp-texto2);
 }
 
-html, body { background: var(--ion-background-color); font-variant-numeric: tabular-nums; }
+html, body {
+  background: var(--ion-background-color);
+  font-family: var(--pp-font);
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
 
 /* La cabecera custom (logo/spot/acciones) vive dentro de ion-toolbar */
 .pp-logo { font-size: 20px; padding: 0 4px; }
@@ -86,12 +95,22 @@ ion-tab-bar { position: fixed; bottom: 0; left: 0; right: 0; z-index: 1500; }
 /* Genericos de contenido (vistas): tarjeta, estado de carga, nota al pie.
    Portados de www/css/app.css -- se van anadiendo aqui a medida que cada
    vista de Fase 3 los necesita. */
-.pp-pad { padding: 0 10px; }
-.pp-cargando { text-align: center; color: var(--pp-texto2); padding: 40px 0; }
-.pp-card { background: var(--pp-panel); border: 1px solid var(--ion-border-color); border-radius: 14px;
-  padding: 12px 14px; margin-bottom: 10px; }
-.pp-card h3 { margin: 0 0 10px; font-size: 15px; color: var(--ion-text-color); }
-.pp-nota { font-size: 12px; color: var(--pp-texto2); margin: 8px 0 0; line-height: 1.45; }
+.pp-pad { padding: 0 12px; }
+.pp-cargando {
+  text-align: center; color: var(--pp-texto2); padding: 48px 0;
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+}
+.pp-card {
+  background: var(--pp-panel);
+  border: 1px solid var(--ion-border-color);
+  border-radius: var(--pp-radius);
+  box-shadow: var(--pp-shadow-card);
+  padding: 14px 16px;
+  margin-bottom: 10px;
+}
+.pp-card h3 { margin: 0 0 12px; font-size: 14px; font-weight: 700; letter-spacing: .04em;
+  text-transform: uppercase; color: var(--pp-texto2); }
+.pp-nota { font-size: 11.5px; color: var(--pp-texto2); margin: 10px 0 0; line-height: 1.55; }
 
 /* Vista Especies: grid de tarjetas + ficha en modal (ver vista-especies.js) */
 .pp-esp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 10px; }
@@ -128,11 +147,16 @@ ion-tab-bar { position: fixed; bottom: 0; left: 0; right: 0; z-index: 1500; }
    que trae su propio Shadow DOM y no necesita clases de aqui. */
 .pp-stats { margin: 10px 0; }
 .pp-stats-titulo { font-size: 12.5px; font-weight: 700; color: var(--pp-texto2); text-transform: uppercase; letter-spacing: .4px; }
-.pp-factor { display: flex; align-items: center; gap: 8px; margin: 6px 0; }
-.pp-factor-nombre { flex: 0 0 118px; font-size: 13px; color: var(--pp-texto2); }
-.pp-barra { flex: 1; height: 8px; background: var(--pp-panel2); border-radius: 6px; overflow: hidden; }
-.pp-barra-rel { height: 100%; border-radius: 6px; transition: width .3s; }
-.pp-factor-peso { flex: 0 0 34px; text-align: right; font-size: 11.5px; color: var(--pp-texto2); }
+.pp-factor { display: flex; align-items: center; gap: 8px; margin: 7px 0; }
+.pp-factor-nombre { flex: 0 0 100px; font-size: 12.5px; color: var(--pp-texto2); }
+.pp-barra { flex: 1; height: 9px; background: var(--pp-panel2); border-radius: 6px; overflow: hidden; }
+.pp-barra-rel { height: 100%; border-radius: 6px; transition: width .45s var(--pp-ease); }
+.pp-factor-val {
+  flex: 0 0 36px; text-align: right; font-size: 12px; font-weight: 700;
+  font-variant-numeric: tabular-nums; font-family: var(--pp-font-mono);
+}
+.pp-factor-peso { flex: 0 0 30px; text-align: right; font-size: 10.5px; color: var(--pp-texto2);
+  font-variant-numeric: tabular-nums; }
 
 .pp-galeria { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
 .pp-galeria-celda { aspect-ratio: 1; border-radius: 10px; overflow: hidden; background: var(--pp-panel2); cursor: pointer; }
@@ -157,3 +181,90 @@ ion-tab-bar { position: fixed; bottom: 0; left: 0; right: 0; z-index: 1500; }
 #pp-mapa-hora { font-weight: 700; min-width: 92px; }
 #pp-mapa-estado { font-size: 12px; color: var(--pp-texto2); }
 .pp-leyenda { display: flex; gap: 10px; font-size: 11px; color: var(--pp-texto2); flex-wrap: wrap; }
+
+/* ── Índice principal (vista-ahora) ── */
+.pp-card-indice { display: flex; align-items: center; gap: 18px; }
+pp-gauge { width: 124px; flex: 0 0 124px; }
+.pp-indice-info { flex: 1; min-width: 0; }
+.pp-indice-etiqueta {
+  font-size: 26px; font-weight: 800; letter-spacing: -.02em;
+  line-height: 1.1;
+}
+.pp-indice-sub {
+  color: var(--pp-texto2); margin-top: 6px; font-size: 13px; line-height: 1.4;
+}
+
+/* Selector de modalidad */
+ion-segment {
+  --background: var(--pp-panel2);
+  margin: 0 0 2px;
+}
+ion-segment-button {
+  --color: var(--pp-texto2);
+  --color-checked: var(--ion-color-primary-contrast);
+  --background-checked: var(--ion-color-primary);
+  --indicator-color: transparent;
+  --border-radius: 10px;
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+/* ── Condiciones grid (2 columnas) ── */
+.pp-cond-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.pp-cond {
+  background: var(--pp-panel2);
+  border: 1px solid var(--ion-border-color);
+  border-radius: var(--pp-radius-sm);
+  box-shadow: var(--pp-shadow-inset);
+  padding: 10px 12px;
+}
+.pp-cond-ico { font-size: 17px; line-height: 1; }
+.pp-cond-lbl { font-size: 11px; color: var(--pp-texto2); margin-top: 5px; line-height: 1.3; }
+.pp-cond-val {
+  font-size: 14px; font-weight: 650; margin-top: 2px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Marea ── */
+.pp-marea-linea { font-size: 14px; margin-bottom: 8px; line-height: 1.5; }
+.pp-marea-amp { font-size: 12.5px; color: var(--pp-texto2); margin-bottom: 8px; }
+.pp-mareas-prox { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 10px; }
+.pp-marea-item {
+  background: var(--pp-panel2);
+  border: 1px solid var(--ion-border-color);
+  border-radius: var(--pp-radius-sm);
+  padding: 7px 10px; font-size: 12px; color: var(--pp-texto2); line-height: 1.6;
+}
+
+/* ── Sol, luna y solunar ── */
+.pp-solunar { font-size: 13px; margin-top: 12px; line-height: 2.2; }
+.pp-tag {
+  display: inline-block;
+  background: var(--pp-panel2);
+  border: 1px solid var(--ion-border-color);
+  border-radius: 8px;
+  padding: 3px 9px; font-size: 12px; margin: 2px 3px 2px 0;
+}
+.pp-tag-mayor {
+  border-color: var(--ion-color-primary);
+  color: var(--ion-color-primary);
+  background: rgba(255, 165, 0, 0.08);
+}
+
+/* ── ion-card visual override ── */
+ion-card {
+  --background: var(--pp-panel);
+  --color: var(--ion-text-color);
+  border: 1px solid var(--ion-border-color);
+  border-radius: var(--pp-radius) !important;
+  box-shadow: var(--pp-shadow-card) !important;
+  margin: 0 0 10px;
+}
+ion-card-title {
+  font-size: 13.5px !important;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--pp-texto2) !important;
+}
+ion-card-content { padding-top: 6px !important; }

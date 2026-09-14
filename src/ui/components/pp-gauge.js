@@ -14,17 +14,19 @@ const TEMPLATE = document.createElement('template');
 TEMPLATE.innerHTML = `
   <style>
     :host { display: inline-block; width: 128px; }
-    svg { width: 100%; height: auto; display: block; }
-    .fondo { stroke: var(--borde, #24374a); }
-    .num { font-size: 34px; font-weight: 800; }
-    .lbl { font-size: 11px; fill: var(--texto2, #9fb3c4); }
+    svg { width: 100%; height: auto; display: block; filter: drop-shadow(0 0 10px rgba(0,0,0,.6)); }
+    .fondo { stroke: var(--borde, #1e3347); }
+    .fondo2 { stroke: rgba(255,255,255,.04); }
+    .num { font-size: 36px; font-weight: 800; letter-spacing: -.03em; font-family: 'SF Mono', 'Roboto Mono', monospace; }
+    .lbl { font-size: 10px; fill: var(--texto2, #7a96aa); font-family: system-ui, sans-serif; }
   </style>
   <svg viewBox="0 0 140 140">
-    <circle class="fondo" cx="70" cy="70" r="${R}" fill="none" stroke-width="12"/>
-    <circle class="progreso" cx="70" cy="70" r="${R}" fill="none" stroke-width="12"
+    <circle class="fondo" cx="70" cy="70" r="${R}" fill="none" stroke-width="13"/>
+    <circle class="fondo2" cx="70" cy="70" r="${R}" fill="none" stroke-width="1"/>
+    <circle class="progreso" cx="70" cy="70" r="${R}" fill="none" stroke-width="13"
             stroke-linecap="round" transform="rotate(-90 70 70)"
             stroke-dasharray="${C}" stroke-dashoffset="${C}"/>
-    <text class="num" x="70" y="66" text-anchor="middle"></text>
+    <text class="num" x="70" y="68" text-anchor="middle"></text>
     <text class="lbl" x="70" y="88" text-anchor="middle">/ 100</text>
   </svg>
 `;

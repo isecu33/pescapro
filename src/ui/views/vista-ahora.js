@@ -179,9 +179,16 @@ function desgloseFactores(f, modo) {
     const rel = document.createElement('div');
     rel.className = 'pp-barra-rel';
     rel.style.width = Math.round(v * 100) + '%';
-    rel.style.background = v >= 0.7 ? 'var(--verde)' : v >= 0.45 ? 'var(--ambar)' : 'var(--rojo)';
+    const colorBarra = v >= 0.7 ? 'var(--verde)' : v >= 0.45 ? 'var(--ambar)' : 'var(--rojo)';
+    rel.style.background = colorBarra;
     barra.appendChild(rel);
     fila.appendChild(barra);
+
+    const val = document.createElement('span');
+    val.className = 'pp-factor-val';
+    val.textContent = Math.round(v * 100) + '%';
+    val.style.color = colorBarra;
+    fila.appendChild(val);
 
     const peso = document.createElement('span');
     peso.className = 'pp-factor-peso';

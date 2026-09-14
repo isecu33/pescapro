@@ -1,0 +1,297 @@
+/* PescaPro -- paleta oscura marina mapeada a las variables de tema de
+   Ionic (--ion-color-*, --ion-background-color, --ion-text-color), para
+   que ion-app/ion-header/ion-tab-bar/ion-button... hereden el mismo
+   look que ya tenia la app (ver www/css/app.css :root, valores
+   originales conservados). Solo tema oscuro: uso nocturno/exterior. */
+:root {
+  --ion-background-color: #0a1520;
+  --ion-background-color-rgb: 10, 21, 32;
+  --ion-text-color: #dde8f2;
+  --ion-text-color-rgb: 221, 232, 242;
+
+  --ion-color-primary: #ffa500;
+  --ion-color-primary-rgb: 255, 165, 0;
+  --ion-color-primary-contrast: #0a1520;
+  --ion-color-primary-contrast-rgb: 10, 21, 32;
+  --ion-color-primary-shade: #e09400;
+  --ion-color-primary-tint: #ffb833;
+
+  --ion-color-secondary: #3d9be8;
+  --ion-color-secondary-contrast: #0a1520;
+
+  --ion-color-success: #27a83c;
+  --ion-color-success-contrast: #ffffff;
+
+  --ion-color-warning: #f0cc00;
+  --ion-color-warning-contrast: #0a1520;
+
+  --ion-color-danger: #d42b2b;
+  --ion-color-danger-contrast: #ffffff;
+
+  --ion-toolbar-background: #0e1d2c;
+  --ion-item-background: #132030;
+  --ion-border-color: #1e3347;
+
+  --pp-panel: #132030;
+  --pp-panel2: #192a3a;
+  --pp-texto2: #7a96aa;
+
+  /* Tokens de diseño propios */
+  --pp-shadow-card: 0 2px 12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.04);
+  --pp-shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  --pp-radius: 16px;
+  --pp-radius-sm: 10px;
+  --pp-ease: cubic-bezier(.25, .8, .25, 1);
+  --pp-font: 'SF Pro Text', 'Helvetica Neue', system-ui, -apple-system, sans-serif;
+  --pp-font-mono: 'SF Mono', 'Roboto Mono', 'Fira Mono', monospace;
+
+  /* Aliases para nombres clasicos usados en Shadow DOM y componentes portados */
+  --acento: var(--ion-color-primary);
+  --azul: var(--ion-color-secondary);
+  --verde: var(--ion-color-success);
+  --ambar: var(--ion-color-warning);
+  --rojo: var(--ion-color-danger);
+  --borde: var(--ion-border-color);
+  --texto2: var(--pp-texto2);
+}
+
+html, body {
+  background: var(--ion-background-color);
+  font-family: var(--pp-font);
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* La cabecera custom (logo/spot/acciones) vive dentro de ion-toolbar */
+.pp-logo { font-size: 20px; padding: 0 4px; }
+.pp-spot-selector { display: flex; flex-direction: column; cursor: pointer; padding: 2px 8px; }
+.pp-spot-selector small { color: var(--pp-texto2); font-size: 11px; }
+
+/* Banner de seguridad: persistente mientras dure el peligro (no es un
+   toast que se autooculte) */
+.pp-banner { padding: 8px 12px; font-weight: 600; font-size: 13.5px; text-align: center; }
+.pp-banner-rojo { background: #58151c; color: #ffb4ab; }
+.pp-banner-amarillo { background: #4d3800; color: #ffd66e; }
+
+/* Nav inferior fijo (no se usa ion-tabs/router, ver app-shell.js) */
+ion-tab-bar { position: fixed; bottom: 0; left: 0; right: 0; z-index: 1500; }
+
+/* Fix bug real (detectado con Playwright, no por los tests happy-dom):
+   ion-app aplica `justify-content: space-between` de fabrica -- pensado
+   para que ion-content (flex:1) absorba todo el espacio libre entre la
+   cabecera y el nav inferior. Nuestro <main> no es ion-content y sin
+   flex:1 el espacio libre se repartia como un hueco enorme en cualquier
+   vista cuyo contenido fuera mas bajo que la pantalla (Prevision,
+   Cuaderno...). overflow-y/min-height:0 permiten que sea este elemento
+   el que haga scroll, no la pagina entera. */
+.pp-contenido {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding-bottom: calc(56px + env(safe-area-inset-bottom));
+}
+
+/* Genericos de contenido (vistas): tarjeta, estado de carga, nota al pie.
+   Portados de www/css/app.css -- se van anadiendo aqui a medida que cada
+   vista de Fase 3 los necesita. */
+.pp-pad { padding: 0 12px; }
+.pp-cargando {
+  text-align: center; color: var(--pp-texto2); padding: 48px 0;
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+}
+.pp-card {
+  background: var(--pp-panel);
+  border: 1px solid var(--ion-border-color);
+  border-radius: var(--pp-radius);
+  box-shadow: var(--pp-shadow-card);
+  padding: 14px 16px;
+  margin-bottom: 10px;
+}
+.pp-card h3 { margin: 0 0 12px; font-size: 14px; font-weight: 700; letter-spacing: .04em;
+  text-transform: uppercase; color: var(--pp-texto2); }
+.pp-nota { font-size: 11.5px; color: var(--pp-texto2); margin: 10px 0 0; line-height: 1.55; }
+
+/* Vista Especies: grid de tarjetas + ficha en modal (ver vista-especies.js) */
+.pp-esp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 10px; }
+.pp-esp-card { --background: var(--pp-panel); border-radius: 14px; margin: 0; text-align: center; }
+.pp-esp-card-ico { font-size: 30px; }
+.pp-esp-card-nombre { font-weight: 700; margin-top: 4px; }
+.pp-esp-card-val { font-size: 26px; font-weight: 800; margin-top: 2px; }
+.pp-esp-card-motivo { font-size: 11.5px; color: var(--pp-texto2); margin-top: 3px; min-height: 28px; }
+.pp-heat { display: grid; grid-template-columns: repeat(12, 1fr); gap: 3px; margin: 6px 0 10px; }
+.pp-heat-celda { border-radius: 5px; text-align: center; font-size: 10.5px; padding: 6px 0; color: #fff; background: var(--pp-panel2); }
+.pp-heat-actual { outline: 2px solid var(--ion-color-primary); }
+.pp-campo { margin: 7px 0; font-size: 13.5px; line-height: 1.45; }
+.pp-mejor-hora { font-size: 13px; padding: 3px 0; }
+
+/* Vista Prevision: mejores ventanas */
+.pp-vent-idx { flex: 0 0 44px; height: 44px; border-radius: 10px; color: #14202d;
+  font-weight: 800; font-size: 17px; display: flex; align-items: center; justify-content: center; }
+.pp-vent-info { display: flex; flex-direction: column; gap: 2px; font-size: 13.5px; }
+.pp-vent-info span { color: var(--pp-texto2); font-size: 12px; }
+
+/* Vista Prevision: grafico horario (barras a medida, sin equivalente Ionic) */
+.pp-grafico-scroll { overflow-x: auto; }
+.pp-grafico { display: flex; align-items: flex-end; gap: 2px; height: 130px;
+  min-width: max-content; padding-top: 4px; }
+.pp-graf-col { display: flex; flex-direction: column; align-items: center;
+  justify-content: flex-end; height: 100%; width: 16px; cursor: pointer; }
+.pp-graf-barra { width: 12px; border-radius: 3px 3px 0 0; }
+.pp-graf-hora { font-size: 9px; color: var(--pp-texto2); margin-top: 3px; }
+.pp-graf-dia { writing-mode: vertical-rl; transform: rotate(180deg); font-size: 10.5px;
+  color: var(--ion-color-primary); align-self: center; margin: 0 2px; }
+
+/* Vista Cuaderno (src/ui/views/vista-cuaderno.js): tarjetas, estadisticas,
+   galeria y visor de foto. El listado de capturas usa <pp-captura-card>,
+   que trae su propio Shadow DOM y no necesita clases de aqui. */
+.pp-stats { margin: 10px 0; }
+.pp-stats-titulo { font-size: 12.5px; font-weight: 700; color: var(--pp-texto2); text-transform: uppercase; letter-spacing: .4px; }
+.pp-factor { display: flex; align-items: center; gap: 8px; margin: 7px 0; }
+.pp-factor-nombre { flex: 0 0 100px; font-size: 12.5px; color: var(--pp-texto2); }
+.pp-barra { flex: 1; height: 9px; background: var(--pp-panel2); border-radius: 6px; overflow: hidden; }
+.pp-barra-rel { height: 100%; border-radius: 6px; transition: width .45s var(--pp-ease); }
+.pp-factor-val {
+  flex: 0 0 36px; text-align: right; font-size: 12px; font-weight: 700;
+  font-variant-numeric: tabular-nums; font-family: var(--pp-font-mono);
+}
+.pp-factor-peso { flex: 0 0 30px; text-align: right; font-size: 10.5px; color: var(--pp-texto2);
+  font-variant-numeric: tabular-nums; }
+
+.pp-galeria { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.pp-galeria-celda { aspect-ratio: 1; border-radius: 10px; overflow: hidden; background: var(--pp-panel2); cursor: pointer; }
+.pp-galeria-celda img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.pp-form { display: flex; flex-direction: column; gap: 8px; }
+.pp-foto-preview { width: 100%; max-height: 240px; object-fit: cover; border-radius: 12px; border: 1px solid var(--ion-border-color); }
+.pp-foto-grande { width: 100%; max-height: 60vh; object-fit: contain; border-radius: 12px; background: var(--pp-panel2); min-height: 120px; }
+
+.pp-captura-sub, .pp-captura-cond { font-size: 12px; color: var(--pp-texto2); margin-top: 2px; }
+.pp-captura-notas { font-size: 12.5px; margin-top: 3px; font-style: italic; }
+
+/* Vista Mapa (ver src/ui/views/vista-mapa.js) -- equivalente a las reglas
+   #mapa / .pp-mapa-controles / .pp-leyenda de www/css/app.css, adaptadas
+   a las variables de tema nuevas. */
+.pp-vista-mapa { display: flex; flex-direction: column; height: 100%; }
+.pp-vista-mapa-lienzo { flex: 1; min-height: 320px; background: #0a141e; }
+.pp-mapa-controles { padding: 10px 12px; background: var(--pp-panel); border-top: 1px solid var(--ion-border-color); }
+.pp-mapa-fila { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; font-size: 13px; }
+.pp-mapa-fila ion-range { flex: 1; }
+.pp-mapa-toggle { --background: transparent; --padding-start: 0; --min-height: 0; }
+#pp-mapa-hora { font-weight: 700; min-width: 92px; }
+#pp-mapa-estado { font-size: 12px; color: var(--pp-texto2); }
+.pp-leyenda { display: flex; gap: 10px; font-size: 11px; color: var(--pp-texto2); flex-wrap: wrap; }
+
+/* ── Chip / botones compactos ── */
+.pp-chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: var(--pp-panel2); border: 1px solid var(--ion-border-color);
+  border-radius: 20px; padding: 5px 12px; font-size: 12.5px;
+  color: var(--ion-text-color); cursor: pointer;
+  transition: background .15s, border-color .15s;
+}
+.pp-chip:active { background: rgba(255,255,255,.08); border-color: var(--ion-color-primary); }
+.pp-chip-expand { margin-top: 8px; color: var(--pp-texto2); }
+
+/* ── Resumen del día (antes del selector de modo) ── */
+.pp-resumen-dia { margin-bottom: 10px; }
+.pp-resumen-cabeza { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+.pp-resumen-punto { font-size: 14px; line-height: 1; }
+.pp-resumen-veredicto { font-size: 19px; font-weight: 800; letter-spacing: -.02em; }
+.pp-resumen-sub {
+  font-size: 13px; color: var(--pp-texto2); margin-bottom: 5px;
+  font-variant-numeric: tabular-nums;
+}
+.pp-resumen-ventana, .pp-resumen-marea {
+  font-size: 12.5px; color: var(--pp-texto2); margin-top: 3px;
+}
+.pp-delta { font-size: 11.5px; font-weight: 700; }
+.pp-delta-sube { color: var(--verde); }
+.pp-delta-baja { color: var(--rojo); }
+
+/* ── Índice principal (vista-ahora) ── */
+.pp-card-indice { display: flex; align-items: center; gap: 18px; }
+pp-gauge { width: 124px; flex: 0 0 124px; }
+.pp-indice-info { flex: 1; min-width: 0; }
+.pp-indice-etiqueta {
+  font-size: 26px; font-weight: 800; letter-spacing: -.02em;
+  line-height: 1.1;
+}
+.pp-indice-sub {
+  color: var(--pp-texto2); margin-top: 6px; font-size: 13px; line-height: 1.4;
+}
+
+/* Selector de modalidad */
+ion-segment {
+  --background: var(--pp-panel2);
+  margin: 0 0 2px;
+}
+ion-segment-button {
+  --color: var(--pp-texto2);
+  --color-checked: var(--ion-color-primary-contrast);
+  --background-checked: var(--ion-color-primary);
+  --indicator-color: transparent;
+  --border-radius: 10px;
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+/* ── Condiciones grid (2 columnas) ── */
+.pp-cond-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.pp-cond {
+  background: var(--pp-panel2);
+  border: 1px solid var(--ion-border-color);
+  border-radius: var(--pp-radius-sm);
+  box-shadow: var(--pp-shadow-inset);
+  padding: 10px 12px;
+}
+.pp-cond-ico { font-size: 17px; line-height: 1; }
+.pp-cond-lbl { font-size: 11px; color: var(--pp-texto2); margin-top: 5px; line-height: 1.3; }
+.pp-cond-val {
+  font-size: 14px; font-weight: 650; margin-top: 2px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Marea ── */
+.pp-marea-linea { font-size: 14px; margin-bottom: 8px; line-height: 1.5; }
+.pp-marea-amp { font-size: 12.5px; color: var(--pp-texto2); margin-bottom: 8px; }
+.pp-mareas-prox { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 10px; }
+.pp-marea-item {
+  background: var(--pp-panel2);
+  border: 1px solid var(--ion-border-color);
+  border-radius: var(--pp-radius-sm);
+  padding: 7px 10px; font-size: 12px; color: var(--pp-texto2); line-height: 1.6;
+}
+
+/* ── Sol, luna y solunar ── */
+.pp-solunar { font-size: 13px; margin-top: 12px; line-height: 2.2; }
+.pp-tag {
+  display: inline-block;
+  background: var(--pp-panel2);
+  border: 1px solid var(--ion-border-color);
+  border-radius: 8px;
+  padding: 3px 9px; font-size: 12px; margin: 2px 3px 2px 0;
+}
+.pp-tag-mayor {
+  border-color: var(--ion-color-primary);
+  color: var(--ion-color-primary);
+  background: rgba(255, 165, 0, 0.08);
+}
+
+/* ── ion-card visual override ── */
+ion-card {
+  --background: var(--pp-panel);
+  --color: var(--ion-text-color);
+  border: 1px solid var(--ion-border-color);
+  border-radius: var(--pp-radius) !important;
+  box-shadow: var(--pp-shadow-card) !important;
+  margin: 0 0 10px;
+}
+ion-card-title {
+  font-size: 13.5px !important;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--pp-texto2) !important;
+}
+ion-card-content { padding-top: 6px !important; }

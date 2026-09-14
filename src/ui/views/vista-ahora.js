@@ -20,7 +20,7 @@
    decida que hacer -- igual que pp-app-shell emite pp-cambiar-vista/
    pp-cambiar-spot/etc. en vez de llamar a PP.app.* directamente. */
 import { MODOS, WMO, util } from '../../domain/config.js';
-import { indiceHora, horaMasCercana, especiesEn } from '../../domain/indice.js';
+import { indiceHora, horaMasCercana, mejoresVentanas, especiesEn } from '../../domain/indice.js';
 import { sol, luna } from '../../domain/solunar.js';
 import '../components/pp-gauge.js';
 import '../components/pp-curva-marea.js';
@@ -33,7 +33,7 @@ const NOMBRES_FACTOR = {
 const VENTANA_CURVA_ANTES_H = 6;
 const VENTANA_CURVA_DESPUES_H = 30;
 
-export function renderAhora(contenedor, st) {
+export function renderAhora(contenedor, st, delta = null) {
   contenedor.replaceChildren();
 
   if (!st.ctx) {
@@ -46,6 +46,7 @@ export function renderAhora(contenedor, st) {
   const idx = indiceHora(h, st.modo, st.ctx);
 
   contenedor.appendChild(bannerSeguridad(idx.seguridad));
+  contenedor.appendChild(resumenDia(st, idx, delta));
   contenedor.appendChild(selectorModo(st));
   contenedor.appendChild(cardIndice(idx, st));
   contenedor.appendChild(desgloseFactores(idx.factores, st.modo));
@@ -63,6 +64,61 @@ function elCargando() {
   p.textContent = 'Cargando datos…';
   div.appendChild(p);
   return div;
+}
+
+function fmtHora(fecha) {
+  return new Date(fecha).toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' });
+}
+
+function resumenDia(st, idx, delta) {
+  const { card, content } = crearCard(null);
+  card.classList.add('pp-resumen-dia');
+
+  const v = idx.valor;
+  const colorVar = v >= 65 ? 'var(--verde)' : v >= 40 ? 'var(--ambar)' : 'var(--rojo)';
+  const label = v >= 65 ? 'BUENAS' : v >= 40 ? 'REGULARES' : 'MALAS';
+
+  const cabeza = document.createElement('div');
+  cabeza.className = 'pp-resumen-cabeza';
+  const punto = document.createElement('span');
+  punto.className = 'pp-resumen-punto';
+  punto.style.color = colorVar;
+  punto.textContent = '●';
+  const veredicto = document.createElement('span');
+  veredicto.className = 'pp-resumen-veredicto';
+  veredicto.style.color = colorVar;
+  veredicto.textContent = label + ' CONDICIONES';
+  cabeza.append(punto, veredicto);
+  content.appendChild(cabeza);
+
+  const sub = document.createElement('div');
+  sub.className = 'pp-resumen-sub';
+  sub.textContent = (MODOS[st.modo]?.nombre ?? st.modo) + ' · ' + v + '/100';
+  if (delta?.delta != null) {
+    const d = document.createElement('span');
+    d.className = 'pp-delta ' + (delta.delta >= 0 ? 'pp-delta-sube' : 'pp-delta-baja');
+    d.textContent = ' ' + (delta.delta >= 0 ? '▲' : '▼') + Math.abs(delta.delta) + ' vs ayer';
+    sub.appendChild(d);
+  }
+  content.appendChild(sub);
+
+  const ventanas = mejoresVentanas(st.ctx, st.modo, { umbral: 50, maxVentanas: 1, horas: 18 });
+  if (ventanas.length) {
+    const vent = document.createElement('div');
+    vent.className = 'pp-resumen-ventana';
+    vent.textContent = 'Mejor momento: ' + fmtHora(ventanas[0].inicio) + '-' + fmtHora(ventanas[0].fin);
+    content.appendChild(vent);
+  }
+
+  const marea = st.ctx.mareas?.ahora;
+  if (marea) {
+    const tm = document.createElement('div');
+    tm.className = 'pp-resumen-marea';
+    tm.textContent = marea.subiendo ? '↗ Marea subiendo' : '↘ Bajando';
+    content.appendChild(tm);
+  }
+
+  return card;
 }
 
 /* Persistente (no ion-toast): oculto (display:none) si nivel === 'ok',
@@ -161,42 +217,59 @@ function itemCondicion(icono, etiqueta, valor) {
   return it;
 }
 
+function filaFactor(f, pesos, k) {
+  const v = f[k] != null ? f[k] : 0.5;
+  const fila = document.createElement('div');
+  fila.className = 'pp-factor';
+
+  const nombre = document.createElement('span');
+  nombre.className = 'pp-factor-nombre';
+  nombre.textContent = NOMBRES_FACTOR[k] || k;
+  fila.appendChild(nombre);
+
+  const barra = document.createElement('div');
+  barra.className = 'pp-barra';
+  const rel = document.createElement('div');
+  rel.className = 'pp-barra-rel';
+  rel.style.width = Math.round(v * 100) + '%';
+  const colorBarra = v >= 0.7 ? 'var(--verde)' : v >= 0.45 ? 'var(--ambar)' : 'var(--rojo)';
+  rel.style.background = colorBarra;
+  barra.appendChild(rel);
+  fila.appendChild(barra);
+
+  const val = document.createElement('span');
+  val.className = 'pp-factor-val';
+  val.textContent = Math.round(v * 100) + '%';
+  val.style.color = colorBarra;
+  fila.appendChild(val);
+
+  const peso = document.createElement('span');
+  peso.className = 'pp-factor-peso';
+  peso.textContent = Math.round(pesos[k] * 100) + '%';
+  fila.appendChild(peso);
+
+  return fila;
+}
+
 function desgloseFactores(f, modo) {
   const { card, content } = crearCard('Qué suma y qué resta');
   const pesos = MODOS[modo].pesos;
-  Object.keys(pesos).sort((a, b) => pesos[b] - pesos[a]).forEach(k => {
-    const v = f[k] != null ? f[k] : 0.5;
-    const fila = document.createElement('div');
-    fila.className = 'pp-factor';
+  const sorted = Object.keys(pesos).sort((a, b) => pesos[b] - pesos[a]);
+  const visibles = sorted.slice(0, 3);
+  const ocultos = sorted.slice(3);
 
-    const nombre = document.createElement('span');
-    nombre.className = 'pp-factor-nombre';
-    nombre.textContent = NOMBRES_FACTOR[k] || k;
-    fila.appendChild(nombre);
+  visibles.forEach(k => content.appendChild(filaFactor(f, pesos, k)));
 
-    const barra = document.createElement('div');
-    barra.className = 'pp-barra';
-    const rel = document.createElement('div');
-    rel.className = 'pp-barra-rel';
-    rel.style.width = Math.round(v * 100) + '%';
-    const colorBarra = v >= 0.7 ? 'var(--verde)' : v >= 0.45 ? 'var(--ambar)' : 'var(--rojo)';
-    rel.style.background = colorBarra;
-    barra.appendChild(rel);
-    fila.appendChild(barra);
-
-    const val = document.createElement('span');
-    val.className = 'pp-factor-val';
-    val.textContent = Math.round(v * 100) + '%';
-    val.style.color = colorBarra;
-    fila.appendChild(val);
-
-    const peso = document.createElement('span');
-    peso.className = 'pp-factor-peso';
-    peso.textContent = Math.round(pesos[k] * 100) + '%';
-    fila.appendChild(peso);
-
-    content.appendChild(fila);
-  });
+  if (ocultos.length) {
+    const btn = document.createElement('button');
+    btn.className = 'pp-chip pp-chip-expand';
+    btn.textContent = `Ver todos (${sorted.length})`;
+    btn.addEventListener('click', () => {
+      ocultos.forEach(k => content.insertBefore(filaFactor(f, pesos, k), btn));
+      btn.remove();
+    });
+    content.appendChild(btn);
+  }
 
   const nota = document.createElement('p');
   nota.className = 'pp-nota';

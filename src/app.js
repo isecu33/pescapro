@@ -15,6 +15,7 @@ import { renderCuaderno } from './ui/views/vista-cuaderno.js';
 import { renderTrofeos } from './ui/views/vista-trofeos.js';
 
 const PREFS_KEY = 'pp_prefs';
+const PICO_KEY = 'pp_pico';
 const VISTAS = ['ahora', 'prevision', 'mapa', 'especies', 'cuaderno', 'trofeos'];
 
 /* Crea la app conectada a un <pp-app-shell> ya montado en el DOM.
@@ -104,6 +105,7 @@ export function crearApp(shell) {
       st.datos = datos;
       st.ctx = preparar(datos);
       st.error = null;
+      _guardarPicoDia(st.modo);
       renderVistaActiva();
       if (st.mapaIniciado && vistaMapaCtrl) vistaMapaCtrl.cargarCorrientes(st).catch(() => {});
     } catch (e) {
@@ -119,6 +121,31 @@ export function crearApp(shell) {
   }
 
   function refrescarManual() { refrescar(); }
+
+  function _guardarPicoDia(modo) {
+    if (!st.datos || !st.ctx) return;
+    const hoyStr = new Date().toISOString().slice(0, 10);
+    try {
+      const r = JSON.parse(localStorage.getItem(PICO_KEY) || '{}');
+      const valorHoy = Math.max(...st.datos.horas.map(h => indiceHora(h, modo, st.ctx).valor));
+      if (r.fecha !== hoyStr) {
+        r.ayer = r.hoy ?? null;
+        r.hoy = valorHoy;
+        r.fecha = hoyStr;
+      } else {
+        r.hoy = Math.max(r.hoy ?? 0, valorHoy);
+      }
+      localStorage.setItem(PICO_KEY, JSON.stringify(r));
+    } catch (_) { /* noop */ }
+  }
+
+  function picoDelta() {
+    try {
+      const r = JSON.parse(localStorage.getItem(PICO_KEY) || '{}');
+      if (r.hoy == null || r.ayer == null) return null;
+      return { hoy: r.hoy, ayer: r.ayer, delta: Math.round(r.hoy - r.ayer) };
+    } catch (_) { return null; }
+  }
 
   function guardarPrefs() {
     try { localStorage.setItem(PREFS_KEY, JSON.stringify({ spot: st.spot, modo: st.modo })); }
@@ -138,7 +165,7 @@ export function crearApp(shell) {
   function renderVistaActiva() {
     actualizarCabecera();
     const cont = contenedores[st.vista];
-    if (st.vista === 'ahora') renderAhora(cont, st);
+    if (st.vista === 'ahora') renderAhora(cont, st, picoDelta());
     else if (st.vista === 'prevision') renderPrevision(cont, st);
     else if (st.vista === 'especies') renderEspecies(cont, st);
     else if (st.vista === 'cuaderno') renderCuaderno(cont, st);
@@ -340,7 +367,7 @@ export function crearApp(shell) {
   iniciar();
 
   return {
-    cambiarModo, cambiarSpot, refrescarManual, irA,
+    cambiarModo, cambiarSpot, refrescarManual, irA, picoDelta,
     get estado() { return st; }
   };
 }

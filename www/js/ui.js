@@ -27,7 +27,7 @@ PP.ui = (function () {
     const banner = $('#aviso-seguridad');
     banner.className = 'pp-banner pp-banner-' + idx.seguridad.nivel;
     banner.innerHTML = idx.seguridad.nivel === 'ok' ? '' :
-      (idx.seguridad.nivel === 'rojo' ? '⛔ ' : '⚠️ ') + idx.seguridad.motivos.join(' · ');
+      PP.iconos.html(idx.seguridad.nivel === 'rojo' ? 'stop' : 'alerta') + ' ' + idx.seguridad.motivos.join(' · ');
     banner.style.display = idx.seguridad.nivel === 'ok' ? 'none' : 'block';
 
     // Selector de modalidad
@@ -38,7 +38,7 @@ PP.ui = (function () {
     card.appendChild(gauge(idx.valor));
     const info = el('div', 'pp-indice-info');
     info.appendChild(el('div', 'pp-indice-etiqueta', U().etiquetaIndice(idx.valor)));
-    info.appendChild(el('div', 'pp-indice-sub', PP.MODOS[st.modo].icono + ' ' + PP.MODOS[st.modo].nombre + ' · ahora'));
+    info.appendChild(el('div', 'pp-indice-sub', PP.iconos.html(PP.MODOS[st.modo].icono) + PP.MODOS[st.modo].nombre + ' · ahora'));
     card.appendChild(info);
     cont.appendChild(card);
 
@@ -61,7 +61,7 @@ PP.ui = (function () {
   function selectorModo(st) {
     const box = el('div', 'pp-modos');
     Object.values(PP.MODOS).forEach(m => {
-      const b = el('button', 'pp-chip' + (st.modo === m.id ? ' activo' : ''), m.icono + ' ' + m.nombre);
+      const b = el('button', 'pp-chip' + (st.modo === m.id ? ' activo' : ''), PP.iconos.html(m.icono) + m.nombre);
       b.addEventListener('click', () => PP.app.cambiarModo(m.id));
       box.appendChild(b);
     });
@@ -112,21 +112,21 @@ PP.ui = (function () {
   function condicionesActuales(h, st) {
     const card = el('div', 'pp-card');
     card.appendChild(el('h3', null, 'Condiciones ahora'));
-    const wmo = PP.WMO[h.codigo] || ['—', ''];
+    const wmo = PP.WMO[h.codigo] || ['—', '', 'nuboso'];
     const items = [
-      [wmo[1], wmo[0], h.temp != null ? Math.round(h.temp) + '°C' : '—'],
-      ['💨', 'Viento ' + U().gradosACardinal(h.vientoDir), h.viento != null ? Math.round(h.viento) + ' km/h (rachas ' + (h.racha != null ? Math.round(h.racha) : '—') + ')' : '—'],
-      ['🌊', 'Olas ' + U().gradosACardinal(h.olaDir), h.ola != null ? h.ola.toFixed(1) + ' m · ' + (h.olaPeriodo != null ? Math.round(h.olaPeriodo) + ' s' : '') : 'sin dato'],
-      ['🌡️', 'Agua', h.sst != null ? h.sst.toFixed(1) + '°C' : 'sin dato'],
-      ['🧭', 'Corriente', h.corriente != null ? h.corriente.toFixed(2) + ' m/s hacia ' + U().gradosACardinal(h.corrienteDir) : 'sin dato'],
-      ['📉', 'Presión', h.presion != null ? Math.round(h.presion) + ' hPa ' + tendenciaTxt(h.presionTend) : '—'],
-      ['👁️', 'Visibilidad', h.visibilidad != null ? (h.visibilidad / 1000).toFixed(0) + ' km' : '—'],
-      ['🌧️', 'Precipitación', h.lluvia != null ? h.lluvia.toFixed(1) + ' mm' : '—']
+      [wmo[2], wmo[0], h.temp != null ? Math.round(h.temp) + '°C' : '—'],
+      ['viento', 'Viento ' + U().gradosACardinal(h.vientoDir), h.viento != null ? Math.round(h.viento) + ' km/h (rachas ' + (h.racha != null ? Math.round(h.racha) : '—') + ')' : '—'],
+      ['ola', 'Olas ' + U().gradosACardinal(h.olaDir), h.ola != null ? h.ola.toFixed(1) + ' m · ' + (h.olaPeriodo != null ? Math.round(h.olaPeriodo) + ' s' : '') : 'sin dato'],
+      ['termometro', 'Agua', h.sst != null ? h.sst.toFixed(1) + '°C' : 'sin dato'],
+      ['corriente', 'Corriente', h.corriente != null ? h.corriente.toFixed(2) + ' m/s hacia ' + U().gradosACardinal(h.corrienteDir) : 'sin dato'],
+      ['presion', 'Presión', h.presion != null ? Math.round(h.presion) + ' hPa ' + tendenciaTxt(h.presionTend) : '—'],
+      ['ojo', 'Visibilidad', h.visibilidad != null ? (h.visibilidad / 1000).toFixed(0) + ' km' : '—'],
+      ['gota', 'Precipitación', h.lluvia != null ? h.lluvia.toFixed(1) + ' mm' : '—']
     ];
     const grid = el('div', 'pp-cond-grid');
     items.forEach(([ic, lbl, val]) => {
       const it = el('div', 'pp-cond');
-      it.appendChild(el('div', 'pp-cond-ico', ic));
+      it.appendChild(el('div', 'pp-cond-ico', PP.iconos.svg(ic)));
       it.appendChild(el('div', 'pp-cond-lbl', lbl));
       it.appendChild(el('div', 'pp-cond-val', val));
       grid.appendChild(it);
@@ -137,11 +137,11 @@ PP.ui = (function () {
 
   function tendenciaTxt(t) {
     if (t == null) return '';
-    if (t <= -3) return '⬇⬇';
-    if (t <= -1) return '⬇';
-    if (t < 1) return '→';
-    if (t < 3) return '⬆';
-    return '⬆⬆';
+    if (t <= -3) return PP.iconos.html('flechaBajaFuerte');
+    if (t <= -1) return PP.iconos.html('flechaBaja');
+    if (t < 1) return PP.iconos.html('flechaIgual');
+    if (t < 3) return PP.iconos.html('flechaSube');
+    return PP.iconos.html('flechaSubeFuerte');
   }
 
   function cardMarea(st) {
@@ -153,7 +153,7 @@ PP.ui = (function () {
       return card;
     }
     const est = m.ahora;
-    const flecha = est.subiendo ? '↗ Subiendo' : '↘ Bajando';
+    const flecha = PP.iconos.html(est.subiendo ? 'flechaDiagSube' : 'flechaDiagBaja') + (est.subiendo ? 'Subiendo' : 'Bajando');
     const prox = est.siguiente;
     const resta = Math.max(0, prox.fecha - Date.now());
     const hh = Math.floor(resta / 3600e3), mm = Math.round((resta % 3600e3) / 60000);
@@ -171,7 +171,7 @@ PP.ui = (function () {
     const tabla = el('div', 'pp-mareas-prox');
     m.proximos.forEach(e => {
       tabla.appendChild(el('div', 'pp-marea-item',
-        (e.tipo === 'pleamar' ? '⬆ Pleamar' : '⬇ Bajamar') + ' · ' + U().fmtDia(e.fecha) + ' ' +
+        PP.iconos.html(e.tipo === 'pleamar' ? 'flechaSube' : 'flechaBaja') + (e.tipo === 'pleamar' ? 'Pleamar' : 'Bajamar') + ' · ' + U().fmtDia(e.fecha) + ' ' +
         U().fmtHora(e.fecha) + ' · ' + e.altura.toFixed(1) + ' m'));
     });
     card.appendChild(tabla);
@@ -216,11 +216,12 @@ PP.ui = (function () {
     const s = PP.solunar.sol(hoy, st.spot.lat, st.spot.lon);
     const l = PP.solunar.luna(hoy, st.spot.lat, st.spot.lon);
     const fila = el('div', 'pp-cond-grid');
+    const creciente = l.idx <= 1;
     const items = [
-      ['🌅', 'Amanecer', s.amanecer ? U().fmtHora(s.amanecer) : '—'],
-      ['🌇', 'Ocaso', s.ocaso ? U().fmtHora(s.ocaso) : '—'],
-      [l.icono, l.nombre, l.iluminacion + '%'],
-      ['🌙', 'Luna sale/pone', (l.salida ? U().fmtHora(l.salida) : '—') + ' / ' + (l.puesta ? U().fmtHora(l.puesta) : '—')]
+      [PP.iconos.svg('amanecer'), 'Amanecer', s.amanecer ? U().fmtHora(s.amanecer) : '—'],
+      [PP.iconos.svg('atardecer'), 'Ocaso', s.ocaso ? U().fmtHora(s.ocaso) : '—'],
+      [PP.iconos.luna(l.iluminacion, creciente), l.nombre, l.iluminacion + '%'],
+      [PP.iconos.svg('lunaGenerica'), 'Luna sale/pone', (l.salida ? U().fmtHora(l.salida) : '—') + ' / ' + (l.puesta ? U().fmtHora(l.puesta) : '—')]
     ];
     items.forEach(([ic, lbl, val]) => {
       const it = el('div', 'pp-cond');
@@ -412,7 +413,7 @@ PP.ui = (function () {
   function renderCuaderno(st) {
     const cont = $('#vista-cuaderno');
     cont.innerHTML = '';
-    const btn = el('button', 'pp-boton-principal', '➕ Registrar captura');
+    const btn = el('button', 'pp-boton-principal', PP.iconos.html('anadir') + 'Registrar captura');
     btn.addEventListener('click', () => modalCaptura(st));
     cont.appendChild(btn);
 
@@ -470,7 +471,7 @@ PP.ui = (function () {
       cuerpo.innerHTML =
         '<div class="pp-captura-cab"><b>' + (e ? e.icono + ' ' + e.nombre : c.especie) + '</b>' +
         (c.talla ? ' · ' + c.talla + ' cm' : '') + (c.peso ? ' · ' + c.peso + ' kg' : '') +
-        '<button class="pp-borrar" title="Borrar">✕</button></div>' +
+        '<button class="pp-borrar" title="Borrar">' + PP.iconos.html('cerrar') + '</button></div>' +
         '<div class="pp-captura-sub">' + new Date(c.fecha).toLocaleString('es-ES', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) +
         (c.spot && c.spot.nombre ? ' · ' + c.spot.nombre : '') + (c.senuelo ? ' · ' + c.senuelo : '') + '</div>' +
         (cond.faseMarea ? '<div class="pp-captura-cond">🌊 ' + cond.faseMarea + (cond.luna ? ' · ' + cond.luna : '') + (cond.viento != null ? ' · 💨 ' + Math.round(cond.viento) + ' km/h' : '') + (cond.indice != null ? ' · índice ' + cond.indice : '') + '</div>' : '') +
@@ -486,12 +487,12 @@ PP.ui = (function () {
 
     // Export / import
     const card3 = el('div', 'pp-card');
-    const be = el('button', 'pp-chip', '⬇ Exportar (copiar JSON)');
+    const be = el('button', 'pp-chip', PP.iconos.html('descarga') + 'Exportar (copiar JSON)');
     be.addEventListener('click', async () => {
       try { await navigator.clipboard.writeText(PP.cuaderno.exportar()); alert('Cuaderno copiado al portapapeles (las fotos no se incluyen).'); }
       catch (e) { prompt('Copia el contenido:', PP.cuaderno.exportar()); }
     });
-    const bi = el('button', 'pp-chip', '⬆ Importar');
+    const bi = el('button', 'pp-chip', PP.iconos.html('subida') + 'Importar');
     bi.addEventListener('click', () => {
       const txt = prompt('Pega el JSON del cuaderno:');
       if (txt) { try { PP.cuaderno.importar(txt); renderCuaderno(st); } catch (e) { alert('JSON no válido'); } }
@@ -515,7 +516,7 @@ PP.ui = (function () {
       (c.talla ? ' · ' + c.talla + ' cm' : '') + (c.peso ? ' · ' + c.peso + ' kg' : '')));
     cuerpo.appendChild(el('div', 'pp-captura-sub',
       new Date(c.fecha).toLocaleString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' }) +
-      (c.spot && c.spot.nombre ? ' · 📍 ' + c.spot.nombre : '')));
+      (c.spot && c.spot.nombre ? ' · ' + PP.iconos.html('pin') + c.spot.nombre : '')));
     const cond = c.condiciones || {};
     if (cond.faseMarea || cond.luna) {
       cuerpo.appendChild(el('div', 'pp-captura-cond',
@@ -561,7 +562,7 @@ PP.ui = (function () {
     const talla = el('input', 'pp-input'); talla.type = 'number'; talla.placeholder = 'Talla (cm)';
     const peso = el('input', 'pp-input'); peso.type = 'number'; peso.step = '0.1'; peso.placeholder = 'Peso (kg)';
     const selModo = el('select', 'pp-input');
-    Object.values(PP.MODOS).forEach(m => { const o = el('option', null, m.icono + ' ' + m.nombre); o.value = m.id; selModo.appendChild(o); });
+    Object.values(PP.MODOS).forEach(m => { const o = el('option', null, m.nombre); o.value = m.id; selModo.appendChild(o); });
     selModo.value = st.modo;
     const senuelo = el('input', 'pp-input'); senuelo.placeholder = 'Señuelo / cebo';
     const notas = el('input', 'pp-input'); notas.placeholder = 'Notas (opcional)';
@@ -569,7 +570,8 @@ PP.ui = (function () {
     // Foto: cámara o galería (el selector del sistema ofrece ambas)
     const foto = document.createElement('input');
     foto.type = 'file'; foto.accept = 'image/*'; foto.style.display = 'none';
-    const btnFoto = el('button', 'pp-chip', '📷 Añadir foto'); btnFoto.type = 'button';
+    const camTexto = (t) => PP.iconos.html('camara') + t;
+    const btnFoto = el('button', 'pp-chip', camTexto('Añadir foto')); btnFoto.type = 'button';
     const preview = document.createElement('img');
     preview.className = 'pp-foto-preview'; preview.style.display = 'none'; preview.alt = '';
     let fotoData = null;
@@ -577,14 +579,14 @@ PP.ui = (function () {
     foto.addEventListener('change', async () => {
       const f = foto.files && foto.files[0];
       if (!f) return;
-      btnFoto.textContent = '📷 Procesando…';
+      btnFoto.innerHTML = camTexto('Procesando…');
       try {
         fotoData = await PP.fotos.comprimir(f);
         preview.src = fotoData; preview.style.display = 'block';
-        btnFoto.textContent = '📷 Cambiar foto';
+        btnFoto.innerHTML = camTexto('Cambiar foto');
       } catch (e2) {
         fotoData = null;
-        btnFoto.textContent = '📷 No se pudo leer la foto — prueba otra';
+        btnFoto.innerHTML = camTexto('No se pudo leer la foto — prueba otra');
       }
     });
 
@@ -637,7 +639,7 @@ PP.ui = (function () {
     const fondo = el('div', 'pp-modal-fondo');
     fondo.id = 'pp-modal';
     const caja = el('div', 'pp-modal');
-    const x = el('button', 'pp-modal-x', '✕');
+    const x = el('button', 'pp-modal-x', PP.iconos.svg('cerrar'));
     x.addEventListener('click', cerrarModal);
     caja.appendChild(x);
     caja.appendChild(cuerpo);
@@ -653,6 +655,9 @@ PP.ui = (function () {
   /* ============ CABECERA ============ */
 
   function renderCabecera(st) {
+    if (st.spot && PP.solunar) {
+      document.body.dataset.momento = PP.solunar.momentoDelDia(new Date(), st.spot.lat, st.spot.lon);
+    }
     $('#hdr-spot-nombre').textContent = st.spot.nombre || (st.spot.lat.toFixed(3) + ', ' + st.spot.lon.toFixed(3));
     const u = $('#hdr-update');
     if (st.datos && st.datos.obtenido) {

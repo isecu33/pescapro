@@ -5,6 +5,7 @@
   "private": true,
   "scripts": {
     "test": "node test/test_mareas.js && node test/test_indice.js && node test/test_especies.js && node test/test_records.js",
+    "serve": "node scripts/serve.js",
     "android:add": "npx cap add android",
     "android:sync": "npx cap sync android",
     "android:open": "npx cap open android"

@@ -35,14 +35,14 @@ PP.uiTrofeos = (function () {
     const r = PP.records.calcular(capturas);
     const grid = el('div', 'pp-cond-grid');
     const items = [
-      ['🎣', 'Capturas totales', r.total],
-      ['🐟', 'Especies distintas', r.especiesDistintas],
-      ['🔥', 'Mejor día', r.mejorDia ? r.mejorDia.n + ' (' + fmtDia(r.mejorDia.dia) + ')' : '—'],
-      ['🧭', 'Spots con capturas', r.spotsDistintos]
+      ['cana', 'Capturas totales', r.total],
+      ['pez', 'Especies distintas', r.especiesDistintas],
+      ['llama', 'Mejor día', r.mejorDia ? r.mejorDia.n + ' (' + fmtDia(r.mejorDia.dia) + ')' : '—'],
+      ['brujula', 'Spots con capturas', r.spotsDistintos]
     ];
     items.forEach(([ic, lbl, val]) => {
       const it = el('div', 'pp-cond');
-      it.appendChild(el('div', 'pp-cond-ico', ic));
+      it.appendChild(el('div', 'pp-cond-ico', PP.iconos.svg(ic)));
       it.appendChild(el('div', 'pp-cond-lbl', lbl));
       it.appendChild(el('div', 'pp-cond-val', String(val)));
       grid.appendChild(it);
@@ -112,9 +112,9 @@ PP.uiTrofeos = (function () {
     card.appendChild(el('h3', null, '⚔️ Competiciones con amigos'));
 
     const fila = el('div', 'pp-modos');
-    const bCrear = el('button', 'pp-chip', '➕ Crear');
+    const bCrear = el('button', 'pp-chip', PP.iconos.html('anadir') + 'Crear');
     bCrear.addEventListener('click', () => conNombre(st, () => modalCrear(st)));
-    const bUnirse = el('button', 'pp-chip', '📥 Unirse / añadir código');
+    const bUnirse = el('button', 'pp-chip', PP.iconos.html('bandeja') + 'Unirse / añadir código');
     bUnirse.addEventListener('click', () => conNombre(st, () => modalImportar(st)));
     fila.appendChild(bCrear); fila.appendChild(bUnirse);
     card.appendChild(fila);
@@ -146,7 +146,7 @@ PP.uiTrofeos = (function () {
   function conNombre(st, sigue) {
     if (PP.liga.perfil() && PP.liga.perfil().nombre) return sigue();
     const cuerpo = el('div');
-    cuerpo.appendChild(el('h3', null, '🪪 Tu nombre de pescador'));
+    cuerpo.appendChild(el('h3', null, PP.iconos.html('tarjeta') + 'Tu nombre de pescador'));
     cuerpo.appendChild(el('p', 'pp-nota', 'Aparecerá en los rankings que compartas con tus amigos.'));
     const input = el('input', 'pp-input'); input.placeholder = 'P. ej. Iker';
     input.maxLength = 24;
@@ -237,9 +237,9 @@ PP.uiTrofeos = (function () {
 
     // Acciones
     const acciones = el('div', 'pp-form pp-mt');
-    const bInv = el('button', 'pp-chip', '📤 Compartir invitación');
+    const bInv = el('button', 'pp-chip', PP.iconos.html('compartir') + 'Compartir invitación');
     bInv.addEventListener('click', () => compartirInvitacion(liga));
-    const bRes = el('button', 'pp-chip', '📤 Enviar mi resultado');
+    const bRes = el('button', 'pp-chip', PP.iconos.html('compartir') + 'Enviar mi resultado');
     bRes.addEventListener('click', () => {
       try {
         const codigo = PP.liga.codigoResultado(liga.id);
@@ -248,9 +248,9 @@ PP.uiTrofeos = (function () {
           '\nPega este código en Trofeos → Unirse/añadir código:\n' + codigo);
       } catch (e) { alert(e.message); }
     });
-    const bAdd = el('button', 'pp-chip', '📥 Añadir resultado de un amigo');
+    const bAdd = el('button', 'pp-chip', PP.iconos.html('bandeja') + 'Añadir resultado de un amigo');
     bAdd.addEventListener('click', () => { PP.ui.cerrarModal(); modalImportar(st); });
-    const bDel = el('button', 'pp-chip', '🗑 Borrar competición');
+    const bDel = el('button', 'pp-chip', PP.iconos.html('papelera') + 'Borrar competición');
     bDel.addEventListener('click', () => {
       if (confirm('¿Borrar «' + liga.nombre + '» de tu móvil? (a tus amigos no les afecta)')) {
         PP.liga.borrar(liga.id); PP.ui.cerrarModal(); render(st);

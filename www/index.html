@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
-  <meta name="theme-color" content="#0d1620">
+  <meta name="theme-color" content="#050b14">
   <title>PescaPro — Condiciones de pesca</title>
   <link rel="stylesheet" href="lib/leaflet/leaflet.css">
   <link rel="stylesheet" href="css/app.css">
@@ -11,13 +11,13 @@
 <body>
 
   <header class="pp-header">
-    <div class="pp-logo">🐟</div>
+    <div class="pp-logo"><svg class="pp-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 4c0 0 0 8 0 10a4 4 0 1 0 4-4"/><path d="M4 19c2-1.5 4-1.5 6 0s4 1.5 6 0"/></svg></div>
     <div id="hdr-spot" title="Cambiar spot">
       <span id="hdr-spot-nombre">—</span>
       <span id="hdr-update" class="pp-update"></span>
     </div>
-    <button id="btn-fav" class="pp-hbtn" title="Guardar spot en favoritos">☆</button>
-    <button id="btn-refrescar" class="pp-hbtn" title="Actualizar datos">⟳</button>
+    <button id="btn-fav" class="pp-hbtn" title="Guardar spot en favoritos"></button>
+    <button id="btn-refrescar" class="pp-hbtn" title="Actualizar datos"></button>
   </header>
 
   <div id="aviso-seguridad" class="pp-banner" style="display:none"></div>
@@ -31,13 +31,13 @@
       <div id="mapa"></div>
       <div class="pp-mapa-controles">
         <div class="pp-mapa-fila">
-          <span>🕐</span>
+          <span class="pp-ico-wrap"><svg class="pp-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg></span>
           <input type="range" id="mapa-slider" min="0" max="71" value="0" step="1">
           <span id="mapa-hora">—</span>
         </div>
         <div class="pp-mapa-fila">
-          <label><input type="checkbox" id="mapa-viento" checked> 💨 Viento</label>
-          <label><input type="checkbox" id="mapa-seamark"> ⚓ Carta náutica</label>
+          <label><input type="checkbox" id="mapa-viento" checked> <span class="pp-ico-wrap"><svg class="pp-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 8h13a2.5 2.5 0 1 0-2.5-2.5"/><path d="M2 12h17a2.5 2.5 0 1 1-2.5 2.5"/><path d="M2 16h10"/></svg></span> Viento</label>
+          <label><input type="checkbox" id="mapa-seamark"> <span class="pp-ico-wrap"><svg class="pp-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v4M9 5h6"/><path d="M5 11h14l-2 6a5 5 0 0 1-10 0Z"/><path d="M12 21c-2 0-3-1-3-1s1-1 3-1 3 1 3 1-1 1-3 1Z"/></svg></span> Carta náutica</label>
           <span id="mapa-estado"></span>
         </div>
         <div class="pp-leyenda">
@@ -59,17 +59,18 @@
   </main>
 
   <nav class="pp-nav">
-    <button data-vista="ahora" class="activo"><span>🎣</span>Ahora</button>
-    <button data-vista="prevision"><span>📈</span>Previsión</button>
-    <button data-vista="mapa"><span>🗺️</span>Mapa</button>
-    <button data-vista="especies"><span>🐟</span>Especies</button>
-    <button data-vista="cuaderno"><span>📓</span>Cuaderno</button>
-    <button data-vista="trofeos"><span>🏆</span>Trofeos</button>
+    <button data-vista="ahora" class="activo"><span></span>Ahora</button>
+    <button data-vista="prevision"><span></span>Previsión</button>
+    <button data-vista="mapa"><span></span>Mapa</button>
+    <button data-vista="especies"><span></span>Especies</button>
+    <button data-vista="cuaderno"><span></span>Cuaderno</button>
+    <button data-vista="trofeos"><span></span>Trofeos</button>
   </nav>
 
   <script src="lib/leaflet/leaflet.js"></script>
   <script src="lib/suncalc.js"></script>
   <script src="js/config.js"></script>
+  <script src="js/iconos.js"></script>
   <script src="js/especies.js"></script>
   <script src="js/api.js"></script>
   <script src="js/mareas.js"></script>

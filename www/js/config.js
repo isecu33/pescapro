@@ -38,7 +38,7 @@ PP.CONFIG = {
    Cada factor se puntúa 0..1 en indice.js y el índice final es 0..100. */
 PP.MODOS = {
   spinning: {
-    id: 'spinning', nombre: 'Spinning', icono: '🎣',
+    id: 'spinning', nombre: 'Spinning', icono: 'cana',
     desc: 'Costa con señuelos',
     pesos: { viento: 0.15, oleaje: 0.20, marea: 0.15, solunar: 0.10, momento: 0.15, presion: 0.10, cielo: 0.05, corriente: 0.05, sst: 0.05 },
     // trapecio [min, opt1, opt2, max]
@@ -48,7 +48,7 @@ PP.MODOS = {
     noche: 0.55 // factor del momento nocturno (0..1); crepúsculos siempre 1
   },
   eging: {
-    id: 'eging', nombre: 'Eging', icono: '🦑',
+    id: 'eging', nombre: 'Eging', icono: 'calamar',
     desc: 'Calamar y sepia',
     pesos: { viento: 0.14, oleaje: 0.24, marea: 0.10, solunar: 0.08, momento: 0.18, presion: 0.06, cielo: 0.05, corriente: 0.07, sst: 0.08 },
     vientoOK: [0, 0, 12, 22],
@@ -57,7 +57,7 @@ PP.MODOS = {
     noche: 1.0 // el eging es sobre todo nocturno/crepuscular
   },
   surfcasting: {
-    id: 'surfcasting', nombre: 'Surfcasting', icono: '🏖️',
+    id: 'surfcasting', nombre: 'Surfcasting', icono: 'surf',
     desc: 'Fondo desde playa',
     pesos: { viento: 0.10, oleaje: 0.15, marea: 0.25, solunar: 0.10, momento: 0.13, presion: 0.10, cielo: 0.04, corriente: 0.03, sst: 0.10 },
     vientoOK: [0, 5, 24, 40],
@@ -83,17 +83,19 @@ PP.MAREA_CLASES = [
   { max: 99,  clase: 'vivas',  etiqueta: 'Mareas vivas',  color: '#f59f00' }
 ];
 
-/* Códigos meteo de Open-Meteo (WMO) → texto e icono */
+/* Códigos meteo de Open-Meteo (WMO) → texto, emoji de contenido (usado en
+   sitios de texto corrido) e icono de trazo (usado en la rejilla de
+   condiciones, ver iconos.js) */
 PP.WMO = {
-  0:['Despejado','☀️'],1:['Mayormente despejado','🌤️'],2:['Parcialmente nuboso','⛅'],3:['Nuboso','☁️'],
-  45:['Niebla','🌫️'],48:['Niebla con cencellada','🌫️'],
-  51:['Llovizna débil','🌦️'],53:['Llovizna','🌦️'],55:['Llovizna intensa','🌧️'],
-  61:['Lluvia débil','🌦️'],63:['Lluvia','🌧️'],65:['Lluvia fuerte','🌧️'],
-  66:['Lluvia helada','🌧️'],67:['Lluvia helada fuerte','🌧️'],
-  71:['Nieve débil','🌨️'],73:['Nieve','🌨️'],75:['Nieve fuerte','❄️'],77:['Cinarra','🌨️'],
-  80:['Chubascos débiles','🌦️'],81:['Chubascos','🌧️'],82:['Chubascos fuertes','⛈️'],
-  85:['Chubascos de nieve','🌨️'],86:['Chubascos de nieve fuertes','❄️'],
-  95:['Tormenta','⛈️'],96:['Tormenta con granizo','⛈️'],99:['Tormenta fuerte con granizo','⛈️']
+  0:['Despejado','☀️','sol'],1:['Mayormente despejado','🌤️','solNube'],2:['Parcialmente nuboso','⛅','solNube'],3:['Nuboso','☁️','nuboso'],
+  45:['Niebla','🌫️','niebla'],48:['Niebla con cencellada','🌫️','niebla'],
+  51:['Llovizna débil','🌦️','llovizna'],53:['Llovizna','🌦️','llovizna'],55:['Llovizna intensa','🌧️','lluvia'],
+  61:['Lluvia débil','🌦️','llovizna'],63:['Lluvia','🌧️','lluvia'],65:['Lluvia fuerte','🌧️','lluviaFuerte'],
+  66:['Lluvia helada','🌧️','lluvia'],67:['Lluvia helada fuerte','🌧️','lluviaFuerte'],
+  71:['Nieve débil','🌨️','nieve'],73:['Nieve','🌨️','nieve'],75:['Nieve fuerte','❄️','nieve'],77:['Cinarra','🌨️','nieve'],
+  80:['Chubascos débiles','🌦️','llovizna'],81:['Chubascos','🌧️','lluvia'],82:['Chubascos fuertes','⛈️','lluviaFuerte'],
+  85:['Chubascos de nieve','🌨️','nieve'],86:['Chubascos de nieve fuertes','❄️','nieve'],
+  95:['Tormenta','⛈️','tormenta'],96:['Tormenta con granizo','⛈️','tormenta'],99:['Tormenta fuerte con granizo','⛈️','tormenta']
 };
 
 /* Utilidades compartidas */

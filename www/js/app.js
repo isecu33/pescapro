@@ -5,6 +5,11 @@ window.PP = window.PP || {};
 PP.app = (function () {
   const $ = (s) => document.querySelector(s);
 
+  const NAV_ICONOS = {
+    ahora: 'cana', prevision: 'grafico', mapa: 'mapa',
+    especies: 'pez', cuaderno: 'libreta', trofeos: 'trofeo'
+  };
+
   const st = {
     spot: null,
     modo: 'spinning',
@@ -51,6 +56,7 @@ PP.app = (function () {
   async function refrescar() {
     if (st.cargando) return;
     st.cargando = true;
+    $('#btn-refrescar').classList.add('girando');
     PP.ui.renderCabecera(st);
     try {
       const datos = await PP.api.cargarTodo(st.spot.lat, st.spot.lon);
@@ -72,6 +78,7 @@ PP.app = (function () {
       }
     } finally {
       st.cargando = false;
+      $('#btn-refrescar').classList.remove('girando');
       PP.ui.renderCabecera(st);
     }
   }
@@ -189,7 +196,7 @@ PP.app = (function () {
 
   function modalBuscar() {
     const cuerpo = document.createElement('div');
-    cuerpo.innerHTML = '<h3>📍 Cambiar spot</h3>';
+    cuerpo.innerHTML = '<h3>' + PP.iconos.html('pin') + ' Cambiar spot</h3>';
     const input = document.createElement('input');
     input.className = 'pp-input'; input.placeholder = 'Busca un puerto, playa o pueblo…';
     const res = document.createElement('div');
@@ -218,12 +225,14 @@ PP.app = (function () {
 
     // GPS
     const gps = document.createElement('button');
-    gps.className = 'pp-chip'; gps.textContent = '🛰️ Usar mi ubicación (GPS)';
+    gps.className = 'pp-chip';
+    const gpsTexto = (t) => { gps.innerHTML = PP.iconos.html('ubicacion') + ' ' + t; };
+    gpsTexto('Usar mi ubicación (GPS)');
     gps.addEventListener('click', () => {
-      gps.textContent = '🛰️ Localizando…';
+      gpsTexto('Localizando…');
       navigator.geolocation.getCurrentPosition(
         (pos) => cambiarSpot({ nombre: 'Mi ubicación', lat: pos.coords.latitude, lon: pos.coords.longitude }),
-        (err) => { gps.textContent = '🛰️ Sin permiso o sin señal GPS'; },
+        () => { gpsTexto('Sin permiso o sin señal GPS'); },
         { enableHighAccuracy: true, timeout: 12000 }
       );
     });
@@ -233,12 +242,12 @@ PP.app = (function () {
     const favs = PP.favoritos.leer();
     if (favs.length) {
       const t = document.createElement('div');
-      t.className = 'pp-campo'; t.innerHTML = '<b>⭐ Favoritos</b>';
+      t.className = 'pp-campo'; t.innerHTML = '<b>' + PP.iconos.html('estrellaLlena') + ' Favoritos</b>';
       cuerpo.appendChild(t);
       favs.forEach((f, i) => {
         const fila = document.createElement('div');
         fila.className = 'pp-lugar';
-        fila.innerHTML = '<b>' + f.nombre + '</b> <button class="pp-borrar">✕</button>';
+        fila.innerHTML = '<b>' + f.nombre + '</b> <button class="pp-borrar">' + PP.iconos.html('cerrar') + '</button>';
         fila.querySelector('.pp-borrar').addEventListener('click', (e) => {
           e.stopPropagation(); PP.favoritos.borrar(i); PP.ui.cerrarModal(); modalBuscar();
         });
@@ -252,14 +261,20 @@ PP.app = (function () {
   /* ---------- Cableado inicial ---------- */
 
   function conectarUI() {
-    document.querySelectorAll('.pp-nav button').forEach(b =>
-      b.addEventListener('click', () => irA(b.dataset.vista)));
+    document.querySelectorAll('.pp-nav button').forEach(b => {
+      b.querySelector('span').innerHTML = PP.iconos.svg(NAV_ICONOS[b.dataset.vista]);
+      b.addEventListener('click', () => irA(b.dataset.vista));
+    });
     $('#hdr-spot').addEventListener('click', modalBuscar);
+    $('#btn-refrescar').innerHTML = PP.iconos.svg('refrescar');
     $('#btn-refrescar').addEventListener('click', refrescar);
-    $('#btn-fav').addEventListener('click', () => {
+    const btnFav = $('#btn-fav');
+    btnFav.innerHTML = PP.iconos.svg('estrella');
+    btnFav.addEventListener('click', () => {
       PP.favoritos.anadir(st.spot);
-      $('#btn-fav').textContent = '⭐';
-      setTimeout(() => { $('#btn-fav').textContent = '☆'; }, 1200);
+      btnFav.innerHTML = PP.iconos.svg('estrellaLlena');
+      btnFav.classList.add('activo');
+      setTimeout(() => { btnFav.innerHTML = PP.iconos.svg('estrella'); btnFav.classList.remove('activo'); }, 1200);
     });
   }
 

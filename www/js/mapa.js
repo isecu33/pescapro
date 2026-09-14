@@ -36,7 +36,7 @@ PP.mapa = (function () {
       title: spot.nombre || 'Spot',
       icon: L.divIcon({
         className: 'pp-spot-icon',
-        html: '<div class="pp-pin">📍</div>',
+        html: '<div class="pp-pin">' + PP.iconos.svg('pin') + '</div>',
         iconSize: [30, 30], iconAnchor: [15, 28]
       })
     }).addTo(map);
@@ -48,7 +48,7 @@ PP.mapa = (function () {
     capaFavs.clearLayers();
     favs.forEach(f => {
       L.marker([f.lat, f.lon], {
-        icon: L.divIcon({ className: 'pp-fav-icon', html: '⭐', iconSize: [22, 22] })
+        icon: L.divIcon({ className: 'pp-fav-icon', html: PP.iconos.svg('estrellaLlena'), iconSize: [22, 22] })
       }).addTo(capaFavs)
         .bindPopup('<b>' + (f.nombre || 'Favorito') + '</b><br><a href="#" data-fav-ir="' + f.lat + ',' + f.lon + '">Usar este spot</a>')
         .on('popupopen', (ev) => {
@@ -123,7 +123,7 @@ PP.mapa = (function () {
       interactive: false,
       icon: L.divIcon({
         className: 'pp-viento-icon',
-        html: '<div class="pp-viento" style="transform:rotate(' + hacia + 'deg)">⬆</div><div class="pp-viento-txt">' + Math.round(vel) + ' km/h</div>',
+        html: '<div class="pp-viento" style="transform:rotate(' + hacia + 'deg)">' + PP.iconos.svg('flechaSube') + '</div><div class="pp-viento-txt">' + Math.round(vel) + ' km/h</div>',
         iconSize: [60, 60], iconAnchor: [30, 30]
       })
     }).addTo(map);

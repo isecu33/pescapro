@@ -5,6 +5,8 @@ genéricas de estilo, tests, commits y seguridad ya están cubiertas por la
 config global del equipo (`~/.claude/CLAUDE.md` + `team-claude/rules`); aquí
 solo van hechos específicos de PescaPro.
 
+Mapa estructural: ver AGENTS.md
+
 ## Qué es
 
 App Android (Capacitor) de condiciones de pesca para costa: marea, viento,

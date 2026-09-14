@@ -35,6 +35,21 @@
   --pp-panel: #16222f;
   --pp-panel2: #1c2b3a;
   --pp-texto2: #9fb3c4;
+
+  /* Fix bug real: nombres de color "clasicos" de www/css/app.css que
+     varias vistas/componentes siguen usando tal cual en JS (vista-
+     ahora.js, pp-curva-marea.js: `var(--verde)`, `var(--azul)`...).
+     Nunca se definieron aqui -- una custom property sin definir usada
+     en `background`/`stroke`/`fill` cae al valor inicial (transparent),
+     asi que las barras de factores y la curva de marea se veian
+     invisibles (solo el fondo de la barra, sin relleno de color).
+     Alias 1:1 sobre las --ion-color-* ya definidas, para que ambos
+     nombres queden siempre sincronizados. */
+  --acento: var(--ion-color-primary);
+  --azul: var(--ion-color-secondary);
+  --verde: var(--ion-color-success);
+  --ambar: var(--ion-color-warning);
+  --rojo: var(--ion-color-danger);
 }
 
 html, body { background: var(--ion-background-color); font-variant-numeric: tabular-nums; }

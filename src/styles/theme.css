@@ -55,8 +55,14 @@ ion-tab-bar { position: fixed; bottom: 0; left: 0; right: 0; z-index: 1500; }
 
 .pp-contenido { padding-bottom: calc(56px + env(safe-area-inset-bottom)); }
 
+/* Genericos de contenido (vistas): tarjeta, estado de carga, nota al pie.
+   Portados de www/css/app.css -- se van anadiendo aqui a medida que cada
+   vista de Fase 3 los necesita. */
 .pp-pad { padding: 0 10px; }
 .pp-cargando { text-align: center; color: var(--pp-texto2); padding: 40px 0; }
+.pp-card { background: var(--pp-panel); border: 1px solid var(--ion-border-color);
+  border-radius: 14px; padding: 14px; margin: 12px; }
+.pp-card h3 { margin: 0 0 10px; font-size: 15px; color: var(--ion-text-color); }
 .pp-nota { font-size: 12px; color: var(--pp-texto2); margin: 8px 0 0; line-height: 1.45; }
 
 /* Vista Especies: grid de tarjetas + ficha en modal (ver vista-especies.js) */
@@ -71,3 +77,20 @@ ion-tab-bar { position: fixed; bottom: 0; left: 0; right: 0; z-index: 1500; }
 .pp-heat-actual { outline: 2px solid var(--ion-color-primary); }
 .pp-campo { margin: 7px 0; font-size: 13.5px; line-height: 1.45; }
 .pp-mejor-hora { font-size: 13px; padding: 3px 0; }
+
+/* Vista Prevision: mejores ventanas */
+.pp-vent-idx { flex: 0 0 44px; height: 44px; border-radius: 10px; color: #14202d;
+  font-weight: 800; font-size: 17px; display: flex; align-items: center; justify-content: center; }
+.pp-vent-info { display: flex; flex-direction: column; gap: 2px; font-size: 13.5px; }
+.pp-vent-info span { color: var(--pp-texto2); font-size: 12px; }
+
+/* Vista Prevision: grafico horario (barras a medida, sin equivalente Ionic) */
+.pp-grafico-scroll { overflow-x: auto; }
+.pp-grafico { display: flex; align-items: flex-end; gap: 2px; height: 130px;
+  min-width: max-content; padding-top: 4px; }
+.pp-graf-col { display: flex; flex-direction: column; align-items: center;
+  justify-content: flex-end; height: 100%; width: 16px; cursor: pointer; }
+.pp-graf-barra { width: 12px; border-radius: 3px 3px 0 0; }
+.pp-graf-hora { font-size: 9px; color: var(--pp-texto2); margin-top: 3px; }
+.pp-graf-dia { writing-mode: vertical-rl; transform: rotate(180deg); font-size: 10.5px;
+  color: var(--ion-color-primary); align-self: center; margin: 0 2px; }

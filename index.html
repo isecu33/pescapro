@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+  <meta name="theme-color" content="#0d1620" />
+  <!-- Fix HIGH de auditoria: sin CSP, un XSS logrado (aunque los fixes de
+       Fase2/3 ya lo cierran estructuralmente) tendria capacidad total de
+       fetch/XHR hacia cualquier dominio y de ejecutar scripts inline.
+       connect-src/img-src listan exactamente los hosts que la app usa de
+       verdad: las 3 APIs de Open-Meteo (fetch) y las teselas de mapa de
+       OpenStreetMap/OpenSeaMap (imagenes, via Leaflet). style-src necesita
+       'unsafe-inline' porque Ionic/Stencil inyecta estilos en los Shadow
+       Roots de sus componentes en tiempo de ejecucion; verificar en Fase5
+       que la consola del navegador no reporta ningun otro bloqueo. -->
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    script-src 'self';
+    style-src 'self' 'unsafe-inline';
+    img-src 'self' data: blob: https://tile.openstreetmap.org https://tiles.openseamap.org;
+    connect-src 'self' https://api.open-meteo.com https://marine-api.open-meteo.com https://geocoding-api.open-meteo.com;
+    object-src 'none';
+    base-uri 'self';
+  " />
+  <title>PescaPro — Condiciones de pesca</title>
+</head>
+<body>
+  <div id="app"></div>
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

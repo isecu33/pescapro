@@ -54,3 +54,16 @@ html, body { background: var(--ion-background-color); font-variant-numeric: tabu
 ion-tab-bar { position: fixed; bottom: 0; left: 0; right: 0; z-index: 1500; }
 
 .pp-contenido { padding-bottom: calc(56px + env(safe-area-inset-bottom)); }
+
+/* Vista Mapa (ver src/ui/views/vista-mapa.js) -- equivalente a las reglas
+   #mapa / .pp-mapa-controles / .pp-leyenda de www/css/app.css, adaptadas
+   a las variables de tema nuevas. */
+.pp-vista-mapa { display: flex; flex-direction: column; height: 100%; }
+.pp-vista-mapa-lienzo { flex: 1; min-height: 320px; background: #0a141e; }
+.pp-mapa-controles { padding: 10px 12px; background: var(--pp-panel); border-top: 1px solid var(--ion-border-color); }
+.pp-mapa-fila { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; font-size: 13px; }
+.pp-mapa-fila ion-range { flex: 1; }
+.pp-mapa-toggle { --background: transparent; --padding-start: 0; --min-height: 0; }
+#pp-mapa-hora { font-weight: 700; min-width: 92px; }
+#pp-mapa-estado { font-size: 12px; color: var(--pp-texto2); }
+.pp-leyenda { display: flex; gap: 10px; font-size: 11px; color: var(--pp-texto2); flex-wrap: wrap; }

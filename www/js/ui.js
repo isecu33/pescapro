@@ -12,6 +12,57 @@ PP.ui = (function () {
     return e;
   }
 
+  const FOTOS_ESPECIE = {
+    lubina:    'img/svg/lubina.svg',
+    dorada:    'img/svg/dorada.svg',
+    sargo:     'img/svg/sargo.svg',
+    jurel:     'img/svg/jurel-chicharro.svg',
+    caballa:   'img/svg/caballa-verdel.svg',
+    lisa:      'img/svg/lisa-muble.svg',
+    congrio:   'img/svg/congrio.svg',
+    faneca:    'img/svg/faneca.svg',
+    salmonete: 'img/svg/salmonete.svg',
+    calamar:   'img/svg/calamar.svg',
+    sepia:     'img/svg/sepia.svg',
+    pulpo:     'img/svg/pulpo.svg'
+  };
+
+  const FOTOS_NATURAL = {
+    lubina:    'img/lubina.png',
+    dorada:    'img/dorada.png',
+    jurel:     'img/jurel-chicharro.png',
+    caballa:   'img/caballa-verdel.png',
+    lisa:      'img/lisa-muble.png',
+    congrio:   'img/congrio.png',
+    faneca:    'img/faneca.png',
+    salmonete: 'img/salmonete.png',
+    calamar:   'img/calamar.png',
+    sepia:     'img/sepia.png',
+    pulpo:     'img/pulpo.png'
+  };
+
+  function iconoEspecie(esp, modo) {
+    const src = FOTOS_ESPECIE[esp.id];
+    if (!src) return el('span', 'pp-esp-ico', esp.icono);
+    if (modo === 'mini') {
+      const img = document.createElement('img');
+      img.src = src; img.alt = esp.nombre; img.className = 'pp-esp-foto-mini';
+      const span = el('span', 'pp-esp-ico', esp.icono); span.style.display = 'none';
+      img.onerror = function () { this.style.display = 'none'; span.style.display = ''; };
+      const wrap = el('span');
+      wrap.appendChild(img); wrap.appendChild(span);
+      return wrap;
+    }
+    // modo 'card': imagen full-width + fallback emoji
+    const img = document.createElement('img');
+    img.src = src; img.alt = esp.nombre; img.className = 'pp-esp-card-foto';
+    const fb = el('div', 'pp-esp-card-foto-fallback', esp.icono); fb.style.display = 'none';
+    img.onerror = function () { this.style.display = 'none'; fb.style.display = 'flex'; };
+    const wrap = el('div');
+    wrap.appendChild(img); wrap.appendChild(fb);
+    return wrap;
+  }
+
   /* ============ VISTA AHORA ============ */
 
   function renderAhora(st) {
@@ -33,23 +84,23 @@ PP.ui = (function () {
     // Selector de modalidad
     cont.appendChild(selectorModo(st));
 
-    // Gauge del índice
-    const card = el('div', 'pp-card pp-card-indice');
-    card.appendChild(gauge(idx.valor));
-    const info = el('div', 'pp-indice-info');
-    info.appendChild(el('div', 'pp-indice-etiqueta', U().etiquetaIndice(idx.valor)));
-    info.appendChild(el('div', 'pp-indice-sub', PP.iconos.html(PP.MODOS[st.modo].icono) + PP.MODOS[st.modo].nombre + ' · ahora'));
-    card.appendChild(info);
+    // Gauge centrado (hero)
+    const card = el('div', 'pp-card-gauge-hero');
+    const gWrap = el('div', 'pp-gauge-hero-wrap');
+    gWrap.appendChild(gauge(idx.valor));
+    card.appendChild(gWrap);
+    card.appendChild(el('div', 'pp-indice-etiqueta', U().etiquetaIndice(idx.valor)));
+    card.appendChild(el('div', 'pp-indice-sub', PP.iconos.html(PP.MODOS[st.modo].icono) + PP.MODOS[st.modo].nombre + ' · ahora'));
     cont.appendChild(card);
+
+    // Marea con gráfico interactivo — primer módulo tras el índice
+    cont.appendChild(cardMarea(st));
 
     // Desglose de factores
     cont.appendChild(desgloseFactores(idx.factores, st.modo));
 
     // Condiciones actuales
     cont.appendChild(condicionesActuales(h, st));
-
-    // Marea
-    cont.appendChild(cardMarea(st));
 
     // Sol y luna
     cont.appendChild(cardSolLuna(st));
@@ -99,7 +150,7 @@ PP.ui = (function () {
       const barra = el('div', 'pp-barra');
       const rel = el('div', 'pp-barra-rel');
       rel.style.width = Math.round(v * 100) + '%';
-      rel.style.background = v >= 0.7 ? 'var(--verde)' : v >= 0.45 ? 'var(--ambar)' : 'var(--rojo)';
+      rel.style.background = v >= 0.7 ? 'var(--acento)' : v >= 0.45 ? 'rgba(255,172,0,.7)' : 'var(--rojo)';
       barra.appendChild(rel);
       fila.appendChild(barra);
       fila.appendChild(el('span', 'pp-factor-peso', Math.round(pesos[k] * 100) + '%'));
@@ -166,7 +217,7 @@ PP.ui = (function () {
         '<span style="color:' + m.amplitud.color + '">●</span> ' + m.amplitud.etiqueta +
         ' · amplitud ' + m.amplitud.rango.toFixed(1) + ' m · coef. ~' + m.amplitud.coef));
     }
-    card.appendChild(curvaMarea(st));
+    card.appendChild(curvaMareaInteractiva(st));
     // Próximas mareas
     const tabla = el('div', 'pp-mareas-prox');
     m.proximos.forEach(e => {
@@ -179,34 +230,144 @@ PP.ui = (function () {
     return card;
   }
 
-  /* Curva SVG del nivel del mar: desde hace 6h hasta +30h */
-  function curvaMarea(st) {
-    const ahora = Date.now();
-    const desde = ahora - 6 * 3600e3, hasta = ahora + 30 * 3600e3;
+  /* Gráfico canvas interactivo del nivel del mar: −6h hasta +30h.
+     Spline Catmull-Rom, gradiente naranja, HUD al tocar/pasar el dedo. */
+  function curvaMareaInteractiva(st) {
+    const NOW = Date.now();
+    const desde = NOW - 6 * 3600e3, hasta = NOW + 30 * 3600e3;
     const pts = st.datos.horas.filter(h => h.fecha >= desde && h.fecha <= hasta && h.nivelMar != null);
     if (pts.length < 4) return el('div');
-    const W = 340, H = 90, PAD = 6;
-    const min = Math.min(...pts.map(p => p.nivelMar)), max = Math.max(...pts.map(p => p.nivelMar));
-    const x = (t) => PAD + (t - desde) / (hasta - desde) * (W - 2 * PAD);
-    const y = (v) => H - PAD - (v - min) / (max - min || 1) * (H - 2 * PAD);
-    let d = '';
-    pts.forEach((p, i) => { d += (i ? 'L' : 'M') + x(p.fecha.getTime()).toFixed(1) + ',' + y(p.nivelMar).toFixed(1); });
-    const xNow = x(ahora);
-    // etiquetas de extremos dentro de la ventana
-    let marcas = '';
-    st.ctx.mareas.extremos.filter(e => e.fecha >= desde && e.fecha <= hasta).forEach(e => {
-      const ex = x(e.fecha.getTime()), ey = y(e.altura);
-      marcas += '<circle cx="' + ex + '" cy="' + ey + '" r="3" fill="var(--acento)"/>' +
-        '<text x="' + ex + '" y="' + (e.tipo === 'pleamar' ? ey - 6 : ey + 12) + '" text-anchor="middle" class="pp-svg-txt">' + U().fmtHora(e.fecha) + '</text>';
-    });
-    const div = el('div', 'pp-curva');
-    div.innerHTML = '<svg viewBox="0 0 ' + W + ' ' + H + '">' +
-      '<path d="' + d + ' L' + x(pts[pts.length - 1].fecha.getTime()) + ',' + (H - 1) + ' L' + x(pts[0].fecha.getTime()) + ',' + (H - 1) + ' Z" fill="rgba(77,171,247,.15)" stroke="none"/>' +
-      '<path d="' + d + '" fill="none" stroke="var(--azul)" stroke-width="2"/>' +
-      '<line x1="' + xNow + '" y1="2" x2="' + xNow + '" y2="' + (H - 2) + '" stroke="var(--acento)" stroke-width="1.5" stroke-dasharray="4 3"/>' +
-      '<text x="' + xNow + '" y="12" text-anchor="middle" class="pp-svg-txt" fill="var(--acento)">ahora</text>' +
-      marcas + '</svg>';
-    return div;
+
+    const wrap = el('div', 'pp-marea-chart-wrap');
+    const canvas = document.createElement('canvas');
+    canvas.className = 'pp-marea-canvas';
+    canvas.style.height = '120px';
+    const hud = el('div', 'pp-marea-hud');
+    wrap.appendChild(canvas);
+    wrap.appendChild(hud);
+
+    const PAD_X = 8, PAD_Y = 20;
+
+    function dibujar(cursorT) {
+      const W = canvas.offsetWidth || 340;
+      const H = canvas.offsetHeight || 120;
+      canvas.width = W; canvas.height = H;
+      const ctx = canvas.getContext('2d');
+
+      const vals = pts.map(p => p.nivelMar);
+      const minV = Math.min(...vals), maxV = Math.max(...vals);
+      const rng = maxV - minV || 1;
+      const tx = t => PAD_X + (t - desde) / (hasta - desde) * (W - 2 * PAD_X);
+      const ty = v => H - PAD_Y - (v - minV) / rng * (H - 2 * PAD_Y);
+
+      function splinePath() {
+        ctx.moveTo(tx(pts[0].fecha.getTime()), ty(pts[0].nivelMar));
+        for (let i = 0; i < pts.length - 1; i++) {
+          const p0 = pts[Math.max(0, i - 1)], p1 = pts[i];
+          const p2 = pts[i + 1], p3 = pts[Math.min(pts.length - 1, i + 2)];
+          const x0 = tx(p0.fecha.getTime()), y0 = ty(p0.nivelMar);
+          const x1 = tx(p1.fecha.getTime()), y1 = ty(p1.nivelMar);
+          const x2 = tx(p2.fecha.getTime()), y2 = ty(p2.nivelMar);
+          const x3 = tx(p3.fecha.getTime()), y3 = ty(p3.nivelMar);
+          ctx.bezierCurveTo(
+            x1 + (x2 - x0) / 6, y1 + (y2 - y0) / 6,
+            x2 - (x3 - x1) / 6, y2 - (y3 - y1) / 6,
+            x2, y2
+          );
+        }
+      }
+
+      // Gradiente relleno
+      const grad = ctx.createLinearGradient(0, PAD_Y, 0, H);
+      grad.addColorStop(0, 'rgba(255,114,0,.40)');
+      grad.addColorStop(1, 'rgba(255,114,0,.02)');
+      ctx.beginPath(); splinePath();
+      const lastX = tx(pts[pts.length - 1].fecha.getTime());
+      const firstX = tx(pts[0].fecha.getTime());
+      ctx.lineTo(lastX, H); ctx.lineTo(firstX, H); ctx.closePath();
+      ctx.fillStyle = grad; ctx.fill();
+
+      // Línea naranja
+      ctx.beginPath(); splinePath();
+      ctx.strokeStyle = '#ff7200'; ctx.lineWidth = 2.5; ctx.lineJoin = 'round'; ctx.stroke();
+
+      // Etiquetas horas X
+      ctx.fillStyle = 'rgba(200,200,200,.35)';
+      ctx.font = '8px -apple-system, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+      for (let t = desde; t <= hasta; t += 6 * 3600e3) {
+        const lx = tx(t);
+        if (lx < PAD_X + 10 || lx > W - PAD_X - 10) continue;
+        ctx.fillText(String(new Date(t).getHours()).padStart(2, '0') + 'h', lx, H - 1);
+      }
+
+      // Extremos (pleamar/bajamar)
+      if (st.ctx && st.ctx.mareas && st.ctx.mareas.extremos) {
+        st.ctx.mareas.extremos.filter(e => e.fecha >= desde && e.fecha <= hasta).forEach(e => {
+          const ex = tx(e.fecha.getTime()), ey = ty(e.altura);
+          ctx.beginPath(); ctx.arc(ex, ey, 5, 0, Math.PI * 2);
+          ctx.fillStyle = '#ffab00'; ctx.fill();
+          ctx.strokeStyle = 'rgba(0,0,0,.3)'; ctx.lineWidth = 1; ctx.stroke();
+          ctx.fillStyle = 'rgba(255,200,60,.9)';
+          ctx.font = 'bold 9px -apple-system, sans-serif'; ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(U().fmtHora(e.fecha), ex, e.tipo === 'pleamar' ? ey - 12 : ey + 12);
+        });
+      }
+
+      // Línea "ahora"
+      const xNow = tx(NOW);
+      ctx.save(); ctx.setLineDash([4, 3]);
+      ctx.strokeStyle = 'rgba(255,255,255,.5)'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(xNow, 3); ctx.lineTo(xNow, H - PAD_Y); ctx.stroke();
+      ctx.restore();
+      ctx.fillStyle = 'rgba(255,255,255,.5)'; ctx.font = '9px sans-serif';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+      ctx.fillText('ahora', xNow, 3);
+
+      // Línea cursor interactivo
+      if (cursorT != null) {
+        const xC = tx(cursorT);
+        ctx.save(); ctx.setLineDash([2, 2]);
+        ctx.strokeStyle = 'rgba(255,255,255,.35)'; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(xC, 0); ctx.lineTo(xC, H); ctx.stroke();
+        ctx.restore();
+      }
+    }
+
+    function mostrarHUD(clientX) {
+      const rect = canvas.getBoundingClientRect();
+      const xRel = Math.max(0, Math.min(clientX - rect.left, rect.width));
+      const t = desde + xRel / rect.width * (hasta - desde);
+      let nearest = pts[0];
+      pts.forEach(p => { if (Math.abs(p.fecha.getTime() - t) < Math.abs(nearest.fecha.getTime() - t)) nearest = p; });
+      const ni = pts.indexOf(nearest);
+      const dir = ni > 0 && nearest.nivelMar > pts[ni - 1].nivelMar ? '↑' : '↓';
+
+      dibujar(nearest.fecha.getTime());
+
+      let idxTxt = '';
+      if (st.ctx && PP.indice) {
+        try { const r = PP.indice.indiceHora(nearest, st.modo, st.ctx); idxTxt = r.valor + '/100'; } catch (e) {}
+      }
+
+      hud.style.display = 'flex';
+      hud.innerHTML =
+        '<span class="pp-marea-hud-hora">' + U().fmtHora(nearest.fecha) + '</span>' +
+        '<span class="pp-marea-hud-val">' + nearest.nivelMar.toFixed(2) + ' m ' + dir + '</span>' +
+        (idxTxt ? '<span class="pp-marea-hud-idx">índice ' + idxTxt + '</span>' : '');
+
+      const W = canvas.offsetWidth;
+      const xH = PAD_X + (nearest.fecha.getTime() - desde) / (hasta - desde) * (W - 2 * PAD_X);
+      hud.style.left = Math.max(60, Math.min(W - 60, xH)) + 'px';
+    }
+
+    canvas.addEventListener('mousemove', e => mostrarHUD(e.clientX));
+    canvas.addEventListener('touchmove', e => { e.preventDefault(); mostrarHUD(e.touches[0].clientX); }, { passive: false });
+    canvas.addEventListener('mouseleave', () => { hud.style.display = 'none'; dibujar(); });
+    canvas.addEventListener('touchend', () => { hud.style.display = 'none'; dibujar(); });
+
+    requestAnimationFrame(() => requestAnimationFrame(dibujar));
+    return wrap;
   }
 
   function cardSolLuna(st) {
@@ -245,7 +406,7 @@ PP.ui = (function () {
     const rank = PP.indice.especiesEn(fecha, st.ctx).slice(0, 6);
     rank.forEach(r => {
       const fila = el('div', 'pp-esp-fila');
-      fila.appendChild(el('span', 'pp-esp-ico', r.especie.icono));
+      fila.appendChild(iconoEspecie(r.especie, 'mini'));
       fila.appendChild(el('span', 'pp-esp-nombre', r.especie.nombre));
       const barra = el('div', 'pp-barra pp-barra-esp');
       const relleno = el('div', 'pp-barra-rel');
@@ -354,12 +515,14 @@ PP.ui = (function () {
     const grid = el('div', 'pp-esp-grid');
     rank.forEach(r => {
       const c = el('div', 'pp-esp-card');
-      c.appendChild(el('div', 'pp-esp-card-ico', r.especie.icono));
-      c.appendChild(el('div', 'pp-esp-card-nombre', r.especie.nombre));
+      c.appendChild(iconoEspecie(r.especie, 'card'));
+      const body = el('div', 'pp-esp-card-body');
+      body.appendChild(el('div', 'pp-esp-card-nombre', r.especie.nombre));
       const v = el('div', 'pp-esp-card-val', r.act.valor);
       v.style.color = U().colorIndice(r.act.valor);
-      c.appendChild(v);
-      c.appendChild(el('div', 'pp-esp-card-motivo', r.act.motivo));
+      body.appendChild(v);
+      body.appendChild(el('div', 'pp-esp-card-motivo', r.act.motivo));
+      c.appendChild(body);
       c.addEventListener('click', () => modalEspecie(r.especie, st));
       grid.appendChild(c);
     });
@@ -369,14 +532,22 @@ PP.ui = (function () {
 
   function modalEspecie(esp, st) {
     const cuerpo = el('div');
-    cuerpo.appendChild(el('h3', null, esp.icono + ' ' + esp.nombre + ' <small>(' + esp.cientifico + ')</small>'));
+    const fotoSrcM = FOTOS_NATURAL[esp.id];
+    if (fotoSrcM) {
+      const imgM = document.createElement('img');
+      imgM.src = fotoSrcM; imgM.alt = esp.nombre;
+      imgM.style.cssText = 'width:100%;max-height:150px;object-fit:cover;border-radius:12px;margin-bottom:10px;display:block;filter:brightness(.75) contrast(1.1)';
+      imgM.onerror = function () { this.style.display = 'none'; };
+      cuerpo.appendChild(imgM);
+    }
+    cuerpo.appendChild(el('h3', null, esp.nombre + ' <small>(' + esp.cientifico + ')</small>'));
 
     // Temporada: mini heatmap 12 meses
     const meses = 'EFMAMJJASOND';
     const heat = el('div', 'pp-heat');
     esp.meses.forEach((v, i) => {
       const celda = el('div', 'pp-heat-celda', meses[i]);
-      celda.style.background = 'rgba(47,179,68,' + (v * 0.85) + ')';
+      celda.style.background = 'rgba(255,114,0,' + (v * 0.85) + ')';
       if (i === new Date().getMonth()) celda.classList.add('pp-heat-actual');
       heat.appendChild(celda);
     });
@@ -468,14 +639,34 @@ PP.ui = (function () {
       }
       const cuerpo = el('div', 'pp-captura-cuerpo');
       const cond = c.condiciones || {};
-      cuerpo.innerHTML =
-        '<div class="pp-captura-cab"><b>' + (e ? e.icono + ' ' + e.nombre : c.especie) + '</b>' +
-        (c.talla ? ' · ' + c.talla + ' cm' : '') + (c.peso ? ' · ' + c.peso + ' kg' : '') +
-        '<button class="pp-borrar" title="Borrar">' + PP.iconos.html('cerrar') + '</button></div>' +
+
+      // cab via DOM — no URL string in innerHTML
+      const cab = el('div', 'pp-captura-cab');
+      const cabB = el('b');
+      if (e && FOTOS_ESPECIE[e.id]) {
+        const espIco = document.createElement('img');
+        espIco.src = FOTOS_ESPECIE[e.id]; espIco.alt = ''; espIco.className = 'pp-captura-esp-ico';
+        espIco.onerror = function () { this.style.display = 'none'; };
+        cabB.appendChild(espIco);
+      } else if (e) {
+        cabB.appendChild(document.createTextNode(e.icono + ' '));
+      }
+      cabB.appendChild(document.createTextNode(
+        (e ? e.nombre : c.especie) + (c.talla ? ' · ' + c.talla + ' cm' : '') + (c.peso ? ' · ' + c.peso + ' kg' : '')
+      ));
+      const borrar = el('button', 'pp-borrar', PP.iconos.html('cerrar'));
+      borrar.title = 'Borrar';
+      cab.appendChild(cabB);
+      cab.appendChild(borrar);
+      cuerpo.appendChild(cab);
+
+      const resto = el('div');
+      resto.innerHTML =
         '<div class="pp-captura-sub">' + new Date(c.fecha).toLocaleString('es-ES', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) +
         (c.spot && c.spot.nombre ? ' · ' + c.spot.nombre : '') + (c.senuelo ? ' · ' + c.senuelo : '') + '</div>' +
         (cond.faseMarea ? '<div class="pp-captura-cond">🌊 ' + cond.faseMarea + (cond.luna ? ' · ' + cond.luna : '') + (cond.viento != null ? ' · 💨 ' + Math.round(cond.viento) + ' km/h' : '') + (cond.indice != null ? ' · índice ' + cond.indice : '') + '</div>' : '') +
         (c.notas ? '<div class="pp-captura-notas">' + c.notas + '</div>' : '');
+      cuerpo.appendChild(resto);
       cuerpo.querySelector('.pp-borrar').addEventListener('click', () => {
         if (confirm('¿Borrar esta captura?' + (c.fotoId ? ' (también su foto)' : ''))) { PP.cuaderno.borrar(c.id); renderCuaderno(st); }
       });
@@ -541,7 +732,7 @@ PP.ui = (function () {
       const barra = el('div', 'pp-barra');
       const rel = el('div', 'pp-barra-rel');
       rel.style.width = Math.round((obj[k] || 0) / max * 100) + '%';
-      rel.style.background = 'var(--azul)';
+      rel.style.background = 'var(--acento)';
       barra.appendChild(rel);
       fila.appendChild(barra);
       fila.appendChild(el('span', 'pp-factor-peso', obj[k]));

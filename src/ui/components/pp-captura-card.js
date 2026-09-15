@@ -20,7 +20,7 @@
    (pp-borrar, pp-abrir-foto) para que la vista (Fase 3) los conecte con
    confirm()/cuaderno.borrar()/el visor de foto, manteniendo el
    componente desacoplado de la orquestacion de la app. */
-import { especiePorId } from '../../domain/especies.js';
+import { especiePorId, espImgEl } from '../../domain/especies.js';
 import { obtener as obtenerFoto } from '../../domain/fotos.js';
 
 export class PpCapturaCard extends HTMLElement {
@@ -29,16 +29,16 @@ export class PpCapturaCard extends HTMLElement {
     const shadow = this.attachShadow({ mode: 'open' });
     const style = document.createElement('style');
     style.textContent = `
-      :host { display: block; border-bottom: 1px solid var(--borde, #24374a); padding: 9px 0; }
+      :host { display: block; border-bottom: 1px solid var(--borde, #242424); padding: 9px 0; }
       .flex { display: flex; gap: 10px; align-items: flex-start; }
       .thumb { flex: 0 0 56px; width: 56px; height: 56px; border-radius: 10px; overflow: hidden;
-        background: var(--panel2, #1c2b3a); cursor: pointer; }
+        background: var(--panel2, #1a1a1a); cursor: pointer; }
       .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
       .cuerpo { flex: 1; min-width: 0; }
       .cab { display: flex; align-items: center; gap: 6px; }
-      .sub, .cond { font-size: 12px; color: var(--texto2, #9fb3c4); margin-top: 2px; }
+      .sub, .cond { font-size: 12px; color: var(--texto2, #888888); margin-top: 2px; }
       .notas { font-size: 12.5px; margin-top: 3px; font-style: italic; }
-      .borrar { margin-left: auto; background: none; border: none; color: var(--texto2, #9fb3c4);
+      .borrar { margin-left: auto; background: none; border: none; color: var(--texto2, #888888);
         cursor: pointer; font-size: 13px; }
     `;
     shadow.appendChild(style);
@@ -76,7 +76,8 @@ export class PpCapturaCard extends HTMLElement {
     const cab = document.createElement('div');
     cab.className = 'cab';
     const b = document.createElement('b');
-    b.textContent = especie ? especie.icono + ' ' + especie.nombre : c.especie;
+    if (especie) b.appendChild(espImgEl(especie, 'pp-esp-cab-ico'));
+    b.append(' ' + (especie ? especie.nombre : c.especie));
     cab.appendChild(b);
     if (c.talla) cab.appendChild(document.createTextNode(' · ' + c.talla + ' cm'));
     if (c.peso) cab.appendChild(document.createTextNode(' · ' + c.peso + ' kg'));

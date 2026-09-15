@@ -34,7 +34,7 @@ import leafletCss from 'leaflet/dist/leaflet.css?inline';
 import { util } from '../../domain/config.js';
 
 export function colorPorVelocidad(vel) {
-  return vel < 0.15 ? '#7f8fa0' : vel < 0.35 ? '#4dabf7' : vel < 0.6 ? '#f59f00' : '#e03131';
+  return vel < 0.15 ? '#666666' : vel < 0.35 ? '#cc6600' : vel < 0.6 ? '#ff7200' : '#e03131';
 }
 
 /* Geometria pura de una flecha de corriente (direccion oceanica = hacia

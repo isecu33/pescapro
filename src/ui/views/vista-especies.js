@@ -15,6 +15,7 @@
 import { especiesEn, mejoresHorasEspecie } from '../../domain/indice.js';
 import { util } from '../../domain/config.js';
 import { abrirModal } from '../util/modal.js';
+import { espImgEl } from '../../domain/especies.js';
 
 const MESES_INICIALES = 'EFMAMJJASOND';
 const HORIZONTE_MEJORES_HORAS = 72;
@@ -55,9 +56,7 @@ function crearTarjeta(r, st) {
 
   const content = document.createElement('ion-card-content');
 
-  const ico = document.createElement('div');
-  ico.className = 'pp-esp-card-ico';
-  ico.textContent = r.especie.icono;
+  const ico = espImgEl(r.especie, 'pp-esp-card-ico');
 
   const nombre = document.createElement('div');
   nombre.className = 'pp-esp-card-nombre';
@@ -82,11 +81,21 @@ function abrirModalEspecie(esp, st) {
   const cuerpo = document.createElement('div');
 
   const titulo = document.createElement('h3');
-  titulo.append(esp.icono + ' ' + esp.nombre + ' ');
+  titulo.appendChild(espImgEl(esp, 'pp-esp-modal-ico'));
+  titulo.append(' ' + esp.nombre + ' ');
   const cientifico = document.createElement('small');
   cientifico.textContent = '(' + esp.cientifico + ')';
   titulo.appendChild(cientifico);
   cuerpo.appendChild(titulo);
+
+  if (esp.foto) {
+    const foto = document.createElement('img');
+    foto.src = esp.foto;
+    foto.alt = esp.nombre;
+    foto.className = 'pp-esp-ficha-foto';
+    foto.onerror = function () { this.style.display = 'none'; };
+    cuerpo.appendChild(foto);
+  }
 
   const cabeceraTemporada = document.createElement('div');
   cabeceraTemporada.className = 'pp-campo';
@@ -139,7 +148,7 @@ function crearHeatmapMensual(esp) {
     const celda = document.createElement('div');
     celda.className = 'pp-heat-celda';
     celda.textContent = MESES_INICIALES[i];
-    celda.style.background = 'rgba(47,179,68,' + (v * 0.85) + ')';
+    celda.style.background = 'rgba(255,114,0,' + (v * 0.85) + ')';
     if (i === mesActual) celda.classList.add('pp-heat-actual');
     heat.appendChild(celda);
   });

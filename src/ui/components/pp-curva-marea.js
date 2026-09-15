@@ -1,104 +1,201 @@
-/* <pp-curva-marea> -- curva SVG del nivel del mar (desde -6h hasta +30h),
-   con marcadores de pleamar/bajamar y una linea vertical en "ahora".
-   Reemplaza curvaMarea() de www/js/ui.js:183-210 (SVG reconstruido via
-   innerHTML con coordenadas concatenadas en un string). Mismo patron que
-   pp-gauge: Shadow DOM creado una vez, aqui usando SVG namespaced
-   (createElementNS) en vez de innerHTML -- ademas de evitar el patron
-   inseguro, permite reconstruir solo el contenido del <svg> al cambiar
-   `data` sin recrear el elemento raiz.
+/* <pp-curva-marea> -- gráfico de nivel del mar con uPlot.
+   API pública: set data({ puntos, extremos, ahora })
+   - puntos:  [{t: epochMs, nivel: number}]
+   - extremos: [{tipo: 'pleamar'|'bajamar', t: epochMs, altura: number}]
+   - ahora:   epochMs */
+import uPlot from 'uplot';
+import 'uplot/dist/uPlot.min.css';
 
-   Recibe los datos como PROPIEDAD de objeto (nunca como string HTML):
-   data = { puntos: [{t: epochMs, nivel: number}], extremos: [{tipo,
-   t: epochMs, altura}], ahora: epochMs }. */
-import { util } from '../../domain/config.js';
+const ACENTO = '#ff7200';
+const FILL   = 'rgba(255, 114, 0, 0.10)';
+const GRID   = 'rgba(255, 255, 255, 0.06)';
+const AXIS   = 'rgba(255, 255, 255, 0.40)';
+const H      = 200;
 
-const NS = 'http://www.w3.org/2000/svg';
-const W = 340, H = 90, PAD = 6;
+function fmtHM(epochMs) {
+  return new Date(epochMs).toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' });
+}
+
+function buildOpts(w, ahoraSec, extremos, tooltip) {
+  return {
+    width:  w,
+    height: H,
+    padding: [20, 6, 0, 0],
+    cursor: {
+      show: true,
+      x: true,
+      y: false,
+      drag: { x: false, y: false },
+    },
+    legend: { show: false },
+    scales: {
+      x: { time: true },
+      y: { auto: true },
+    },
+    axes: [
+      {
+        stroke: AXIS,
+        grid:   { stroke: GRID, width: 1 },
+        ticks:  { stroke: GRID, width: 1, size: 3 },
+        font:   '11px system-ui, sans-serif',
+        gap:    4,
+        values: (_u, ticks) => ticks.map(t => fmtHM(t * 1000)),
+      },
+      {
+        stroke: AXIS,
+        grid:   { stroke: GRID, width: 1 },
+        ticks:  { stroke: GRID, width: 1, size: 3 },
+        font:   '11px system-ui, sans-serif',
+        gap:    4,
+        size:   46,
+        values: (_u, ticks) => ticks.map(v => (v != null ? v.toFixed(1) + ' m' : '')),
+      },
+    ],
+    series: [
+      {},
+      {
+        stroke: ACENTO,
+        fill:   FILL,
+        width:  2,
+      },
+    ],
+    hooks: {
+      ready: [
+        (u) => {
+          u.root.style.position = 'relative';
+          u.root.appendChild(tooltip);
+        },
+      ],
+      setCursor: [
+        (u) => {
+          const idx = u.cursor.idx;
+          if (idx == null) { tooltip.style.display = 'none'; return; }
+          const v = u.data[1][idx];
+          if (v == null) { tooltip.style.display = 'none'; return; }
+
+          const t = u.data[0][idx];
+          tooltip.textContent = fmtHM(t * 1000) + '  ·  ' + v.toFixed(2) + ' m';
+          tooltip.style.display = 'block';
+
+          // Posición dentro de u.root (u-wrap)
+          const yAxisPx = u.bbox.left / devicePixelRatio;
+          const cursorX = yAxisPx + u.cursor.left;
+          const totalW  = u.root.offsetWidth;
+          const tipW    = 110;
+          tooltip.style.left = (cursorX + tipW + 8 > totalW ? cursorX - tipW - 4 : cursorX + 8) + 'px';
+          tooltip.style.top  = '4px';
+        },
+      ],
+      draw: [
+        (u) => {
+          const ctx = u.ctx;
+          const { left, top, width, height } = u.bbox;
+
+          // Línea vertical "ahora"
+          const xNow = u.valToPos(ahoraSec, 'x', true);
+          if (xNow >= left && xNow <= left + width) {
+            ctx.save();
+            ctx.strokeStyle = ACENTO;
+            ctx.lineWidth   = 1.5;
+            ctx.setLineDash([4, 3]);
+            ctx.beginPath();
+            ctx.moveTo(xNow, top);
+            ctx.lineTo(xNow, top + height);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.fillStyle = ACENTO;
+            ctx.font      = 'bold 10px system-ui, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('ahora', xNow, top + 13);
+            ctx.restore();
+          }
+
+          // Marcadores de pleamar/bajamar
+          extremos.forEach(e => {
+            const ex = u.valToPos(e.t / 1000, 'x', true);
+            const ey = u.valToPos(e.altura,    'y', true);
+            if (ex < left || ex > left + width) return;
+
+            ctx.save();
+            ctx.fillStyle = ACENTO;
+            ctx.beginPath();
+            ctx.arc(ex, ey, 4, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.font      = '10px system-ui, sans-serif';
+            ctx.textAlign = 'center';
+            if (e.tipo === 'pleamar') {
+              ctx.fillText(e.altura.toFixed(1) + ' m', ex, ey - 18);
+              ctx.fillText(fmtHM(e.t),                 ex, ey -  7);
+            } else {
+              ctx.fillText(fmtHM(e.t),                 ex, ey + 14);
+              ctx.fillText(e.altura.toFixed(1) + ' m', ex, ey + 25);
+            }
+            ctx.restore();
+          });
+        },
+      ],
+    },
+  };
+}
 
 export class PpCurvaMarea extends HTMLElement {
   constructor() {
     super();
-    const shadow = this.attachShadow({ mode: 'open' });
-    const style = document.createElement('style');
-    style.textContent = `
-      :host { display: block; }
-      svg { width: 100%; height: auto; display: block; }
-      text { font-size: 9.5px; }
-    `;
-    shadow.appendChild(style);
-    this._cont = document.createElement('div');
-    shadow.appendChild(this._cont);
-    this._data = null;
+    this._data  = null;
+    this._chart = null;
+    this._ro    = null;
   }
 
-  set data(d) { this._data = d; this._render(); }
+  connectedCallback() {
+    this._ro = new ResizeObserver(() => this._onResize());
+    this._ro.observe(this);
+  }
+
+  disconnectedCallback() {
+    if (this._ro)    { this._ro.disconnect(); this._ro = null; }
+    if (this._chart) { this._chart.destroy(); this._chart = null; }
+  }
+
+  set data(d) {
+    this._data = d;
+    if (this.isConnected) this._maybeRender();
+  }
+
   get data() { return this._data; }
 
-  _render() {
-    this._cont.textContent = '';
+  _onResize() {
+    const w = this.offsetWidth;
+    if (w === 0 || !this._data) return;
+    if (this._chart) {
+      this._chart.setSize({ width: w, height: H });
+    } else {
+      this._maybeRender();
+    }
+  }
+
+  _maybeRender() {
+    const w = this.offsetWidth || 340;
+    if (!this._data) return;
+    this._doRender(w);
+  }
+
+  _doRender(w) {
+    if (this._chart) { this._chart.destroy(); this._chart = null; }
+    this.textContent = '';
+
     const d = this._data;
     if (!d || !Array.isArray(d.puntos) || d.puntos.length < 4) return;
 
-    const puntos = d.puntos;
+    const ahora    = d.ahora != null ? d.ahora : Date.now();
     const extremos = Array.isArray(d.extremos) ? d.extremos : [];
-    const ahora = d.ahora != null ? d.ahora : Date.now();
-    const desde = puntos[0].t, hasta = puntos[puntos.length - 1].t;
-    const niveles = puntos.map(p => p.nivel);
-    const min = Math.min(...niveles), max = Math.max(...niveles);
-    const x = (t) => PAD + (t - desde) / (hasta - desde) * (W - 2 * PAD);
-    const y = (v) => H - PAD - (v - min) / (max - min || 1) * (H - 2 * PAD);
 
-    let pathD = '';
-    puntos.forEach((p, i) => { pathD += (i ? 'L' : 'M') + x(p.t).toFixed(1) + ',' + y(p.nivel).toFixed(1); });
-    const areaD = pathD + ' L' + x(hasta).toFixed(1) + ',' + (H - 1) + ' L' + x(desde).toFixed(1) + ',' + (H - 1) + ' Z';
+    const xData = d.puntos.map(p => p.t / 1000);
+    const yData = d.puntos.map(p => p.nivel);
 
-    const svg = document.createElementNS(NS, 'svg');
-    svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+    const tooltip = document.createElement('div');
+    tooltip.className = 'pp-marea-tooltip';
 
-    const area = document.createElementNS(NS, 'path');
-    area.setAttribute('d', areaD);
-    area.setAttribute('fill', 'rgba(77,171,247,.15)');
-    area.setAttribute('stroke', 'none');
-    svg.appendChild(area);
-
-    const linea = document.createElementNS(NS, 'path');
-    linea.setAttribute('d', pathD);
-    linea.setAttribute('fill', 'none');
-    linea.setAttribute('stroke', 'var(--azul)');
-    linea.setAttribute('stroke-width', '2');
-    svg.appendChild(linea);
-
-    const xNow = x(ahora);
-    const lineaAhora = document.createElementNS(NS, 'line');
-    lineaAhora.setAttribute('x1', xNow); lineaAhora.setAttribute('y1', '2');
-    lineaAhora.setAttribute('x2', xNow); lineaAhora.setAttribute('y2', String(H - 2));
-    lineaAhora.setAttribute('stroke', 'var(--acento)');
-    lineaAhora.setAttribute('stroke-width', '1.5');
-    lineaAhora.setAttribute('stroke-dasharray', '4 3');
-    svg.appendChild(lineaAhora);
-
-    const txtAhora = document.createElementNS(NS, 'text');
-    txtAhora.setAttribute('x', xNow); txtAhora.setAttribute('y', '12');
-    txtAhora.setAttribute('text-anchor', 'middle');
-    txtAhora.setAttribute('fill', 'var(--acento)');
-    txtAhora.textContent = 'ahora';
-    svg.appendChild(txtAhora);
-
-    extremos.filter(e => e.t >= desde && e.t <= hasta).forEach(e => {
-      const ex = x(e.t), ey = y(e.altura);
-      const c = document.createElementNS(NS, 'circle');
-      c.setAttribute('cx', ex); c.setAttribute('cy', ey); c.setAttribute('r', '3');
-      c.setAttribute('fill', 'var(--acento)');
-      svg.appendChild(c);
-
-      const t = document.createElementNS(NS, 'text');
-      t.setAttribute('x', ex); t.setAttribute('y', String(e.tipo === 'pleamar' ? ey - 6 : ey + 12));
-      t.setAttribute('text-anchor', 'middle');
-      t.textContent = util.fmtHora(new Date(e.t));
-      svg.appendChild(t);
-    });
-
-    this._cont.appendChild(svg);
+    this._chart = new uPlot(buildOpts(w, ahora / 1000, extremos, tooltip), [xData, yData], this);
   }
 }
 

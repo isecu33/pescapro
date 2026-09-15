@@ -81,9 +81,9 @@ export const SEGURIDAD = {
 
 /* Clasificación de la amplitud de marea (Cantábrico, rango medio ~2.8 m) */
 export const MAREA_CLASES = [
-  { max: 2.2, clase: 'muertas', etiqueta: 'Mareas muertas', color: '#8aa0b4' },
-  { max: 3.4, clase: 'medias', etiqueta: 'Mareas medias', color: '#4dabf7' },
-  { max: 99,  clase: 'vivas',  etiqueta: 'Mareas vivas',  color: '#f59f00' }
+  { max: 2.2, clase: 'muertas', etiqueta: 'Mareas muertas', color: '#888888' },
+  { max: 3.4, clase: 'medias', etiqueta: 'Mareas medias', color: '#cc6600' },
+  { max: 99,  clase: 'vivas',  etiqueta: 'Mareas vivas',  color: '#ff7200' }
 ];
 
 /* Códigos meteo de Open-Meteo (WMO) → texto e icono */
@@ -124,10 +124,10 @@ export const util = {
   fmtFecha(d) { return d.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' }); },
   esMismoDia(a, b) { return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate(); },
   colorIndice(v) {
-    if (v >= 70) return '#2fb344';
-    if (v >= 50) return '#8bc34a';
-    if (v >= 35) return '#f59f00';
-    if (v >= 20) return '#f76707';
+    if (v >= 70) return '#ff9500';
+    if (v >= 50) return '#ff7200';
+    if (v >= 35) return '#e05500';
+    if (v >= 20) return '#c44000';
     return '#e03131';
   },
   etiquetaIndice(v) {

@@ -21,9 +21,11 @@
    pp-cambiar-spot/etc. en vez de llamar a PP.app.* directamente. */
 import { MODOS, WMO, util } from '../../domain/config.js';
 import { indiceHora, horaMasCercana, mejoresVentanas, especiesEn } from '../../domain/indice.js';
-import { sol, luna } from '../../domain/solunar.js';
+import { sol, luna, curvaSolunar } from '../../domain/solunar.js';
+import { espImgEl } from '../../domain/especies.js';
 import '../components/pp-gauge.js';
 import '../components/pp-curva-marea.js';
+import '../components/pp-curva-solunar.js';
 
 const NOMBRES_FACTOR = {
   viento: 'Viento', oleaje: 'Oleaje', marea: 'Marea', solunar: 'Solunar',
@@ -48,10 +50,11 @@ export function renderAhora(contenedor, st, delta = null) {
   contenedor.appendChild(bannerSeguridad(idx.seguridad));
   contenedor.appendChild(resumenDia(st, idx, delta));
   contenedor.appendChild(selectorModo(st));
-  contenedor.appendChild(cardIndice(idx, st));
-  contenedor.appendChild(desgloseFactores(idx.factores, st.modo));
-  contenedor.appendChild(condicionesActuales(h));
+  contenedor.appendChild(cardIndiceFull(idx, st));
+  const alerta = cardAlertaFactor(idx.factores, st.modo);
+  if (alerta) contenedor.appendChild(alerta);
   contenedor.appendChild(cardMarea(st));
+  contenedor.appendChild(condicionesActuales(h));
   contenedor.appendChild(cardSolLuna(st, ahora));
   contenedor.appendChild(cardEspeciesAhora(st, ahora));
 }
@@ -75,7 +78,7 @@ function resumenDia(st, idx, delta) {
   card.classList.add('pp-resumen-dia');
 
   const v = idx.valor;
-  const colorVar = v >= 65 ? 'var(--verde)' : v >= 40 ? 'var(--ambar)' : 'var(--rojo)';
+  const colorVar = v >= 65 ? 'var(--acento)' : v >= 40 ? 'var(--ambar)' : 'var(--rojo)';
   const label = v >= 65 ? 'BUENAS' : v >= 40 ? 'REGULARES' : 'MALAS';
 
   const cabeza = document.createElement('div');
@@ -166,55 +169,152 @@ function selectorModo(st) {
   return segment;
 }
 
-function cardIndice(idx, st) {
+function cardIndiceFull(idx, st) {
   const card = document.createElement('ion-card');
+  card.classList.add('pp-card-indice-full');
+
+  const header = document.createElement('ion-card-header');
+  const headerRow = document.createElement('div');
+  headerRow.className = 'pp-card-header-row';
+  const title = document.createElement('ion-card-title');
+  title.textContent = 'Índice de pesca';
+  const btnInfo = document.createElement('button');
+  btnInfo.className = 'pp-btn-info';
+  btnInfo.textContent = 'ⓘ';
+  btnInfo.setAttribute('aria-label', 'Ver desglose completo');
+  headerRow.append(title, btnInfo);
+  header.appendChild(headerRow);
+  card.appendChild(header);
+
   const content = document.createElement('ion-card-content');
-  content.className = 'pp-card-indice';
 
-  const gauge = document.createElement('pp-gauge');
-  gauge.value = idx.valor;
-  content.appendChild(gauge);
+  const split = document.createElement('div');
+  split.className = 'pp-indice-split';
 
-  const info = document.createElement('div');
-  info.className = 'pp-indice-info';
-  const etiqueta = document.createElement('div');
-  etiqueta.className = 'pp-indice-etiqueta';
-  etiqueta.textContent = util.etiquetaIndice(idx.valor);
-  const sub = document.createElement('div');
-  sub.className = 'pp-indice-sub';
-  sub.textContent = MODOS[st.modo].icono + ' ' + MODOS[st.modo].nombre + ' · ahora';
-  info.append(etiqueta, sub);
-  content.appendChild(info);
+  // Panel izquierdo: puntuación
+  const scorePanel = document.createElement('div');
+  scorePanel.className = 'pp-score-panel';
+  const v = idx.valor;
+  const colorVar = v >= 65 ? 'var(--acento)' : v >= 40 ? 'var(--ambar)' : 'var(--rojo)';
 
+  const scoreNum = document.createElement('div');
+  scoreNum.className = 'pp-score-num';
+  scoreNum.style.color = colorVar;
+  scoreNum.textContent = v;
+  const scoreDenom = document.createElement('div');
+  scoreDenom.className = 'pp-score-denom';
+  scoreDenom.textContent = '/ 100';
+  const scoreLabel = document.createElement('div');
+  scoreLabel.className = 'pp-score-label';
+  scoreLabel.style.color = colorVar;
+  scoreLabel.textContent = util.etiquetaIndice(v).toUpperCase();
+  const scoreModo = document.createElement('div');
+  scoreModo.className = 'pp-score-modo';
+  scoreModo.textContent = MODOS[st.modo].icono + ' ' + MODOS[st.modo].nombre;
+  scorePanel.append(scoreNum, scoreDenom, scoreLabel, scoreModo);
+
+  // Panel derecho: top 3 factores compactos
+  const factoresPanel = document.createElement('div');
+  factoresPanel.className = 'pp-factores-panel';
+  const pesos = MODOS[st.modo].pesos;
+  const sorted = Object.keys(pesos).sort((a, b) => pesos[b] - pesos[a]);
+
+  sorted.slice(0, 3).forEach(k => {
+    const vf = idx.factores[k] != null ? idx.factores[k] : 0.5;
+    const colorBarra = vf >= 0.7 ? 'var(--acento)' : vf >= 0.45 ? 'var(--ambar)' : 'var(--rojo)';
+    const fila = document.createElement('div');
+    fila.className = 'pp-factor-mini';
+    const nombre = document.createElement('span');
+    nombre.className = 'pp-factor-mini-nombre';
+    nombre.textContent = NOMBRES_FACTOR[k] || k;
+    const barra = document.createElement('div');
+    barra.className = 'pp-factor-mini-barra';
+    const rel = document.createElement('div');
+    rel.className = 'pp-factor-mini-rel';
+    rel.style.width = Math.round(vf * 100) + '%';
+    rel.style.background = colorBarra;
+    barra.appendChild(rel);
+    const val = document.createElement('span');
+    val.className = 'pp-factor-mini-val';
+    val.style.color = colorBarra;
+    val.textContent = Math.round(vf * 100) + '%';
+    fila.append(nombre, barra, val);
+    factoresPanel.appendChild(fila);
+  });
+
+  split.append(scorePanel, factoresPanel);
+  content.appendChild(split);
+
+  // Sección expandible: todos los factores
+  const todos = document.createElement('div');
+  todos.className = 'pp-factores-todos';
+  todos.style.display = 'none';
+  sorted.forEach(k => todos.appendChild(filaFactor(idx.factores, pesos, k)));
+  const notaTodos = document.createElement('p');
+  notaTodos.className = 'pp-nota';
+  notaTodos.style.marginTop = '6px';
+  notaTodos.textContent = 'El % de peso indica la influencia de cada factor para esta modalidad.';
+  todos.appendChild(notaTodos);
+  content.appendChild(todos);
   card.appendChild(content);
+
+  btnInfo.addEventListener('click', () => {
+    const oculto = todos.style.display === 'none';
+    todos.style.display = oculto ? 'block' : 'none';
+    btnInfo.classList.toggle('pp-btn-info--activo', oculto);
+  });
+
+  return card;
+}
+
+function cardAlertaFactor(factores, modo) {
+  const pesos = MODOS[modo].pesos;
+  const malos = Object.keys(pesos)
+    .filter(k => factores[k] != null && factores[k] < 0.25 && pesos[k] >= 0.10)
+    .sort((a, b) => factores[a] - factores[b]);
+
+  if (!malos.length) return null;
+
+  const card = document.createElement('ion-card');
+  card.className = 'pp-alerta-factor';
+  malos.forEach(k => {
+    const row = document.createElement('div');
+    row.className = 'pp-alerta-factor-row';
+    const titulo = document.createElement('span');
+    titulo.className = 'pp-alerta-factor-titulo';
+    titulo.textContent = (NOMBRES_FACTOR[k] || k) + ' muy desfavorable';
+    const val = document.createElement('span');
+    val.className = 'pp-alerta-factor-val';
+    val.textContent = Math.round(factores[k] * 100) + '%';
+    row.append(titulo, val);
+    card.appendChild(row);
+  });
+
   return card;
 }
 
 function crearCard(titulo) {
   const card = document.createElement('ion-card');
-  const header = document.createElement('ion-card-header');
-  const title = document.createElement('ion-card-title');
-  title.textContent = titulo;
-  header.appendChild(title);
+  if (titulo != null && titulo !== '') {
+    const header = document.createElement('ion-card-header');
+    const title = document.createElement('ion-card-title');
+    title.textContent = titulo;
+    header.appendChild(title);
+    card.appendChild(header);
+  }
   const content = document.createElement('ion-card-content');
-  card.append(header, content);
+  card.appendChild(content);
   return { card, content };
 }
 
-function itemCondicion(icono, etiqueta, valor) {
-  const it = document.createElement('div');
-  it.className = 'pp-cond';
-  const ico = document.createElement('div');
-  ico.className = 'pp-cond-ico';
-  ico.textContent = icono;
-  const lbl = document.createElement('div');
-  lbl.className = 'pp-cond-lbl';
-  lbl.textContent = etiqueta;
-  const val = document.createElement('div');
-  val.className = 'pp-cond-val';
-  val.textContent = valor;
-  it.append(ico, lbl, val);
-  return it;
+function wmoIcoName(codigo) {
+  if (!codigo || codigo <= 1) return 'sunny-outline';
+  if (codigo <= 3) return 'partly-sunny-outline';
+  if (codigo <= 49) return 'cloud-outline';
+  if (codigo <= 67) return 'rainy-outline';
+  if (codigo <= 79) return 'snow-outline';
+  if (codigo <= 82) return 'rainy-outline';
+  return 'thunderstorm-outline';
 }
 
 function filaFactor(f, pesos, k) {
@@ -232,7 +332,7 @@ function filaFactor(f, pesos, k) {
   const rel = document.createElement('div');
   rel.className = 'pp-barra-rel';
   rel.style.width = Math.round(v * 100) + '%';
-  const colorBarra = v >= 0.7 ? 'var(--verde)' : v >= 0.45 ? 'var(--ambar)' : 'var(--rojo)';
+  const colorBarra = v >= 0.7 ? 'var(--acento)' : v >= 0.45 ? 'var(--ambar)' : 'var(--rojo)';
   rel.style.background = colorBarra;
   barra.appendChild(rel);
   fila.appendChild(barra);
@@ -251,32 +351,6 @@ function filaFactor(f, pesos, k) {
   return fila;
 }
 
-function desgloseFactores(f, modo) {
-  const { card, content } = crearCard('Qué suma y qué resta');
-  const pesos = MODOS[modo].pesos;
-  const sorted = Object.keys(pesos).sort((a, b) => pesos[b] - pesos[a]);
-  const visibles = sorted.slice(0, 3);
-  const ocultos = sorted.slice(3);
-
-  visibles.forEach(k => content.appendChild(filaFactor(f, pesos, k)));
-
-  if (ocultos.length) {
-    const btn = document.createElement('button');
-    btn.className = 'pp-chip pp-chip-expand';
-    btn.textContent = `Ver todos (${sorted.length})`;
-    btn.addEventListener('click', () => {
-      ocultos.forEach(k => content.insertBefore(filaFactor(f, pesos, k), btn));
-      btn.remove();
-    });
-    content.appendChild(btn);
-  }
-
-  const nota = document.createElement('p');
-  nota.className = 'pp-nota';
-  nota.textContent = 'El % es el peso del factor en el índice para esta modalidad.';
-  content.appendChild(nota);
-  return card;
-}
 
 function tendenciaTxt(t) {
   if (t == null) return '';
@@ -290,19 +364,67 @@ function tendenciaTxt(t) {
 function condicionesActuales(h) {
   const { card, content } = crearCard('Condiciones ahora');
   const wmo = WMO[h.codigo] || ['—', ''];
-  const items = [
-    [wmo[1], wmo[0], h.temp != null ? Math.round(h.temp) + '°C' : '—'],
-    ['💨', 'Viento ' + util.gradosACardinal(h.vientoDir), h.viento != null ? Math.round(h.viento) + ' km/h (rachas ' + (h.racha != null ? Math.round(h.racha) : '—') + ')' : '—'],
-    ['🌊', 'Olas ' + util.gradosACardinal(h.olaDir), h.ola != null ? h.ola.toFixed(1) + ' m · ' + (h.olaPeriodo != null ? Math.round(h.olaPeriodo) + ' s' : '') : 'sin dato'],
-    ['🌡️', 'Agua', h.sst != null ? h.sst.toFixed(1) + '°C' : 'sin dato'],
-    ['🧭', 'Corriente', h.corriente != null ? h.corriente.toFixed(2) + ' m/s hacia ' + util.gradosACardinal(h.corrienteDir) : 'sin dato'],
-    ['📉', 'Presión', h.presion != null ? Math.round(h.presion) + ' hPa ' + tendenciaTxt(h.presionTend) : '—'],
-    ['👁️', 'Visibilidad', h.visibilidad != null ? (h.visibilidad / 1000).toFixed(0) + ' km' : '—'],
-    ['🌧️', 'Precipitación', h.lluvia != null ? h.lluvia.toFixed(1) + ' mm' : '—']
-  ];
+
+  // Cabecera: icono del tiempo + descripción + temperatura
+  const cielo = document.createElement('div');
+  cielo.className = 'pp-cond-cielo';
+  const icoWmo = document.createElement('ion-icon');
+  icoWmo.setAttribute('name', wmoIcoName(h.codigo));
+  icoWmo.className = 'pp-cond-ico-ion pp-cond-ico-cielo';
+  const cieloDesc = document.createElement('span');
+  cieloDesc.className = 'pp-cond-cielo-desc';
+  cieloDesc.textContent = wmo[0];
+  const cieloTemp = document.createElement('span');
+  cieloTemp.className = 'pp-cond-cielo-temp';
+  cieloTemp.textContent = h.temp != null ? Math.round(h.temp) + '°' : '—';
+  cielo.append(icoWmo, cieloDesc, cieloTemp);
+  content.appendChild(cielo);
+
+  // Cuadrícula 2 col: icono | etiqueta + valor
   const grid = document.createElement('div');
-  grid.className = 'pp-cond-grid';
-  items.forEach(([ic, lbl, val]) => grid.appendChild(itemCondicion(ic, lbl, val)));
+  grid.className = 'pp-cond-grid3';
+
+  function cel(iconName, lbl, val) {
+    const c = document.createElement('div');
+    c.className = 'pp-cond-cel';
+    const ico = document.createElement('ion-icon');
+    ico.setAttribute('name', iconName);
+    ico.className = 'pp-cond-ico-ion';
+    const texto = document.createElement('div');
+    texto.className = 'pp-cond-texto';
+    const le = document.createElement('div');
+    le.className = 'pp-cond-lbl2';
+    le.textContent = lbl;
+    const ve = document.createElement('div');
+    ve.className = 'pp-cond-val2';
+    ve.textContent = val;
+    texto.append(le, ve);
+    c.append(ico, texto);
+    return c;
+  }
+
+  grid.appendChild(cel('wind-outline',
+    'Viento ' + util.gradosACardinal(h.vientoDir),
+    h.viento != null ? Math.round(h.viento) + ' km/h' + (h.racha != null ? '  r.' + Math.round(h.racha) : '') : '—'));
+  grid.appendChild(cel('water-outline',
+    'Oleaje ' + util.gradosACardinal(h.olaDir),
+    h.ola != null ? h.ola.toFixed(1) + ' m · ' + (h.olaPeriodo != null ? Math.round(h.olaPeriodo) + ' s' : '—') : '—'));
+  grid.appendChild(cel('thermometer-outline',
+    'Agua',
+    h.sst != null ? h.sst.toFixed(1) + '°C' : '—'));
+  grid.appendChild(cel('navigate-outline',
+    'Corriente ' + util.gradosACardinal(h.corrienteDir),
+    h.corriente != null ? h.corriente.toFixed(2) + ' m/s' : '—'));
+  grid.appendChild(cel('speedometer-outline',
+    'Presión',
+    h.presion != null ? Math.round(h.presion) + ' hPa ' + tendenciaTxt(h.presionTend) : '—'));
+  grid.appendChild(cel('rainy-outline',
+    'Lluvia',
+    h.lluvia != null ? h.lluvia.toFixed(1) + ' mm' : '—'));
+  grid.appendChild(cel('eye-outline',
+    'Visibilidad',
+    h.visibilidad != null ? (h.visibilidad / 1000).toFixed(0) + ' km' : '—'));
+
   content.appendChild(grid);
   return card;
 }
@@ -330,108 +452,139 @@ function curvaMareaEl(st) {
 
 function cardMarea(st) {
   const { card, content } = crearCard('Marea');
+  card.classList.add('pp-card-marea');
   const m = st.ctx.mareas;
 
   if (!m.ahora) {
     const nota = document.createElement('p');
     nota.className = 'pp-nota';
+    nota.style.padding = '10px 14px';
     nota.textContent = 'Sin datos de marea para este punto (¿demasiado lejos del mar?).';
     content.appendChild(nota);
     return card;
   }
 
-  const est = m.ahora;
+  const est  = m.ahora;
   const prox = est.siguiente;
   const resta = Math.max(0, prox.fecha - Date.now());
   const hh = Math.floor(resta / 3600e3);
   const mm = Math.round((resta % 3600e3) / 60000);
 
-  const linea = document.createElement('div');
-  linea.className = 'pp-marea-linea';
-  const flecha = document.createElement('b');
-  flecha.textContent = est.subiendo ? '↗ Subiendo' : '↘ Bajando';
-  linea.appendChild(flecha);
-  linea.appendChild(document.createTextNode(
-    ' · ' + (prox.tipo === 'pleamar' ? 'Pleamar' : 'Bajamar') + ' a las '
-  ));
-  const horaB = document.createElement('b');
-  horaB.textContent = util.fmtHora(prox.fecha);
-  linea.appendChild(horaB);
-  linea.appendChild(document.createTextNode(' (en ' + hh + 'h ' + String(mm).padStart(2, '0') + 'm)'));
-  content.appendChild(linea);
+  // Cabecera: dirección + próximo extremo + badge amplitud
+  const header = document.createElement('div');
+  header.className = 'pp-marea-header';
+
+  const dir = document.createElement('span');
+  dir.className = 'pp-marea-dir';
+  dir.textContent = est.subiendo ? '↗ Subiendo' : '↘ Bajando';
+
+  const nextChip = document.createElement('span');
+  nextChip.className = 'pp-marea-next';
+  nextChip.textContent =
+    (prox.tipo === 'pleamar' ? '⬆ ' : '⬇ ') +
+    util.fmtHora(prox.fecha) + '  en ' + hh + 'h ' + String(mm).padStart(2, '0') + 'm';
+
+  header.append(dir, nextChip);
 
   if (m.amplitud) {
-    const amp = document.createElement('div');
-    amp.className = 'pp-marea-amp';
-    const punto = document.createElement('span');
-    punto.style.color = m.amplitud.color;
-    punto.textContent = '●';
-    amp.appendChild(punto);
-    amp.appendChild(document.createTextNode(
-      ' ' + m.amplitud.etiqueta + ' · amplitud ' + m.amplitud.rango.toFixed(1) + ' m · coef. ~' + m.amplitud.coef
-    ));
-    content.appendChild(amp);
+    const amp = document.createElement('span');
+    amp.className = 'pp-marea-amp-badge';
+    amp.style.color = m.amplitud.color;
+    amp.style.borderColor = m.amplitud.color;
+    amp.textContent = m.amplitud.etiqueta + '  ' + m.amplitud.rango.toFixed(1) + ' m';
+    header.appendChild(amp);
   }
 
+  content.appendChild(header);
+
+  // Gráfico a ancho completo
   content.appendChild(curvaMareaEl(st));
 
-  const tabla = document.createElement('div');
-  tabla.className = 'pp-mareas-prox';
-  m.proximos.forEach(e => {
-    const item = document.createElement('div');
-    item.className = 'pp-marea-item';
-    item.textContent = (e.tipo === 'pleamar' ? '⬆ Pleamar' : '⬇ Bajamar') + ' · ' +
-      util.fmtDia(e.fecha) + ' ' + util.fmtHora(e.fecha) + ' · ' + e.altura.toFixed(1) + ' m';
-    tabla.appendChild(item);
-  });
-  content.appendChild(tabla);
+  // Próximos extremos: cuadrícula 2 × 2
+  if (m.proximos?.length) {
+    const grid = document.createElement('div');
+    grid.className = 'pp-mareas-grid';
+    m.proximos.slice(0, 4).forEach(e => {
+      const it  = document.createElement('div');
+      it.className = 'pp-marea-it';
+      const ico = document.createElement('div');
+      ico.className = 'pp-marea-it-ico';
+      ico.style.color = e.tipo === 'pleamar' ? '#ff7200' : 'var(--pp-texto2)';
+      ico.textContent = e.tipo === 'pleamar' ? '⬆' : '⬇';
+      const info = document.createElement('div');
+      info.className = 'pp-marea-it-info';
+      const when = document.createElement('div');
+      when.className = 'pp-marea-it-when';
+      when.textContent = util.fmtDia(e.fecha) + ' · ' + util.fmtHora(e.fecha);
+      const alt = document.createElement('div');
+      alt.className = 'pp-marea-it-alt';
+      alt.textContent = e.altura.toFixed(1) + ' m';
+      info.append(when, alt);
+      it.append(ico, info);
+      grid.appendChild(it);
+    });
+    content.appendChild(grid);
+  }
 
-  const nota = document.createElement('p');
-  nota.className = 'pp-nota';
-  nota.textContent = 'Media marea = máxima corriente = máxima actividad. Las horas de pleamar/bajamar proceden del modelo global; contrasta con las tablas oficiales de tu puerto.';
-  content.appendChild(nota);
   return card;
 }
 
 function cardSolLuna(st, hoy) {
-  const { card, content } = crearCard('Sol, luna y solunar');
+  const { card, content } = crearCard('Sol y solunar');
   const s = sol(hoy, st.spot.lat, st.spot.lon);
   const l = luna(hoy, st.spot.lat, st.spot.lon);
-
-  const grid = document.createElement('div');
-  grid.className = 'pp-cond-grid';
-  const items = [
-    ['🌅', 'Amanecer', s.amanecer ? util.fmtHora(s.amanecer) : '—'],
-    ['🌇', 'Ocaso', s.ocaso ? util.fmtHora(s.ocaso) : '—'],
-    [l.icono, l.nombre, l.iluminacion + '%'],
-    ['🌙', 'Luna sale/pone', (l.salida ? util.fmtHora(l.salida) : '—') + ' / ' + (l.puesta ? util.fmtHora(l.puesta) : '—')]
-  ];
-  items.forEach(([ic, lbl, val]) => grid.appendChild(itemCondicion(ic, lbl, val)));
-  content.appendChild(grid);
-
   const periodosDia = st.ctx.periodosDe(hoy);
-  const solunarDiv = document.createElement('div');
-  solunarDiv.className = 'pp-solunar';
-  const titulo = document.createElement('b');
-  titulo.textContent = 'Periodos solunares hoy:';
-  solunarDiv.append(titulo, document.createElement('br'));
-  if (periodosDia.length === 0) {
-    solunarDiv.appendChild(document.createTextNode('—'));
-  } else {
-    periodosDia.forEach((p, i) => {
-      const tag = document.createElement('span');
-      tag.className = 'pp-tag' + (p.tipo === 'mayor' ? ' pp-tag-mayor' : '');
-      tag.textContent = (p.tipo === 'mayor' ? '★ ' : '☆ ') + util.fmtHora(p.inicio) + '–' + util.fmtHora(p.fin);
-      solunarDiv.appendChild(tag);
-      if (i < periodosDia.length - 1) solunarDiv.appendChild(document.createTextNode(' '));
-    });
-  }
-  content.appendChild(solunarDiv);
 
-  const nota = document.createElement('p');
-  nota.className = 'pp-nota';
-  nota.textContent = '★ mayores (tránsito lunar) · ☆ menores (orto/ocaso lunar). Coincidiendo con amanecer/atardecer o media marea multiplican las opciones.';
-  content.appendChild(nota);
+  // Fila de datos: amanecer/ocaso a la izquierda, luna a la derecha
+  const infoRow = document.createElement('div');
+  infoRow.className = 'pp-sol-info-row';
+
+  const solPart = document.createElement('div');
+  const solLbl = document.createElement('div');
+  solLbl.className = 'pp-sol-dato-lbl';
+  solLbl.textContent = 'Amanecer · Ocaso';
+  const solVal = document.createElement('div');
+  solVal.className = 'pp-sol-dato-val';
+  solVal.textContent =
+    (s.amanecer ? util.fmtHora(s.amanecer) : '—') + '  ·  ' +
+    (s.ocaso ? util.fmtHora(s.ocaso) : '—');
+  solPart.append(solLbl, solVal);
+
+  const lunaPart = document.createElement('div');
+  lunaPart.style.textAlign = 'right';
+  const lunaLbl = document.createElement('div');
+  lunaLbl.className = 'pp-sol-dato-lbl';
+  lunaLbl.textContent = l.nombre;
+  const lunaVal = document.createElement('div');
+  lunaVal.className = 'pp-sol-dato-val';
+  lunaVal.textContent = l.iluminacion + '%' +
+    (l.salida ? '  ·  ' + util.fmtHora(l.salida) : '');
+  lunaPart.append(lunaLbl, lunaVal);
+
+  infoRow.append(solPart, lunaPart);
+  content.appendChild(infoRow);
+
+  // Gráfico uPlot 24h: altitud sol + luna + bandas solunares
+  const chart = document.createElement('pp-curva-solunar');
+  const curva = curvaSolunar(hoy, st.spot.lat, st.spot.lon);
+  chart.data = { ...curva, periodos: periodosDia, ahora: hoy.getTime() };
+  content.appendChild(chart);
+
+  // Chips de periodos solunares
+  if (periodosDia.length) {
+    const chips = document.createElement('div');
+    chips.className = 'pp-solunar-chips';
+    periodosDia.forEach(p => {
+      const chip = document.createElement('span');
+      chip.className = 'pp-tag' + (p.tipo === 'mayor' ? ' pp-tag-mayor' : '');
+      chip.textContent =
+        (p.tipo === 'mayor' ? '● ' : '○ ') +
+        util.fmtHora(p.inicio) + '–' + util.fmtHora(p.fin);
+      chips.appendChild(chip);
+    });
+    content.appendChild(chips);
+  }
+
   return card;
 }
 
@@ -442,9 +595,7 @@ function cardEspeciesAhora(st, fecha) {
     const fila = document.createElement('div');
     fila.className = 'pp-esp-fila';
 
-    const ico = document.createElement('span');
-    ico.className = 'pp-esp-ico';
-    ico.textContent = r.especie.icono;
+    const ico = espImgEl(r.especie, 'pp-esp-ico');
 
     const nombre = document.createElement('span');
     nombre.className = 'pp-esp-nombre';

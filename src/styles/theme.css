@@ -4,37 +4,37 @@
    look que ya tenia la app (ver www/css/app.css :root, valores
    originales conservados). Solo tema oscuro: uso nocturno/exterior. */
 :root {
-  --ion-background-color: #0a1520;
-  --ion-background-color-rgb: 10, 21, 32;
-  --ion-text-color: #dde8f2;
-  --ion-text-color-rgb: 221, 232, 242;
+  --ion-background-color: #080808;
+  --ion-background-color-rgb: 8, 8, 8;
+  --ion-text-color: #f0f0f0;
+  --ion-text-color-rgb: 240, 240, 240;
 
-  --ion-color-primary: #ffa500;
-  --ion-color-primary-rgb: 255, 165, 0;
-  --ion-color-primary-contrast: #0a1520;
-  --ion-color-primary-contrast-rgb: 10, 21, 32;
-  --ion-color-primary-shade: #e09400;
-  --ion-color-primary-tint: #ffb833;
+  --ion-color-primary: #ff7200;
+  --ion-color-primary-rgb: 255, 114, 0;
+  --ion-color-primary-contrast: #000000;
+  --ion-color-primary-contrast-rgb: 0, 0, 0;
+  --ion-color-primary-shade: #e06500;
+  --ion-color-primary-tint: #ffac00;
 
-  --ion-color-secondary: #3d9be8;
-  --ion-color-secondary-contrast: #0a1520;
+  --ion-color-secondary: #e07000;
+  --ion-color-secondary-contrast: #000000;
 
-  --ion-color-success: #27a83c;
-  --ion-color-success-contrast: #ffffff;
+  --ion-color-success: #ff9500;
+  --ion-color-success-contrast: #000000;
 
-  --ion-color-warning: #f0cc00;
-  --ion-color-warning-contrast: #0a1520;
+  --ion-color-warning: #ffac00;
+  --ion-color-warning-contrast: #000000;
 
   --ion-color-danger: #d42b2b;
   --ion-color-danger-contrast: #ffffff;
 
-  --ion-toolbar-background: #0e1d2c;
-  --ion-item-background: #132030;
-  --ion-border-color: #1e3347;
+  --ion-toolbar-background: #111111;
+  --ion-item-background: #131313;
+  --ion-border-color: #242424;
 
-  --pp-panel: #132030;
-  --pp-panel2: #192a3a;
-  --pp-texto2: #7a96aa;
+  --pp-panel: #121212;
+  --pp-panel2: #1a1a1a;
+  --pp-texto2: #888888;
 
   /* Tokens de diseño propios */
   --pp-shadow-card: 0 2px 12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.04);
@@ -53,6 +53,37 @@
   --rojo: var(--ion-color-danger);
   --borde: var(--ion-border-color);
   --texto2: var(--pp-texto2);
+  --panel: var(--pp-panel);
+  --panel2: var(--pp-panel2);
+}
+
+/* dark.always.css aplica --ion-card-background, --ion-item-background,
+   --ion-toolbar-background y --ion-tab-bar-background en :root.ios y
+   :root.md con mayor especificidad que :root. Este bloque los anula. */
+:root.ios,
+:root.md {
+  --ion-background-color: #080808;
+  --ion-background-color-rgb: 8, 8, 8;
+  --ion-text-color: #f0f0f0;
+  --ion-text-color-rgb: 240, 240, 240;
+  --ion-card-background: #121212;
+  --ion-item-background: #131313;
+  --ion-toolbar-background: #111111;
+  --ion-tab-bar-background: #111111;
+  --ion-tab-bar-background-focused: #1a1a1a;
+}
+
+/* Explícito en el host de ion-card-content por si el Shadow DOM no hereda
+   --ion-card-background correctamente en alguna versión de Ionic. */
+ion-card-content {
+  --background: var(--pp-panel);
+  --color: var(--ion-text-color);
+}
+
+ion-item {
+  --background: var(--pp-panel);
+  --color: var(--ion-text-color);
+  --border-color: var(--ion-border-color);
 }
 
 html, body {
@@ -126,7 +157,7 @@ ion-tab-bar { position: fixed; bottom: 0; left: 0; right: 0; z-index: 1500; }
 .pp-mejor-hora { font-size: 13px; padding: 3px 0; }
 
 /* Vista Prevision: mejores ventanas */
-.pp-vent-idx { flex: 0 0 44px; height: 44px; border-radius: 10px; color: #14202d;
+.pp-vent-idx { flex: 0 0 44px; height: 44px; border-radius: 10px; color: #000000;
   font-weight: 800; font-size: 17px; display: flex; align-items: center; justify-content: center; }
 .pp-vent-info { display: flex; flex-direction: column; gap: 2px; font-size: 13.5px; }
 .pp-vent-info span { color: var(--pp-texto2); font-size: 12px; }
@@ -173,7 +204,7 @@ ion-tab-bar { position: fixed; bottom: 0; left: 0; right: 0; z-index: 1500; }
    #mapa / .pp-mapa-controles / .pp-leyenda de www/css/app.css, adaptadas
    a las variables de tema nuevas. */
 .pp-vista-mapa { display: flex; flex-direction: column; height: 100%; }
-.pp-vista-mapa-lienzo { flex: 1; min-height: 320px; background: #0a141e; }
+.pp-vista-mapa-lienzo { flex: 1; min-height: 320px; background: #0a0a0a; }
 .pp-mapa-controles { padding: 10px 12px; background: var(--pp-panel); border-top: 1px solid var(--ion-border-color); }
 .pp-mapa-fila { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; font-size: 13px; }
 .pp-mapa-fila ion-range { flex: 1; }
@@ -206,19 +237,156 @@ ion-tab-bar { position: fixed; bottom: 0; left: 0; right: 0; z-index: 1500; }
   font-size: 12.5px; color: var(--pp-texto2); margin-top: 3px;
 }
 .pp-delta { font-size: 11.5px; font-weight: 700; }
-.pp-delta-sube { color: var(--verde); }
+.pp-delta-sube { color: var(--acento); }
 .pp-delta-baja { color: var(--rojo); }
 
-/* ── Índice principal (vista-ahora) ── */
-.pp-card-indice { display: flex; align-items: center; gap: 18px; }
-pp-gauge { width: 124px; flex: 0 0 124px; }
-.pp-indice-info { flex: 1; min-width: 0; }
-.pp-indice-etiqueta {
-  font-size: 26px; font-weight: 800; letter-spacing: -.02em;
-  line-height: 1.1;
+/* ── Índice de pesca: card unificada ── */
+.pp-card-indice-full ion-card-content { padding: 0 !important; }
+
+.pp-card-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
 }
-.pp-indice-sub {
-  color: var(--pp-texto2); margin-top: 6px; font-size: 13px; line-height: 1.4;
+.pp-btn-info {
+  background: none;
+  border: 1px solid var(--ion-border-color);
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  font-size: 13px;
+  color: var(--pp-texto2);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: 0;
+  transition: border-color .15s, color .15s;
+}
+.pp-btn-info:active,
+.pp-btn-info--activo {
+  border-color: var(--ion-color-primary);
+  color: var(--ion-color-primary);
+}
+
+.pp-indice-split {
+  display: flex;
+  min-height: 130px;
+}
+
+/* Panel izquierdo: número grande */
+.pp-score-panel {
+  flex: 0 0 42%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 16px 10px;
+  border-right: 1px solid var(--ion-border-color);
+}
+.pp-score-num {
+  font-size: 62px;
+  font-weight: 900;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  font-family: var(--pp-font-mono);
+}
+.pp-score-denom {
+  font-size: 13px;
+  color: var(--pp-texto2);
+  margin-top: 1px;
+  font-variant-numeric: tabular-nums;
+}
+.pp-score-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  margin-top: 6px;
+}
+.pp-score-modo {
+  font-size: 11px;
+  color: var(--pp-texto2);
+  margin-top: 3px;
+}
+
+/* Panel derecho: factores mini */
+.pp-factores-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 14px 12px 14px 14px;
+  gap: 10px;
+  min-width: 0;
+}
+.pp-factor-mini {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.pp-factor-mini-nombre {
+  flex: 0 0 52px;
+  font-size: 11px;
+  color: var(--pp-texto2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pp-factor-mini-barra {
+  flex: 1;
+  height: 5px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.pp-factor-mini-rel {
+  height: 100%;
+  border-radius: 3px;
+  transition: width .4s var(--pp-ease);
+}
+.pp-factor-mini-val {
+  flex: 0 0 30px;
+  text-align: right;
+  font-size: 11px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Sección expandible con todos los factores */
+.pp-factores-todos {
+  padding: 10px 12px 4px;
+  border-top: 1px solid var(--ion-border-color);
+}
+
+/* ── Alerta de factor muy negativo ── */
+.pp-alerta-factor {
+  background: rgba(212, 43, 43, 0.07) !important;
+  border-color: rgba(212, 43, 43, 0.35) !important;
+  padding: 0;
+}
+.pp-alerta-factor-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  gap: 8px;
+}
+.pp-alerta-factor-row + .pp-alerta-factor-row {
+  border-top: 1px solid rgba(212, 43, 43, 0.2);
+}
+.pp-alerta-factor-titulo {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--rojo);
+}
+.pp-alerta-factor-val {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--rojo);
+  font-variant-numeric: tabular-nums;
 }
 
 /* Selector de modalidad */
@@ -236,35 +404,102 @@ ion-segment-button {
   font-weight: 600;
 }
 
-/* ── Condiciones grid (2 columnas) ── */
-.pp-cond-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.pp-cond {
-  background: var(--pp-panel2);
-  border: 1px solid var(--ion-border-color);
-  border-radius: var(--pp-radius-sm);
-  box-shadow: var(--pp-shadow-inset);
-  padding: 10px 12px;
+/* ── Condiciones ahora ── */
+.pp-cond-cielo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-bottom: 8px;
 }
-.pp-cond-ico { font-size: 17px; line-height: 1; }
-.pp-cond-lbl { font-size: 11px; color: var(--pp-texto2); margin-top: 5px; line-height: 1.3; }
-.pp-cond-val {
-  font-size: 14px; font-weight: 650; margin-top: 2px;
+.pp-cond-ico-ion {
+  font-size: 20px;
+  color: var(--pp-texto2);
+  flex-shrink: 0;
+}
+.pp-cond-ico-cielo {
+  font-size: 22px;
+}
+.pp-cond-cielo-desc {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--pp-texto2);
+  flex: 1;
+}
+.pp-cond-cielo-temp {
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--ion-text-color);
+  font-variant-numeric: tabular-nums;
+}
+/* Cuadrícula 2×N con líneas de separación mediante gap + background */
+.pp-cond-grid3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--ion-border-color);
+  border-top: 1px solid var(--ion-border-color);
+  border-bottom-left-radius: 4px;
+  border-bottom-right-radius: 4px;
+  overflow: hidden;
+}
+.pp-cond-cel {
+  background: var(--pp-panel);
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 9px 10px 9px 8px;
+}
+.pp-cond-cel .pp-cond-ico-ion {
+  margin-top: 2px;
+}
+.pp-cond-texto { min-width: 0; }
+.pp-cond-lbl2 {
+  font-size: 11px;
+  color: var(--pp-texto2);
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pp-cond-val2 {
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.5;
+  color: var(--ion-text-color);
   font-variant-numeric: tabular-nums;
 }
 
-/* ── Marea ── */
+/* ── Marea (legacy classes kept for compatibility) ── */
 .pp-marea-linea { font-size: 14px; margin-bottom: 8px; line-height: 1.5; }
 .pp-marea-amp { font-size: 12.5px; color: var(--pp-texto2); margin-bottom: 8px; }
-.pp-mareas-prox { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 10px; }
-.pp-marea-item {
-  background: var(--pp-panel2);
-  border: 1px solid var(--ion-border-color);
-  border-radius: var(--pp-radius-sm);
-  padding: 7px 10px; font-size: 12px; color: var(--pp-texto2); line-height: 1.6;
-}
 
-/* ── Sol, luna y solunar ── */
-.pp-solunar { font-size: 13px; margin-top: 12px; line-height: 2.2; }
+/* ── Sol y solunar ── */
+.pp-sol-info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.pp-sol-dato-lbl {
+  font-size: 11px;
+  color: var(--pp-texto2);
+  line-height: 1.3;
+}
+.pp-sol-dato-val {
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.5;
+}
+pp-curva-solunar { display: block; width: 100%; margin-bottom: 4px; }
+.pp-solunar-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 6px;
+  margin-top: 6px;
+}
 .pp-tag {
   display: inline-block;
   background: var(--pp-panel2);
@@ -275,7 +510,78 @@ ion-segment-button {
 .pp-tag-mayor {
   border-color: var(--ion-color-primary);
   color: var(--ion-color-primary);
-  background: rgba(255, 165, 0, 0.08);
+  background: rgba(255, 114, 0, 0.08);
+}
+
+/* ── Imágenes de especies ── */
+/* Card grid (vista-especies): silueta arriba de la tarjeta */
+.pp-esp-card-ico {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: contain;
+  border-radius: 6px 6px 0 0;
+  display: block;
+  padding: 6px 10px;
+}
+/* Fallback emoji en card: centrado y grande */
+span.pp-esp-card-ico {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  line-height: 1;
+}
+/* Lista de especies activas (vista-ahora): icono pequeño inline */
+img.pp-esp-ico {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+span.pp-esp-ico {
+  font-size: 20px;
+  flex-shrink: 0;
+}
+/* Modal de especie: imagen junto al título */
+img.pp-esp-modal-ico {
+  width: 44px;
+  height: 36px;
+  object-fit: contain;
+  vertical-align: middle;
+  margin-right: 6px;
+}
+span.pp-esp-modal-ico {
+  font-size: 22px;
+  vertical-align: middle;
+  margin-right: 4px;
+}
+/* Cabecera de captura en cuaderno: icono pequeño inline */
+img.pp-esp-cab-ico {
+  width: 20px;
+  height: 16px;
+  object-fit: contain;
+  vertical-align: middle;
+}
+span.pp-esp-cab-ico {
+  font-size: 14px;
+  vertical-align: middle;
+}
+/* Foto realista en ficha modal de especie */
+.pp-esp-ficha-foto {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: 10px;
+  margin: 6px 0 12px;
+  filter: brightness(.88) contrast(1.06) saturate(.95);
+}
+
+/* Siluetas SVG: color blanco para destacar sobre fondos oscuros */
+img.pp-esp-card-ico[src$=".svg"],
+img.pp-esp-ico[src$=".svg"],
+img.pp-esp-modal-ico[src$=".svg"],
+img.pp-esp-cab-ico[src$=".svg"] {
+  filter: brightness(0) invert(1);
 }
 
 /* ── ion-card visual override ── */
@@ -294,4 +600,105 @@ ion-card-title {
   text-transform: uppercase;
   color: var(--pp-texto2) !important;
 }
-ion-card-content { padding-top: 6px !important; }
+ion-card-header { padding-bottom: 4px !important; }
+ion-card-content { padding: 8px 12px 12px !important; }
+
+/* ── uPlot: curva de marea ── */
+pp-curva-marea { display: block; }
+
+.u-wrap { background: transparent !important; }
+
+/* Línea vertical del cursor: sutil, no compite con la línea "ahora" naranja */
+.u-cursor-x { border-left: 1.5px solid rgba(255, 255, 255, 0.18) !important; }
+.u-cursor-y,
+.u-cursor-pt,
+.u-legend          { display: none !important; }
+
+.u-wrap > canvas { display: block; max-width: 100%; }
+
+/* Tooltip interactivo del cursor */
+.pp-marea-tooltip {
+  position: absolute;
+  top: 4px;
+  background: rgba(18, 18, 18, 0.94);
+  border: 1px solid rgba(255, 114, 0, 0.55);
+  border-radius: 8px;
+  padding: 3px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #f0f0f0;
+  pointer-events: none;
+  display: none;
+  white-space: nowrap;
+  z-index: 10;
+  letter-spacing: 0.02em;
+}
+
+/* ── Tarjeta unificada de Marea ── */
+.pp-card-marea ion-card-content {
+  padding: 0 !important;
+}
+.pp-card-marea .pp-marea-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 10px 14px;
+}
+.pp-marea-dir {
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--ion-color-primary);
+  white-space: nowrap;
+}
+.pp-marea-next {
+  font-size: 13px;
+  color: var(--ion-text-color);
+  white-space: nowrap;
+  flex: 1;
+}
+.pp-marea-amp-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border: 1px solid;
+  border-radius: 20px;
+  white-space: nowrap;
+  opacity: 0.85;
+}
+.pp-mareas-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  padding: 4px 0 10px;
+  border-top: 1px solid var(--ion-border-color);
+}
+.pp-marea-it {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 6px;
+}
+.pp-marea-it-ico {
+  font-size: 24px;
+  font-weight: 900;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.pp-marea-it-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.pp-marea-it-when {
+  font-size: 11px;
+  color: var(--pp-texto2);
+  white-space: nowrap;
+}
+.pp-marea-it-alt {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ion-text-color);
+  font-variant-numeric: tabular-nums;
+}

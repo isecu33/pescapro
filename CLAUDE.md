@@ -127,3 +127,34 @@ renderiza. Las fotos del cuaderno van aparte, a IndexedDB.
   una decisión de producto deliberada, no un hueco por completar.
 - **Open-Meteo sin API key** pero con límites de uso no comercial — no
   añadir autenticación ni asumir que existe una clave en algún `.env`.
+
+## Assets visuales de especies (decisión sep-16)
+
+El sistema de imágenes usa **dos assets separados por propósito**:
+
+| Campo | Tipo | Ruta | Uso |
+|-------|------|------|-----|
+| `imagen` | SVG silueta | `./img/svg/<id>.svg` | Iconos en tarjetas, cabeceras, capturas |
+| `foto` | PNG fotorrealista | `./img/<id>.png` | Imagen principal del modal de ficha |
+
+- `foto` es **opcional** (`null` si la especie no tiene foto — actualmente sargo).
+- `imagen` lo tienen todas las especies excepto las futuras hasta que se añada su SVG.
+- Fuentes en `img/svg/` e `img/` (raíz del repo); desplegadas en `www/img/svg/` y `www/img/`.
+
+**En los componentes nuevos** (`src/`): usa `espImgEl(esp, clase)` de
+`src/domain/especies.js` — es el único punto de renderizado de iconos. Devuelve
+un `<img>` con el SVG o un `<span>` con el emoji de fallback.
+
+**En el código legacy** (`www/js/ui.js`) hay dos mappings diferenciados:
+- `FOTOS_ESPECIE` → rutas SVG, para iconos en tarjetas y capturas.
+- `FOTOS_NATURAL` → rutas PNG, para la foto grande en el modal de ficha.
+- **No mezclarlos**: el bug de sep-16 fue exactamente usar `FOTOS_ESPECIE`
+  donde debía ir `FOTOS_NATURAL`, haciendo que el modal mostrase la silueta
+  en lugar de la foto real.
+
+## Flujo de git (decisión sep-16)
+
+- **Un commit por tarea** antes de pasar a la siguiente.
+- **Rama `develop`** para el trabajo en curso; **PR a `master`** al cerrar
+  un conjunto de tareas coherente.
+- Tests (`npm test`) siempre deben pasar antes de commitear.

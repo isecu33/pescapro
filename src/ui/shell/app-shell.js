@@ -160,16 +160,13 @@ export class PpAppShell extends HTMLElement {
       this._bannerEl.replaceChildren();
       return;
     }
-    this._bannerEl.style.display = 'block';
+    this._bannerEl.style.display = 'flex';
     this._bannerEl.className = 'pp-banner pp-banner-' + info.nivel;
 
-    const wrapper = document.createElement('div');
-    wrapper.className = 'pp-banner-content';
-    wrapper.appendChild(svg(info.nivel === 'rojo' ? 'stop' : 'alerta'));
+    const ico = svg(info.nivel === 'rojo' ? 'stop' : 'alerta');
     const texto = document.createElement('span');
     texto.textContent = info.motivos.join(' · ');
-    wrapper.appendChild(texto);
-    this._bannerEl.replaceChildren(wrapper);
+    this._bannerEl.replaceChildren(ico, texto);
   }
 
   _emit(nombre, detail) {

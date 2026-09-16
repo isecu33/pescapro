@@ -130,22 +130,16 @@ function resumenDia(st, idx, delta) {
    igual que el banner global del original (www/js/ui.js:27-31). */
 function bannerSeguridad(seg) {
   const card = document.createElement('ion-card');
-  card.className = 'pp-banner';
+  card.className = 'pp-banner pp-banner-' + (seg?.nivel || 'ok');
   if (!seg || seg.nivel === 'ok') {
     card.style.display = 'none';
     return card;
   }
-  card.style.display = 'block';
-  card.setAttribute('color', seg.nivel === 'rojo' ? 'danger' : 'warning');
-  const content = document.createElement('ion-card-content');
-  const wrapper = document.createElement('div');
-  wrapper.className = 'pp-banner-content';
-  wrapper.appendChild(svg(seg.nivel === 'rojo' ? 'stop' : 'alerta'));
+  card.style.display = 'flex';
+  card.appendChild(svg(seg.nivel === 'rojo' ? 'stop' : 'alerta'));
   const texto = document.createElement('span');
   texto.textContent = seg.motivos.join(' · ');
-  wrapper.appendChild(texto);
-  content.appendChild(wrapper);
-  card.appendChild(content);
+  card.appendChild(texto);
   return card;
 }
 

@@ -17,78 +17,101 @@ Open-Meteo (forecast + marine + geocoding APIs), sin API key. Ver README.md
 para el detalle funcional completo (mareas, solunar, índice, especies,
 cuaderno, trofeos, competiciones sin servidor).
 
-## Stack
+## Stack — App moderna (Vite) vs. legacy
 
-JavaScript vanilla, sin build step, sin bundler, sin TypeScript, sin
-framework de UI. Cada módulo se cuelga de `window.PP` (`PP.api`, `PP.mareas`,
-`PP.indice`, `PP.ui`, `PP.app`...) y se carga vía `<script>` planos en
-`www/index.html`, en orden de dependencia. Empaquetado a Android con
-Capacitor 7. Mapa con Leaflet (vendored en `www/lib/leaflet/`). Astronomía
-con SunCalc (vendored en `www/lib/suncalc.js`, funciona sin red).
+**App a editar en tareas: `/src/` (Vite, moderna)**
+- JavaScript con módulos ES (`import`/`export`)
+- Bundleada con Vite
+- Estructura: `src/domain/`, `src/ui/`, `src/styles/`
+- Sirve con `npm run dev` (Vite dev server)
+
+**App legacy (referencia): `/www/` (Capacitor, vanilla)**
+- JavaScript vanilla, sin build step, sin bundler, sin TypeScript
+- Cada módulo se cuelga de `window.PP` (`PP.api`, `PP.mareas`, etc.)
+- Se carga vía `<script>` planos en `www/index.html`, en orden de dependencia
+- Empaquetado a Android con Capacitor 7 (sincronización con `npx cap sync android`)
+- Mapa con Leaflet (vendored en `www/lib/leaflet/`)
+- Astronomía con SunCalc (vendored en `www/lib/suncalc.js`, funciona sin red)
 
 ## Comandos reales
 
+**App moderna (Vite):**
 ```bash
-npm install                      # deps de Capacitor (no hay deps de runtime)
+npm install                      # instala deps (Vite, testing, etc.)
+npm run dev                       # dev server Vite en http://localhost:5173
+npm run build                     # build para dist/
+npm run preview                   # preview del build en http://localhost:4173
+npm test                          # tests de src/ (si están configurados)
+```
+
+**App legacy (Capacitor):**
+```bash
 npx cap add android               # una vez: crea android/ (gitignored, generado)
 npx cap sync android              # copia www/ al proyecto nativo — repetir tras CUALQUIER cambio en www/
 npx cap open android              # abre Android Studio para compilar/firmar
 
-npm test                          # tests de lógica (mareas, índice, especies, records) — sin red
+node scripts/serve.js             # dev server local para www/ en http://localhost:8090
 node test/test_api_live.js        # integración con el API real de Open-Meteo — requiere internet
 npm i jsdom --no-save && node test/test_ui_smoke.js   # smoke test de render (jsdom no es dependencia fija)
 ```
 
-Probar en navegador sin compilar nada: abrir `www/index.html` directamente
+Probar app legacy en navegador sin compilar: abrir `www/index.html` directamente
 (doble clic). Es el mismo código que corre en el móvil.
 
-No hay script `dev`/`start`; no hay linter ni formatter configurados en
-`package.json`.
+No hay linter ni formatter configurados en `package.json`.
 
 ## Arquitectura
 
+### App moderna (Vite) — LA PRINCIPAL
+
 ```
-www/                 webDir de Capacitor — es la app entera, sin src/ separado
+src/                 código fuente moderno con ES modules
+├── main.js           entry point de Vite
+├── app.js            componente raíz / orquestación
+├── domain/           lógica de dominio
+│   ├── api.js         fetch a Open-Meteo + caché en localStorage
+│   ├── mareas.js      cálculo de pleamares/bajamares
+│   ├── solunar.js     sol/luna via SunCalc
+│   ├── indice.js      índice de pesca (ponderación de factores)
+│   ├── especies.js    definición de especies + actividad
+│   ├── cuaderno.js    registro de capturas
+│   ├── records.js     récords personales
+│   ├── trofeos.js     logros desbloqueables
+│   └── ...otros
+├── ui/               componentes de interfaz (vistas, Cards, etc.)
+│   ├── Vista.js       vistas principales
+│   ├── Card*.js       componentes de tarjeta
+│   └── ...
+└── styles/           CSS global y variables de tema
+
+dist/                 salida de build (generada por `npm run build`)
+
+index.html           shell HTML + CSP headers
+vite.config.mjs      configuración de bundler
+```
+
+### App legacy (Capacitor) — REFERENCIA
+
+```
+www/                 webDir de Capacitor — código vanilla para Android
 ├── index.html        shell + orden de carga de <script> (importa!)
 ├── css/app.css        tema/colores en :root
-├── js/
-│   ├── config.js       config central: endpoints Open-Meteo, PP.MODOS (pesos
-│   │                   por modalidad), PP.SEGURIDAD (umbrales), PP.MAREA_CLASES,
-│   │                   tabla WMO, utilidades (PP.util.trap = scoring trapezoidal)
-│   ├── api.js           fetch a Open-Meteo (clima/marino/geo) + caché en localStorage
-│   │                   (arranque offline-first desde caché, refresco en paralelo)
-│   ├── mareas.js        extrae pleamares/bajamares de la serie de nivel del mar
-│   │                   (interpolación parabólica), clasifica amplitud, calcula flujo
-│   ├── solunar.js       sol/luna via SunCalc, 100% local sin red
-│   ├── indice.js        índice de pesca: pondera factores 0..1 (PP.util.trap) según
-│   │                   pesos de PP.MODOS
-│   ├── especies.js      definición de especies (temporada/agua/mar/marea/luz/luna) y
-│   │                   cálculo de actividad (media geométrica ponderada)
-│   ├── fotos.js         fotos del cuaderno: comprimidas, guardadas en IndexedDB
-│   │                   (NO localStorage, NO servidor)
-│   ├── cuaderno.js       registro de capturas (snapshot de condiciones + foto opcional)
-│   ├── records.js       récords personales derivados del cuaderno
-│   ├── trofeos.js       logros desbloqueables
-│   ├── mapa.js           mapa Leaflet: viento, corrientes, carta náutica
-│   ├── ui.js             capa de render de todas las vistas (668 líneas, el módulo más grande)
-│   └── app.js            orquestación: estado global (st), arranque, navegación entre
-│                        vistas, refresco periódico (PP.CONFIG.REFRESH_MS) y en
-│                        visibilitychange, GPS, prefs en localStorage (clave pp_prefs)
-└── lib/               vendored: leaflet, suncalc.js
+├── js/               módulos vanilla en window.PP
+│   ├── config.js, api.js, mareas.js, solunar.js, indice.js, 
+│   ├── especies.js, fotos.js, cuaderno.js, records.js, trofeos.js, 
+│   ├── mapa.js, ui.js, app.js
+│   └── ...
+└── lib/              vendored: leaflet, suncalc.js
 
-test/                 tests planos con Node, sin framework de test
-├── harness.js          shim: global.window = global + require() de www/js/*.js para
-│                      poder testear módulos de navegador en Node sin bundler; check()/
-│                      resumen() propios (resumen() hace process.exit(1) si falla algo)
-├── fixtures.js         generación de datos de prueba
-├── test_mareas.js, test_indice.js, test_especies.js, test_records.js   → cubiertos por `npm test`
-├── test_api_live.js    NO cubierto por npm test (pide red real)
-└── test_ui_smoke.js    NO cubierto por npm test (pide jsdom, instalar con --no-save)
+test/                tests planos con Node
+├── harness.js        shim para poder require() código de navegador en Node
+├── fixtures.js, test_mareas.js, test_indice.js, test_especies.js, test_records.js
+├── test_api_live.js, test_ui_smoke.js
+└── ...
 ```
 
 **Flujo de datos**: `api.js` pide a Open-Meteo y cachea en `localStorage` →
-`mareas.js`/`solunar.js`/`indice.js` procesan esos datos crudos → `ui.js`
-renderiza. Las fotos del cuaderno van aparte, a IndexedDB.
+`mareas.js`/`solunar.js`/`indice.js` procesan esos datos crudos → UI los renderiza.
 
 ## Convenciones y gotchas específicos de este repo
 

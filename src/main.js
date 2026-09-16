@@ -21,6 +21,8 @@ import './styles/theme.css';
 
 import './ui/shell/app-shell.js';
 import { crearApp } from './app.js';
+import { iniciarAuth, usuario } from './domain/auth.js';
+import { mostrarLogin } from './ui/views/vista-login.js';
 
 addIcons({
   'speedometer-outline': speedometerOutline,
@@ -51,9 +53,22 @@ addIcons({
 
 defineCustomElements(window);
 
-document.addEventListener('DOMContentLoaded', () => {
+function arrancarApp() {
   const raiz = document.getElementById('app');
   const shell = document.createElement('pp-app-shell');
   raiz.appendChild(shell);
-  crearApp(shell); // se engancha a su propio DOMContentLoaded (once) para arrancar
+  crearApp(shell);
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+  await iniciarAuth();
+
+  if (usuario()) {
+    arrancarApp();
+  } else {
+    mostrarLogin(
+      (_u) => arrancarApp(),      // onExito: usuario autenticado
+      () => arrancarApp()          // onOmitir: continuar sin cuenta
+    );
+  }
 });

@@ -508,59 +508,62 @@ function cardSolLuna(st, hoy) {
   const l = luna(hoy, st.spot.lat, st.spot.lon);
   const periodosDia = st.ctx.periodosDe(hoy);
 
-  // Grid compacto: 4 items de sol/luna
+  // Grid compacto: 4 items de sol/luna con iconos SVG
   const grid = document.createElement('div');
   grid.className = 'pp-cond-grid';
 
-  function celSol(ico, lbl, val) {
+  function celSol(icoNombre, lbl, val) {
     const c = document.createElement('div');
     c.className = 'pp-cond';
-    c.style.paddingTop = '8px';
-    c.style.paddingBottom = '8px';
     const icoEl = document.createElement('div');
     icoEl.className = 'pp-cond-ico';
-    icoEl.style.fontSize = '16px';
-    icoEl.textContent = ico;
+    const svg = icoSvg(icoNombre);
+    if (svg) icoEl.appendChild(svg);
     const lblEl = document.createElement('div');
     lblEl.className = 'pp-cond-lbl';
     lblEl.textContent = lbl;
-    lblEl.style.fontSize = '9px';
     const valEl = document.createElement('div');
     valEl.className = 'pp-cond-val';
     valEl.textContent = val;
-    valEl.style.fontSize = '14px';
     c.append(icoEl, lblEl, valEl);
     return c;
   }
 
-  grid.appendChild(celSol('🌅', 'Amanecer', s.amanecer ? util.fmtHora(s.amanecer) : '—'));
-  grid.appendChild(celSol('🌄', 'Ocaso', s.ocaso ? util.fmtHora(s.ocaso) : '—'));
-  grid.appendChild(celSol('🌙', l.nombre.split(' ')[0], l.iluminacion + '%'));
-  grid.appendChild(celSol('🌜', 'Sale/Pone',
+  grid.appendChild(celSol('amanecer', 'Amanecer', s.amanecer ? util.fmtHora(s.amanecer) : '—'));
+  grid.appendChild(celSol('atardecer', 'Ocaso', s.ocaso ? util.fmtHora(s.ocaso) : '—'));
+  grid.appendChild(celSol('lunaGenerica', l.nombre.split(' ')[0], l.iluminacion + '%'));
+  grid.appendChild(celSol('lunaGenerica', 'Sale/Pone',
     (l.salida ? util.fmtHora(l.salida) : '—') + ' / ' + (l.puesta ? util.fmtHora(l.puesta) : '—')));
 
   content.appendChild(grid);
 
   // Gráfico compacto 24h
   const chart = document.createElement('pp-curva-solunar');
-  chart.style.marginTop = '6px';
+  chart.style.marginTop = '4px';
   const curva = curvaSolunar(hoy, st.spot.lat, st.spot.lon);
   chart.data = { ...curva, periodos: periodosDia, ahora: hoy.getTime() };
   content.appendChild(chart);
 
-  // Chips de periodos solunares
+  // Periodos solunares como filas compactas (★ ☆ + rango horario)
   if (periodosDia.length) {
-    const chips = document.createElement('div');
-    chips.className = 'pp-solunar-chips';
+    const solunares = document.createElement('div');
+    solunares.className = 'pp-solunar-rows';
     periodosDia.forEach(p => {
-      const chip = document.createElement('span');
-      chip.className = 'pp-tag' + (p.tipo === 'mayor' ? ' pp-tag-mayor' : '');
-      chip.textContent =
-        (p.tipo === 'mayor' ? '● ' : '○ ') +
-        util.fmtHora(p.inicio) + '–' + util.fmtHora(p.fin);
-      chips.appendChild(chip);
+      const row = document.createElement('div');
+      row.className = 'pp-solunar-row' + (p.tipo === 'mayor' ? ' pp-solunar-major' : '');
+
+      const marker = document.createElement('span');
+      marker.className = 'pp-solunar-marker';
+      marker.textContent = p.tipo === 'mayor' ? '★' : '☆';
+
+      const range = document.createElement('span');
+      range.className = 'pp-solunar-range';
+      range.textContent = util.fmtHora(p.inicio) + ' – ' + util.fmtHora(p.fin);
+
+      row.append(marker, range);
+      solunares.appendChild(row);
     });
-    content.appendChild(chips);
+    content.appendChild(solunares);
   }
 
   return card;

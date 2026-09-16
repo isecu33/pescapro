@@ -774,15 +774,61 @@ pp-curva-marea { display: block; }
 }
 
 /* ── Card Sol y Solunar: versión compacta ── */
-.pp-card-solunar-compact .pp-cond-grid { gap: 6px; margin-bottom: 6px; }
-.pp-card-solunar-compact .pp-cond { padding: 8px 10px; background: var(--pp-panel2); }
-.pp-solunar-chips {
-  display: flex;
-  flex-wrap: wrap;
+.pp-card-solunar-compact .pp-cond-grid {
   gap: 6px;
-  margin-top: 6px;
-  padding: 6px 0;
+  margin-bottom: 4px;
 }
+.pp-card-solunar-compact .pp-cond {
+  padding: 6px 8px;
+  background: var(--pp-panel2);
+}
+.pp-card-solunar-compact .pp-cond-ico {
+  font-size: 18px;
+}
+.pp-card-solunar-compact .pp-cond-lbl {
+  font-size: 9px;
+}
+.pp-card-solunar-compact .pp-cond-val {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* Periodos solunares como filas compactas */
+.pp-solunar-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding-top: 6px;
+  margin-top: 6px;
+  border-top: 1px solid rgba(255, 255, 255, .08);
+}
+.pp-solunar-row {
+  font-size: 11.5px;
+  color: var(--pp-texto2);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.pp-solunar-marker {
+  font-size: 11px;
+  color: var(--pp-texto2);
+  flex: 0 0 10px;
+  text-align: center;
+  line-height: 1;
+}
+.pp-solunar-major .pp-solunar-marker {
+  color: var(--ion-color-primary);
+  font-weight: 700;
+}
+.pp-solunar-range {
+  font-family: var(--pp-font-mono);
+  font-size: 11.5px;
+  flex: 1;
+  letter-spacing: 0.01em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Legacy chip styles (kept for backwards compat if needed elsewhere) */
 .pp-tag {
   background: var(--pp-panel2);
   border: 1px solid var(--ion-border-color);

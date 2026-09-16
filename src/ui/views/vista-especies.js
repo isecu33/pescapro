@@ -77,7 +77,7 @@ function crearTarjeta(r, st) {
   return card;
 }
 
-function abrirModalEspecie(esp, st) {
+export function abrirModalEspecie(esp, st) {
   const cuerpo = document.createElement('div');
 
   const titulo = document.createElement('h3');

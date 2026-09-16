@@ -1,201 +1,199 @@
-/* <pp-curva-marea> -- gráfico de nivel del mar con uPlot.
+/* <pp-curva-marea> -- gráfico de nivel del mar con canvas (port del legacy).
    API pública: set data({ puntos, extremos, ahora })
    - puntos:  [{t: epochMs, nivel: number}]
    - extremos: [{tipo: 'pleamar'|'bajamar', t: epochMs, altura: number}]
    - ahora:   epochMs */
-import uPlot from 'uplot';
-import 'uplot/dist/uPlot.min.css';
-
-const ACENTO = '#ff7200';
-const FILL   = 'rgba(255, 114, 0, 0.10)';
-const GRID   = 'rgba(255, 255, 255, 0.06)';
-const AXIS   = 'rgba(255, 255, 255, 0.40)';
-const H      = 200;
 
 function fmtHM(epochMs) {
   return new Date(epochMs).toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' });
-}
-
-function buildOpts(w, ahoraSec, extremos, tooltip) {
-  return {
-    width:  w,
-    height: H,
-    padding: [20, 6, 0, 0],
-    cursor: {
-      show: true,
-      x: true,
-      y: false,
-      drag: { x: false, y: false },
-    },
-    legend: { show: false },
-    scales: {
-      x: { time: true },
-      y: { auto: true },
-    },
-    axes: [
-      {
-        stroke: AXIS,
-        grid:   { stroke: GRID, width: 1 },
-        ticks:  { stroke: GRID, width: 1, size: 3 },
-        font:   '11px system-ui, sans-serif',
-        gap:    4,
-        values: (_u, ticks) => ticks.map(t => fmtHM(t * 1000)),
-      },
-      {
-        stroke: AXIS,
-        grid:   { stroke: GRID, width: 1 },
-        ticks:  { stroke: GRID, width: 1, size: 3 },
-        font:   '11px system-ui, sans-serif',
-        gap:    4,
-        size:   46,
-        values: (_u, ticks) => ticks.map(v => (v != null ? v.toFixed(1) + ' m' : '')),
-      },
-    ],
-    series: [
-      {},
-      {
-        stroke: ACENTO,
-        fill:   FILL,
-        width:  2,
-      },
-    ],
-    hooks: {
-      ready: [
-        (u) => {
-          u.root.style.position = 'relative';
-          u.root.appendChild(tooltip);
-        },
-      ],
-      setCursor: [
-        (u) => {
-          const idx = u.cursor.idx;
-          if (idx == null) { tooltip.style.display = 'none'; return; }
-          const v = u.data[1][idx];
-          if (v == null) { tooltip.style.display = 'none'; return; }
-
-          const t = u.data[0][idx];
-          tooltip.textContent = fmtHM(t * 1000) + '  ·  ' + v.toFixed(2) + ' m';
-          tooltip.style.display = 'block';
-
-          // Posición dentro de u.root (u-wrap)
-          const yAxisPx = u.bbox.left / devicePixelRatio;
-          const cursorX = yAxisPx + u.cursor.left;
-          const totalW  = u.root.offsetWidth;
-          const tipW    = 110;
-          tooltip.style.left = (cursorX + tipW + 8 > totalW ? cursorX - tipW - 4 : cursorX + 8) + 'px';
-          tooltip.style.top  = '4px';
-        },
-      ],
-      draw: [
-        (u) => {
-          const ctx = u.ctx;
-          const { left, top, width, height } = u.bbox;
-
-          // Línea vertical "ahora"
-          const xNow = u.valToPos(ahoraSec, 'x', true);
-          if (xNow >= left && xNow <= left + width) {
-            ctx.save();
-            ctx.strokeStyle = ACENTO;
-            ctx.lineWidth   = 1.5;
-            ctx.setLineDash([4, 3]);
-            ctx.beginPath();
-            ctx.moveTo(xNow, top);
-            ctx.lineTo(xNow, top + height);
-            ctx.stroke();
-            ctx.setLineDash([]);
-            ctx.fillStyle = ACENTO;
-            ctx.font      = 'bold 10px system-ui, sans-serif';
-            ctx.textAlign = 'center';
-            ctx.fillText('ahora', xNow, top + 13);
-            ctx.restore();
-          }
-
-          // Marcadores de pleamar/bajamar
-          extremos.forEach(e => {
-            const ex = u.valToPos(e.t / 1000, 'x', true);
-            const ey = u.valToPos(e.altura,    'y', true);
-            if (ex < left || ex > left + width) return;
-
-            ctx.save();
-            ctx.fillStyle = ACENTO;
-            ctx.beginPath();
-            ctx.arc(ex, ey, 4, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.font      = '10px system-ui, sans-serif';
-            ctx.textAlign = 'center';
-            if (e.tipo === 'pleamar') {
-              ctx.fillText(e.altura.toFixed(1) + ' m', ex, ey - 18);
-              ctx.fillText(fmtHM(e.t),                 ex, ey -  7);
-            } else {
-              ctx.fillText(fmtHM(e.t),                 ex, ey + 14);
-              ctx.fillText(e.altura.toFixed(1) + ' m', ex, ey + 25);
-            }
-            ctx.restore();
-          });
-        },
-      ],
-    },
-  };
 }
 
 export class PpCurvaMarea extends HTMLElement {
   constructor() {
     super();
     this._data  = null;
-    this._chart = null;
     this._ro    = null;
+    this._canvas = null;
+    this._hud    = null;
+    this._wrap   = null;
   }
 
   connectedCallback() {
-    this._ro = new ResizeObserver(() => this._onResize());
+    if (!this._wrap) this._initDOM();
+    this._ro = new ResizeObserver(() => this._dibujar());
     this._ro.observe(this);
   }
 
   disconnectedCallback() {
-    if (this._ro)    { this._ro.disconnect(); this._ro = null; }
-    if (this._chart) { this._chart.destroy(); this._chart = null; }
+    if (this._ro) { this._ro.disconnect(); this._ro = null; }
   }
 
   set data(d) {
     this._data = d;
-    if (this.isConnected) this._maybeRender();
+    if (this.isConnected && this._wrap) this._dibujar();
   }
 
   get data() { return this._data; }
 
-  _onResize() {
-    const w = this.offsetWidth;
-    if (w === 0 || !this._data) return;
-    if (this._chart) {
-      this._chart.setSize({ width: w, height: H });
-    } else {
-      this._maybeRender();
+  _initDOM() {
+    this._wrap = document.createElement('div');
+    this._wrap.className = 'pp-marea-chart-wrap';
+
+    this._canvas = document.createElement('canvas');
+    this._canvas.className = 'pp-marea-canvas';
+    this._canvas.style.height = '120px';
+
+    this._hud = document.createElement('div');
+    this._hud.className = 'pp-marea-hud';
+
+    this._wrap.append(this._canvas, this._hud);
+    this.appendChild(this._wrap);
+
+    this._canvas.addEventListener('mousemove',  e => this._mostrarHUD(e.clientX));
+    this._canvas.addEventListener('touchmove',  e => { e.preventDefault(); this._mostrarHUD(e.touches[0].clientX); }, { passive: false });
+    this._canvas.addEventListener('mouseleave', () => { this._hud.style.display = 'none'; this._dibujar(); });
+    this._canvas.addEventListener('touchend',   () => { this._hud.style.display = 'none'; this._dibujar(); });
+  }
+
+  _getPts() {
+    if (!this._data?.puntos?.length) return [];
+    return this._data.puntos;
+  }
+
+  _dibujar(cursorT) {
+    const pts = this._getPts();
+    if (pts.length < 4) return;
+
+    const d       = this._data;
+    const ahora   = d.ahora ?? Date.now();
+    const desde   = ahora - 6  * 3600e3;
+    const hasta   = ahora + 30 * 3600e3;
+    const extremos = d.extremos ?? [];
+
+    const canvas = this._canvas;
+    const W = canvas.offsetWidth || 340;
+    const H = canvas.offsetHeight || 120;
+    canvas.width = W; canvas.height = H;
+    const ctx = canvas.getContext('2d');
+
+    const PAD_X = 8, PAD_Y = 20;
+    const vals = pts.map(p => p.nivel);
+    const minV = Math.min(...vals), maxV = Math.max(...vals);
+    const rng  = maxV - minV || 1;
+    const tx = t => PAD_X + (t - desde) / (hasta - desde) * (W - 2 * PAD_X);
+    const ty = v => H - PAD_Y - (v - minV) / rng * (H - 2 * PAD_Y);
+
+    const splinePath = () => {
+      ctx.moveTo(tx(pts[0].t), ty(pts[0].nivel));
+      for (let i = 0; i < pts.length - 1; i++) {
+        const p0 = pts[Math.max(0, i - 1)];
+        const p1 = pts[i];
+        const p2 = pts[i + 1];
+        const p3 = pts[Math.min(pts.length - 1, i + 2)];
+        const [x0, y0] = [tx(p0.t), ty(p0.nivel)];
+        const [x1, y1] = [tx(p1.t), ty(p1.nivel)];
+        const [x2, y2] = [tx(p2.t), ty(p2.nivel)];
+        const [x3, y3] = [tx(p3.t), ty(p3.nivel)];
+        ctx.bezierCurveTo(
+          x1 + (x2 - x0) / 6, y1 + (y2 - y0) / 6,
+          x2 - (x3 - x1) / 6, y2 - (y3 - y1) / 6,
+          x2, y2
+        );
+      }
+    };
+
+    // Gradiente relleno
+    const grad = ctx.createLinearGradient(0, PAD_Y, 0, H);
+    grad.addColorStop(0, 'rgba(255,114,0,.40)');
+    grad.addColorStop(1, 'rgba(255,114,0,.02)');
+    ctx.beginPath(); splinePath();
+    ctx.lineTo(tx(pts[pts.length - 1].t), H);
+    ctx.lineTo(tx(pts[0].t), H);
+    ctx.closePath();
+    ctx.fillStyle = grad; ctx.fill();
+
+    // Línea naranja
+    ctx.beginPath(); splinePath();
+    ctx.strokeStyle = '#ff7200'; ctx.lineWidth = 2.5; ctx.lineJoin = 'round'; ctx.stroke();
+
+    // Etiquetas horas X
+    ctx.fillStyle = 'rgba(200,200,200,.35)';
+    ctx.font = '8px -apple-system, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+    for (let t = desde; t <= hasta; t += 6 * 3600e3) {
+      const lx = tx(t);
+      if (lx < PAD_X + 10 || lx > W - PAD_X - 10) continue;
+      ctx.fillText(String(new Date(t).getHours()).padStart(2, '0') + 'h', lx, H - 1);
+    }
+
+    // Marcadores de pleamar/bajamar
+    extremos.forEach(e => {
+      const ex = tx(e.t), ey = ty(e.altura);
+      ctx.beginPath(); ctx.arc(ex, ey, 5, 0, Math.PI * 2);
+      ctx.fillStyle = '#ffab00'; ctx.fill();
+      ctx.strokeStyle = 'rgba(0,0,0,.3)'; ctx.lineWidth = 1; ctx.stroke();
+      ctx.fillStyle = 'rgba(255,200,60,.9)';
+      ctx.font = 'bold 9px -apple-system, sans-serif';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(fmtHM(e.t), ex, e.tipo === 'pleamar' ? ey - 12 : ey + 12);
+    });
+
+    // Línea "ahora"
+    const xNow = tx(ahora);
+    ctx.save(); ctx.setLineDash([4, 3]);
+    ctx.strokeStyle = 'rgba(255,255,255,.5)'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(xNow, 3); ctx.lineTo(xNow, H - PAD_Y); ctx.stroke();
+    ctx.restore();
+    ctx.fillStyle = 'rgba(255,255,255,.5)'; ctx.font = '9px sans-serif';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    ctx.fillText('ahora', xNow, 3);
+
+    // Cursor interactivo
+    if (cursorT != null) {
+      const xC = tx(cursorT);
+      ctx.save(); ctx.setLineDash([2, 2]);
+      ctx.strokeStyle = 'rgba(255,255,255,.35)'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(xC, 0); ctx.lineTo(xC, H); ctx.stroke();
+      ctx.restore();
     }
   }
 
-  _maybeRender() {
-    const w = this.offsetWidth || 340;
-    if (!this._data) return;
-    this._doRender(w);
-  }
+  _mostrarHUD(clientX) {
+    const pts = this._getPts();
+    if (!pts.length) return;
 
-  _doRender(w) {
-    if (this._chart) { this._chart.destroy(); this._chart = null; }
-    this.textContent = '';
+    const d     = this._data;
+    const ahora = d.ahora ?? Date.now();
+    const desde = ahora - 6  * 3600e3;
+    const hasta = ahora + 30 * 3600e3;
 
-    const d = this._data;
-    if (!d || !Array.isArray(d.puntos) || d.puntos.length < 4) return;
+    const rect  = this._canvas.getBoundingClientRect();
+    const xRel  = Math.max(0, Math.min(clientX - rect.left, rect.width));
+    const t     = desde + xRel / rect.width * (hasta - desde);
 
-    const ahora    = d.ahora != null ? d.ahora : Date.now();
-    const extremos = Array.isArray(d.extremos) ? d.extremos : [];
+    let nearest = pts[0];
+    pts.forEach(p => {
+      if (Math.abs(p.t - t) < Math.abs(nearest.t - t)) nearest = p;
+    });
+    const ni  = pts.indexOf(nearest);
+    const dir = ni > 0 && nearest.nivel > pts[ni - 1].nivel ? '↑' : '↓';
 
-    const xData = d.puntos.map(p => p.t / 1000);
-    const yData = d.puntos.map(p => p.nivel);
+    this._dibujar(nearest.t);
 
-    const tooltip = document.createElement('div');
-    tooltip.className = 'pp-marea-tooltip';
+    const horaSpan = document.createElement('span');
+    horaSpan.className = 'pp-marea-hud-hora';
+    horaSpan.textContent = fmtHM(nearest.t);
 
-    this._chart = new uPlot(buildOpts(w, ahora / 1000, extremos, tooltip), [xData, yData], this);
+    const valSpan = document.createElement('span');
+    valSpan.className = 'pp-marea-hud-val';
+    valSpan.textContent = nearest.nivel.toFixed(2) + ' m ' + dir;
+
+    this._hud.replaceChildren(horaSpan, valSpan);
+    this._hud.style.display = 'flex';
+
+    const W   = this._canvas.offsetWidth;
+    const PAD_X = 8;
+    const xH  = PAD_X + (nearest.t - desde) / (hasta - desde) * (W - 2 * PAD_X);
+    this._hud.style.left = Math.max(60, Math.min(W - 60, xH)) + 'px';
   }
 }
 

@@ -252,7 +252,7 @@ main { padding-bottom: calc(76px + env(safe-area-inset-bottom)); }
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 .pp-cond-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
 .pp-cond { background: var(--panel-alt); border: 1px solid var(--borde-sutil); border-radius: var(--radio-sm); padding: 12px 13px; }
-.pp-cond-ico { color: var(--texto3); display: flex; }
+.pp-cond-ico { color: var(--texto2); display: flex; align-items: center; }
 .pp-cond-ico .pp-ico, .pp-cond-ico .pp-ico-wrap .pp-ico { width: 20px; height: 20px; }
 .pp-cond-lbl { font-size: 10.5px; color: var(--texto3); margin-top: 5px; text-transform: uppercase; letter-spacing: .05em; }
 .pp-cond-val { font-size: 20px; font-weight: 700; margin-top: 2px; letter-spacing: -.01em; }

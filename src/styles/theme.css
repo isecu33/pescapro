@@ -96,8 +96,28 @@ html, body {
 }
 
 /* La cabecera custom (logo/spot/acciones) vive dentro de ion-toolbar */
-.pp-logo { font-size: 20px; padding: 0 4px; }
+.pp-logo { padding: 0 4px; display: flex; align-items: center; }
+.pp-logo img { height: 40px; width: auto; display: block; }
 .pp-spot-selector { flex: 1; min-width: 0; cursor: pointer; display: flex; flex-direction: row; align-items: center; gap: 6px; padding: 4px 8px; }
+
+/* ── Menú lateral ─────────────────────────────────────── */
+.pp-menu-perfil {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 32px 16px 24px;
+  border-bottom: 1px solid var(--pp-borde, rgba(255,255,255,0.08));
+}
+.pp-menu-avatar { font-size: 72px; color: var(--ion-color-primary); line-height: 1; }
+.pp-menu-perfil-nombre { font-size: 17px; font-weight: 700; margin-top: 8px; }
+.pp-menu-perfil-sub { font-size: 13px; color: var(--pp-texto2); margin-top: 2px; }
+
+.pp-menu-seccion { padding-top: 8px; }
+.pp-menu-seccion-titulo {
+  font-size: 10px; font-weight: 700; letter-spacing: 0.1em;
+  color: var(--pp-texto2); padding: 8px 20px 4px;
+}
+.pp-menu-item { --background: transparent; --padding-start: 20px; --inner-padding-end: 16px; }
+.pp-menu-item ion-icon[slot="start"] { color: var(--ion-color-primary); font-size: 20px; margin-right: 12px; }
+.pp-menu-chevron { font-size: 14px; color: var(--pp-texto2); }
 .pp-spot-textos { display: flex; flex-direction: column; min-width: 0; }
 .pp-spot-nombre { font-weight: 700; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; letter-spacing: -0.01em; }
 .pp-spot-selector small { color: var(--pp-texto2); font-size: 11px; line-height: 1.2; }

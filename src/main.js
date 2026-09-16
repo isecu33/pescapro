@@ -7,7 +7,9 @@ import { addIcons } from 'ionicons';
 import {
   speedometerOutline, trendingUpOutline, mapOutline, fishOutline, bookOutline, trophyOutline,
   refreshOutline, starOutline, starSharp, closeOutline, addOutline, addCircleOutline,
-  cameraOutline, locationOutline, trashOutline
+  cameraOutline, locationOutline, trashOutline,
+  menuOutline, personCircleOutline, notificationsOutline, settingsOutline, informationCircleOutline,
+  chevronForwardOutline, moonOutline, sunnyOutline, cloudDownloadOutline
 } from 'ionicons/icons';
 
 import '@ionic/core/css/core.css';
@@ -35,7 +37,16 @@ addIcons({
   'add-circle-outline': addCircleOutline,
   'camera-outline': cameraOutline,
   'location-outline': locationOutline,
-  'trash-outline': trashOutline
+  'trash-outline': trashOutline,
+  'menu-outline': menuOutline,
+  'person-circle-outline': personCircleOutline,
+  'notifications-outline': notificationsOutline,
+  'settings-outline': settingsOutline,
+  'information-circle-outline': informationCircleOutline,
+  'chevron-forward-outline': chevronForwardOutline,
+  'moon-outline': moonOutline,
+  'sunny-outline': sunnyOutline,
+  'cloud-download-outline': cloudDownloadOutline
 });
 
 defineCustomElements(window);

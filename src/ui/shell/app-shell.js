@@ -61,7 +61,10 @@ export class PpAppShell extends HTMLElement {
     const logo = document.createElement('div');
     logo.slot = 'start';
     logo.className = 'pp-logo';
-    logo.textContent = '🐟';
+    const logoImg = document.createElement('img');
+    logoImg.src = './img/logo-marante.png';
+    logoImg.alt = 'Marante';
+    logo.appendChild(logoImg);
     toolbar.appendChild(logo);
 
     const selector = document.createElement('div');
@@ -78,8 +81,7 @@ export class PpAppShell extends HTMLElement {
     this._spotNombreEl = document.createElement('span');
     this._spotNombreEl.className = 'pp-spot-nombre';
     this._spotNombreEl.textContent = '—';
-    this._actualizadoEl = document.createElement('small');
-    spotTextos.append(this._spotNombreEl, this._actualizadoEl);
+    spotTextos.append(this._spotNombreEl);
     selector.appendChild(spotTextos);
 
     selector.addEventListener('click', () => this._emit('pp-cambiar-spot'));
@@ -105,12 +107,25 @@ export class PpAppShell extends HTMLElement {
     btnRef.appendChild(this._icoRefEl);
     btnRef.addEventListener('click', () => this._emit('pp-refrescar'));
 
-    acciones.append(btnFav, btnRef);
+    const btnMenu = document.createElement('ion-button');
+    btnMenu.setAttribute('fill', 'clear');
+    btnMenu.className = 'pp-accion-btn';
+    const icoMenu = document.createElement('ion-icon');
+    icoMenu.setAttribute('name', 'menu-outline');
+    icoMenu.slot = 'icon-only';
+    btnMenu.appendChild(icoMenu);
+    btnMenu.addEventListener('click', () => {
+      const m = this.querySelector('ion-menu');
+      if (m) m.toggle();
+    });
+
+    acciones.append(btnFav, btnRef, btnMenu);
     toolbar.appendChild(acciones);
     header.appendChild(toolbar);
 
     this._contenido = document.createElement('main');
     this._contenido.className = 'pp-contenido';
+    this._contenido.id = 'pp-contenido';
 
     const tabBar = document.createElement('ion-tab-bar');
     VISTAS.forEach(v => {
@@ -126,9 +141,101 @@ export class PpAppShell extends HTMLElement {
       this._botones[v.id] = btn;
     });
 
-    app.append(header, this._contenido, tabBar);
+    const menuLateral = this._buildMenu();
+    app.append(menuLateral, header, this._contenido, tabBar);
     this.appendChild(app);
     this._actualizarTabSeleccionado();
+  }
+
+  _buildMenu() {
+    const menu = document.createElement('ion-menu');
+    menu.setAttribute('side', 'end');
+    menu.setAttribute('menu-id', 'pp-menu-lateral');
+    menu.setAttribute('content-id', 'pp-contenido');
+
+    // Cabecera del drawer
+    const mHeader = document.createElement('ion-header');
+    const mToolbar = document.createElement('ion-toolbar');
+    const mTitle = document.createElement('ion-title');
+    mTitle.textContent = 'Marante';
+    mToolbar.appendChild(mTitle);
+    mHeader.appendChild(mToolbar);
+
+    const mContent = document.createElement('ion-content');
+
+    // Sección perfil
+    const perfil = document.createElement('div');
+    perfil.className = 'pp-menu-perfil';
+    const avatarWrap = document.createElement('div');
+    avatarWrap.className = 'pp-menu-avatar';
+    const avatarIco = document.createElement('ion-icon');
+    avatarIco.setAttribute('name', 'person-circle-outline');
+    avatarWrap.appendChild(avatarIco);
+    const perfilNombre = document.createElement('div');
+    perfilNombre.className = 'pp-menu-perfil-nombre';
+    perfilNombre.textContent = 'Mi perfil';
+    const perfilSub = document.createElement('div');
+    perfilSub.className = 'pp-menu-perfil-sub';
+    perfilSub.textContent = 'Pescador local';
+    perfil.append(avatarWrap, perfilNombre, perfilSub);
+
+    // Sección notificaciones
+    const secNotif = this._menuSeccion('Notificaciones');
+    const itemNotif = this._menuItem('notifications-outline', 'Alertas de condiciones', () => this._emit('pp-menu-notificaciones'));
+    secNotif.appendChild(itemNotif);
+
+    // Sección ajustes
+    const secAjustes = this._menuSeccion('Ajustes');
+    const ajustesItems = [
+      { ico: 'moon-outline', label: 'Tema oscuro / claro', ev: 'pp-menu-tema' },
+      { ico: 'cloud-download-outline', label: 'Borrar caché de datos', ev: 'pp-menu-borrar-cache' },
+    ];
+    ajustesItems.forEach(({ ico, label, ev }) => {
+      secAjustes.appendChild(this._menuItem(ico, label, () => this._emit(ev)));
+    });
+
+    // Sección información
+    const secInfo = this._menuSeccion('Información');
+    secInfo.appendChild(this._menuItem('information-circle-outline', 'Acerca de Marante', () => this._emit('pp-menu-acerca')));
+
+    mContent.append(perfil, secNotif, secAjustes, secInfo);
+    menu.append(mHeader, mContent);
+    return menu;
+  }
+
+  _menuSeccion(titulo) {
+    const wrap = document.createElement('div');
+    wrap.className = 'pp-menu-seccion';
+    const label = document.createElement('div');
+    label.className = 'pp-menu-seccion-titulo';
+    label.textContent = titulo.toUpperCase();
+    const list = document.createElement('ion-list');
+    list.setAttribute('lines', 'none');
+    wrap.append(label, list);
+    return wrap;
+  }
+
+  _menuItem(icono, texto, onClick) {
+    const item = document.createElement('ion-item');
+    item.setAttribute('button', 'true');
+    item.setAttribute('detail', 'false');
+    item.className = 'pp-menu-item';
+    const ico = document.createElement('ion-icon');
+    ico.setAttribute('name', icono);
+    ico.slot = 'start';
+    const lbl = document.createElement('ion-label');
+    lbl.textContent = texto;
+    const chevron = document.createElement('ion-icon');
+    chevron.setAttribute('name', 'chevron-forward-outline');
+    chevron.slot = 'end';
+    chevron.className = 'pp-menu-chevron';
+    item.append(ico, lbl, chevron);
+    item.addEventListener('click', () => {
+      const m = this.querySelector('ion-menu');
+      if (m) m.close();
+      onClick();
+    });
+    return item;
   }
 
   get contenido() { return this._contenido; }
@@ -152,9 +259,7 @@ export class PpAppShell extends HTMLElement {
     this._spotNombreEl.textContent = (info && info.nombre) ? info.nombre : '—';
   }
 
-  set actualizado(texto) {
-    this._actualizadoEl.textContent = texto || '';
-  }
+  set actualizado(_texto) { /* eliminado: timestamp no aporta info útil */ }
 
   set refrescando(activo) {
     this._icoRefEl.classList.toggle('girando', !!activo);

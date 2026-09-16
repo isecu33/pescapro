@@ -819,46 +819,46 @@ pp-curva-marea { display: block; }
   font-variant-numeric: tabular-nums;
 }
 
-/* Periodos solunares como ventanas horizontales */
-.pp-solunar-rows {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  gap: 4px 8px;
+/* Periodos solunares en dos columnas: Mayor y Menor actividad */
+.pp-solunar-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
   padding-top: 8px;
   margin-top: 8px;
   border-top: 1px solid rgba(255, 255, 255, .08);
-  align-items: center;
+}
+.pp-solunar-col {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.pp-solunar-col-header {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--pp-texto2);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin-bottom: 2px;
 }
 .pp-solunar-row {
-  font-size: 11px;
-  color: var(--pp-texto2);
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  background: rgba(255, 255, 255, 0.04);
-  padding: 3px 6px;
-  border-radius: 4px;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  white-space: nowrap;
-}
-.pp-solunar-marker {
-  font-size: 10px;
-  color: var(--pp-texto2);
-  flex: 0 0 auto;
-  text-align: center;
-  line-height: 1;
-}
-.pp-solunar-major .pp-solunar-marker {
-  color: var(--ion-color-primary);
-  font-weight: 700;
-}
-.pp-solunar-range {
   font-family: var(--pp-font-mono);
-  font-size: 10px;
-  flex: 0 0 auto;
-  letter-spacing: 0;
+  font-size: 11px;
+  padding: 4px 6px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
   font-variant-numeric: tabular-nums;
+  letter-spacing: 0.01em;
+}
+.pp-solunar-major {
+  background: rgba(255, 114, 0, 0.1);
+  color: var(--ion-color-primary);
+  border-color: rgba(255, 114, 0, 0.2);
+}
+.pp-solunar-minor {
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--pp-texto2);
+  border-color: rgba(255, 255, 255, 0.08);
 }
 
 /* Legacy chip styles (kept for backwards compat if needed elsewhere) */

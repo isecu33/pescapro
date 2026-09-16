@@ -501,8 +501,16 @@ function cardMarea(st) {
 }
 
 function cardSolLuna(st, hoy) {
-  const { card, content } = crearCard('Sol y solunar');
+  const { card, content } = crearCard('Sol y Luna');
   card.classList.add('pp-card-solunar-compact');
+
+  // Agregar subtítulo "Períodos solunares" en el header
+  const header = card.querySelector('ion-card-header');
+  if (header) {
+    const subtitle = document.createElement('ion-card-subtitle');
+    subtitle.textContent = 'Períodos solunares';
+    header.appendChild(subtitle);
+  }
 
   const s = sol(hoy, st.spot.lat, st.spot.lon);
   const l = luna(hoy, st.spot.lat, st.spot.lon);
@@ -544,25 +552,48 @@ function cardSolLuna(st, hoy) {
   chart.data = { ...curva, periodos: periodosDia, ahora: hoy.getTime() };
   content.appendChild(chart);
 
-  // Periodos solunares como filas compactas (★ ☆ + rango horario)
+  // Periodos solunares en dos columnas: Mayor y Menor actividad
   if (periodosDia.length) {
+    const mayorPeriodos = periodosDia.filter(p => p.tipo === 'mayor');
+    const menorPeriodos = periodosDia.filter(p => p.tipo === 'menor');
+
     const solunares = document.createElement('div');
-    solunares.className = 'pp-solunar-rows';
-    periodosDia.forEach(p => {
-      const row = document.createElement('div');
-      row.className = 'pp-solunar-row' + (p.tipo === 'mayor' ? ' pp-solunar-major' : '');
+    solunares.className = 'pp-solunar-cols';
 
-      const marker = document.createElement('span');
-      marker.className = 'pp-solunar-marker';
-      marker.textContent = p.tipo === 'mayor' ? '★' : '☆';
+    // Columna Mayor Actividad
+    if (mayorPeriodos.length) {
+      const colMayor = document.createElement('div');
+      colMayor.className = 'pp-solunar-col';
+      const tMayor = document.createElement('div');
+      tMayor.className = 'pp-solunar-col-header';
+      tMayor.textContent = '★ Mayor actividad';
+      colMayor.appendChild(tMayor);
+      mayorPeriodos.forEach(p => {
+        const row = document.createElement('div');
+        row.className = 'pp-solunar-row pp-solunar-major';
+        row.textContent = util.fmtHora(p.inicio) + ' – ' + util.fmtHora(p.fin);
+        colMayor.appendChild(row);
+      });
+      solunares.appendChild(colMayor);
+    }
 
-      const range = document.createElement('span');
-      range.className = 'pp-solunar-range';
-      range.textContent = util.fmtHora(p.inicio) + ' – ' + util.fmtHora(p.fin);
+    // Columna Menor Actividad
+    if (menorPeriodos.length) {
+      const colMenor = document.createElement('div');
+      colMenor.className = 'pp-solunar-col';
+      const tMenor = document.createElement('div');
+      tMenor.className = 'pp-solunar-col-header';
+      tMenor.textContent = '☆ Menor actividad';
+      colMenor.appendChild(tMenor);
+      menorPeriodos.forEach(p => {
+        const row = document.createElement('div');
+        row.className = 'pp-solunar-row pp-solunar-minor';
+        row.textContent = util.fmtHora(p.inicio) + ' – ' + util.fmtHora(p.fin);
+        colMenor.appendChild(row);
+      });
+      solunares.appendChild(colMenor);
+    }
 
-      row.append(marker, range);
-      solunares.appendChild(row);
-    });
     content.appendChild(solunares);
   }
 

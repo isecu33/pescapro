@@ -819,14 +819,23 @@ pp-curva-marea { display: block; }
   font-variant-numeric: tabular-nums;
 }
 
+/* Subtítulo "Períodos solunares" encima de columnas */
+.pp-solunar-subtitle {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--pp-texto2);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin-bottom: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, .08);
+}
+
 /* Periodos solunares en dos columnas: Mayor y Menor actividad */
 .pp-solunar-cols {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
-  padding-top: 8px;
-  margin-top: 8px;
-  border-top: 1px solid rgba(255, 255, 255, .08);
 }
 .pp-solunar-col {
   display: flex;

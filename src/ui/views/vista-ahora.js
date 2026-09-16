@@ -504,14 +504,6 @@ function cardSolLuna(st, hoy) {
   const { card, content } = crearCard('Sol y Luna');
   card.classList.add('pp-card-solunar-compact');
 
-  // Agregar subtítulo "Períodos solunares" en el header
-  const header = card.querySelector('ion-card-header');
-  if (header) {
-    const subtitle = document.createElement('ion-card-subtitle');
-    subtitle.textContent = 'Períodos solunares';
-    header.appendChild(subtitle);
-  }
-
   const s = sol(hoy, st.spot.lat, st.spot.lon);
   const l = luna(hoy, st.spot.lat, st.spot.lon);
   const periodosDia = st.ctx.periodosDe(hoy);
@@ -556,6 +548,12 @@ function cardSolLuna(st, hoy) {
   if (periodosDia.length) {
     const mayorPeriodos = periodosDia.filter(p => p.tipo === 'mayor');
     const menorPeriodos = periodosDia.filter(p => p.tipo === 'menor');
+
+    // Subtítulo encima de las columnas
+    const subtitle = document.createElement('div');
+    subtitle.className = 'pp-solunar-subtitle';
+    subtitle.textContent = 'Períodos solunares';
+    content.appendChild(subtitle);
 
     const solunares = document.createElement('div');
     solunares.className = 'pp-solunar-cols';

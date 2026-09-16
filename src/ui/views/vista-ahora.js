@@ -49,6 +49,7 @@ export function renderAhora(contenedor, st, delta = null) {
   const h = horaMasCercana(st.datos.horas, ahora);
   const idx = indiceHora(h, st.modo, st.ctx);
 
+  contenedor.appendChild(bannerSeguridad(idx.seguridad));
   contenedor.appendChild(resumenDia(st, idx, delta));
   contenedor.appendChild(selectorModo(st));
   contenedor.appendChild(cardIndiceFull(idx, st));

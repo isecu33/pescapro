@@ -95,10 +95,6 @@ export class PpAppShell extends HTMLElement {
     toolbar.appendChild(acciones);
     header.appendChild(toolbar);
 
-    this._bannerEl = document.createElement('div');
-    this._bannerEl.className = 'pp-banner';
-    this._bannerEl.style.display = 'none';
-
     this._contenido = document.createElement('main');
     this._contenido.className = 'pp-contenido';
 
@@ -116,7 +112,7 @@ export class PpAppShell extends HTMLElement {
       this._botones[v.id] = btn;
     });
 
-    app.append(header, this._bannerEl, this._contenido, tabBar);
+    app.append(header, this._contenido, tabBar);
     this.appendChild(app);
     this._actualizarTabSeleccionado();
   }
@@ -154,19 +150,8 @@ export class PpAppShell extends HTMLElement {
      Los motivos vienen de PP.indice.seguridad() (texto fijo del propio
      dominio, no input de usuario), pero se usa textContent igualmente
      por consistencia con el resto de componentes. */
-  set seguridad(info) {
-    if (!info || info.nivel === 'ok') {
-      this._bannerEl.style.display = 'none';
-      this._bannerEl.replaceChildren();
-      return;
-    }
-    this._bannerEl.style.display = 'flex';
-    this._bannerEl.className = 'pp-banner pp-banner-' + info.nivel;
-
-    const ico = svg(info.nivel === 'rojo' ? 'stop' : 'alerta');
-    const texto = document.createElement('span');
-    texto.textContent = info.motivos.join(' · ');
-    this._bannerEl.replaceChildren(ico, texto);
+  set seguridad(_info) {
+    // El banner de seguridad se renderiza dentro de cada vista, no en el shell
   }
 
   _emit(nombre, detail) {

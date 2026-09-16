@@ -775,22 +775,25 @@ pp-curva-marea { display: block; }
 
 /* ── Card Sol y Solunar: versión compacta ── */
 .pp-card-solunar-compact .pp-cond-grid {
-  gap: 6px;
+  gap: 4px;
   margin-bottom: 4px;
 }
 .pp-card-solunar-compact .pp-cond {
-  padding: 6px 8px;
+  padding: 4px 6px;
   background: var(--pp-panel2);
+  min-height: auto;
 }
 .pp-card-solunar-compact .pp-cond-ico {
-  font-size: 18px;
+  font-size: 16px;
 }
 .pp-card-solunar-compact .pp-cond-lbl {
-  font-size: 9px;
+  font-size: 8px;
+  margin-top: 2px;
 }
 .pp-card-solunar-compact .pp-cond-val {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
+  margin-top: 1px;
 }
 
 /* Periodos solunares como filas compactas */

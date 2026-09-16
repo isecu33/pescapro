@@ -1,14 +1,15 @@
-/* Helper compartido para abrir/cerrar dialogos, sobre <ion-modal> en vez
-   del div.pp-modal-fondo + div.pp-modal a mano de www/js/ui.js:635-651
-   (funcion `modal(cuerpo)`/`cerrarModal()`, usada por practicamente todas
-   las vistas). Con `breakpoints` se comporta como bottom-sheet gestual
-   tipo iOS (por defecto); pasa `breakpoints: null` para un modal
-   fullscreen clasico (p.ej. el visor de foto).
-
+/* Dos helpers para abrir dialogos:
+   - abrirModal(): usa <ion-modal> (bottom-sheet gestual por defecto).
+   - abrirModalCentrado(): modal centrado en pantalla, div-based (sin
+     ion-modal), equivalente al modal() de www/js/ui.js pero con
+     align-items:center en vez de flex-end. Evita el colapso de
+     ion-content cuando --height:auto no tiene padre con altura definida.
+   Ambos comparten cerrarModal().
    Guardas `typeof modal.present === 'function'` -- en tests sin el
    loader de Ionic cargado, <ion-modal> es un elemento sin comportamiento
    registrado (no revienta, simplemente no hace nada hasta que Ionic
    este disponible en runtime real). */
+import { svg } from '../../domain/iconos.js';
 export function abrirModal(cuerpoEl, opts = {}) {
   cerrarModal();
 
@@ -50,4 +51,27 @@ export function cerrarModal() {
   if (!m) return;
   if (typeof m.dismiss === 'function') m.dismiss();
   else m.remove();
+}
+
+export function abrirModalCentrado(cuerpoEl) {
+  cerrarModal();
+  const fondo = document.createElement('div');
+  fondo.id = 'pp-modal';
+  fondo.className = 'pp-modal-fondo';
+
+  const caja = document.createElement('div');
+  caja.className = 'pp-modal';
+
+  const btnCerrar = document.createElement('button');
+  btnCerrar.className = 'pp-modal-x';
+  btnCerrar.setAttribute('aria-label', 'Cerrar');
+  const icoEl = svg('cerrar');
+  if (icoEl) btnCerrar.appendChild(icoEl);
+  btnCerrar.addEventListener('click', cerrarModal);
+  caja.appendChild(btnCerrar);
+  caja.appendChild(cuerpoEl);
+
+  fondo.appendChild(caja);
+  fondo.addEventListener('click', e => { if (e.target === fondo) cerrarModal(); });
+  document.body.appendChild(fondo);
 }

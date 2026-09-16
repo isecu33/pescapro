@@ -72,6 +72,11 @@ export function abrirModalCentrado(cuerpoEl) {
   caja.appendChild(cuerpoEl);
 
   fondo.appendChild(caja);
-  fondo.addEventListener('click', e => { if (e.target === fondo) cerrarModal(); });
   document.body.appendChild(fondo);
+  // Diferir el listener de cierre un tick: el tap/click que abre el modal
+  // sigue propagándose en el mismo microtask; registrarlo ahora lo recibiría
+  // inmediatamente y cerraría el modal al instante (bug en iOS/Android).
+  setTimeout(() => {
+    fondo.addEventListener('click', e => { if (e.target === fondo) cerrarModal(); });
+  }, 0);
 }

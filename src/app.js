@@ -308,7 +308,7 @@ export function crearApp(shell) {
         cargando.textContent = 'Buscando…';
         res.appendChild(cargando);
         try {
-          const lugares = await buscarLugar(valor);
+          const lugares = await buscarLugar(valor, st.spot);
           res.replaceChildren();
           if (!lugares.length) {
             const p = document.createElement('p');

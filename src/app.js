@@ -421,6 +421,7 @@ export function crearApp(shell) {
     shell.addEventListener('pp-cambiar-spot', modalBuscar);
     shell.addEventListener('pp-refrescar', refrescarManual);
     shell.addEventListener('pp-favorito', modalGuardarFavorito);
+    shell.addEventListener('pp-menu-modo', (e) => cambiarModo(e.detail.modo));
     shell.contenido.addEventListener('pp-cambiar-modo', (e) => cambiarModo(e.detail.modo));
   }
 

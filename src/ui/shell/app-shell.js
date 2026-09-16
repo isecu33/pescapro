@@ -19,6 +19,8 @@
    Eventos emitidos: pp-cambiar-vista, pp-cambiar-spot, pp-favorito, pp-refrescar */
 
 import { svg } from '../../domain/iconos.js';
+import { estadisticas } from '../../domain/cuaderno.js';
+import { MODOS } from '../../domain/config.js';
 
 const VISTAS = [
   { id: 'ahora', nombre: 'Ahora', icono: 'speedometer-outline' },
@@ -153,7 +155,6 @@ export class PpAppShell extends HTMLElement {
     menu.setAttribute('menu-id', 'pp-menu-lateral');
     menu.setAttribute('content-id', 'pp-contenido');
 
-    // Cabecera del drawer
     const mHeader = document.createElement('ion-header');
     const mToolbar = document.createElement('ion-toolbar');
     const mTitle = document.createElement('ion-title');
@@ -162,8 +163,9 @@ export class PpAppShell extends HTMLElement {
     mHeader.appendChild(mToolbar);
 
     const mContent = document.createElement('ion-content');
+    mContent.className = 'pp-menu-content';
 
-    // Sección perfil
+    // ── Perfil ────────────────────────────────────────
     const perfil = document.createElement('div');
     perfil.className = 'pp-menu-perfil';
     const avatarWrap = document.createElement('div');
@@ -173,34 +175,129 @@ export class PpAppShell extends HTMLElement {
     avatarWrap.appendChild(avatarIco);
     const perfilNombre = document.createElement('div');
     perfilNombre.className = 'pp-menu-perfil-nombre';
-    perfilNombre.textContent = 'Mi perfil';
-    const perfilSub = document.createElement('div');
-    perfilSub.className = 'pp-menu-perfil-sub';
-    perfilSub.textContent = 'Pescador local';
-    perfil.append(avatarWrap, perfilNombre, perfilSub);
+    perfilNombre.textContent = 'Pescador local';
+    this._statsEl = document.createElement('div');
+    this._statsEl.className = 'pp-menu-stats';
+    perfil.append(avatarWrap, perfilNombre, this._statsEl);
 
-    // Sección notificaciones
+    // ── Notificaciones ────────────────────────────────
     const secNotif = this._menuSeccion('Notificaciones');
-    const itemNotif = this._menuItem('notifications-outline', 'Alertas de condiciones', () => this._emit('pp-menu-notificaciones'));
-    secNotif.appendChild(itemNotif);
-
-    // Sección ajustes
-    const secAjustes = this._menuSeccion('Ajustes');
-    const ajustesItems = [
-      { ico: 'moon-outline', label: 'Tema oscuro / claro', ev: 'pp-menu-tema' },
-      { ico: 'cloud-download-outline', label: 'Borrar caché de datos', ev: 'pp-menu-borrar-cache' },
-    ];
-    ajustesItems.forEach(({ ico, label, ev }) => {
-      secAjustes.appendChild(this._menuItem(ico, label, () => this._emit(ev)));
+    const listNotif = secNotif.querySelector('ion-list');
+    const itemNotif = document.createElement('ion-item');
+    itemNotif.className = 'pp-menu-item';
+    const icoNotif = document.createElement('ion-icon');
+    icoNotif.setAttribute('name', 'notifications-outline');
+    icoNotif.slot = 'start';
+    const lblNotif = document.createElement('ion-label');
+    lblNotif.textContent = 'Alertas de condiciones';
+    const toggleNotif = document.createElement('ion-toggle');
+    toggleNotif.slot = 'end';
+    try { toggleNotif.checked = localStorage.getItem('pp_notif') === '1'; } catch (_) {}
+    toggleNotif.addEventListener('ionChange', (e) => {
+      try { localStorage.setItem('pp_notif', e.detail.checked ? '1' : '0'); } catch (_) {}
     });
+    itemNotif.append(icoNotif, lblNotif, toggleNotif);
+    listNotif.appendChild(itemNotif);
 
-    // Sección información
-    const secInfo = this._menuSeccion('Información');
-    secInfo.appendChild(this._menuItem('information-circle-outline', 'Acerca de Marante', () => this._emit('pp-menu-acerca')));
+    // ── Ajustes ───────────────────────────────────────
+    const secAjustes = this._menuSeccion('Ajustes');
+    const listAjustes = secAjustes.querySelector('ion-list');
+
+    // Modalidad por defecto
+    const lblModo = document.createElement('div');
+    lblModo.className = 'pp-menu-seccion-subtitulo';
+    lblModo.textContent = 'Modalidad';
+    this._modoChipsEl = document.createElement('div');
+    this._modoChipsEl.className = 'pp-menu-modo-chips';
+    Object.values(MODOS).forEach(m => {
+      const chip = document.createElement('button');
+      chip.className = 'pp-chip pp-menu-modo-chip';
+      chip.dataset.modo = m.id;
+      chip.textContent = m.nombre;
+      chip.addEventListener('click', () => {
+        this._emit('pp-menu-modo', { modo: m.id });
+        this._actualizarModoChips(m.id);
+      });
+      this._modoChipsEl.appendChild(chip);
+    });
+    listAjustes.append(lblModo, this._modoChipsEl);
+
+    // Borrar caché
+    const itemCache = document.createElement('ion-item');
+    itemCache.setAttribute('button', 'true');
+    itemCache.setAttribute('detail', 'false');
+    itemCache.className = 'pp-menu-item pp-menu-item-danger';
+    const icoCache = document.createElement('ion-icon');
+    icoCache.setAttribute('name', 'cloud-download-outline');
+    icoCache.slot = 'start';
+    const lblCache = document.createElement('ion-label');
+    lblCache.textContent = 'Borrar caché de datos';
+    itemCache.append(icoCache, lblCache);
+    itemCache.addEventListener('click', () => {
+      if (window.confirm('¿Borrar los datos en caché?\nLa app los descargará de nuevo al conectar.')) {
+        try { localStorage.removeItem('pp_datos'); } catch (_) {}
+        menu.close();
+        this._emit('pp-refrescar');
+      }
+    });
+    listAjustes.appendChild(itemCache);
+
+    // ── Acerca de ─────────────────────────────────────
+    const secInfo = this._menuSeccion('Acerca de');
+    const listInfo = secInfo.querySelector('ion-list');
+    const itemAbout = document.createElement('ion-item');
+    itemAbout.className = 'pp-menu-item';
+    const icoAbout = document.createElement('ion-icon');
+    icoAbout.setAttribute('name', 'information-circle-outline');
+    icoAbout.slot = 'start';
+    const lblAbout = document.createElement('ion-label');
+    const aboutTitulo = document.createElement('b');
+    aboutTitulo.textContent = 'Marante · v0.1';
+    const aboutSub = document.createElement('small');
+    aboutSub.className = 'pp-menu-about-sub';
+    aboutSub.textContent = 'Datos: Open-Meteo · Nominatim · SunCalc · Sin servidor · 100% local';
+    lblAbout.append(aboutTitulo, document.createElement('br'), aboutSub);
+    itemAbout.append(icoAbout, lblAbout);
+    listInfo.appendChild(itemAbout);
 
     mContent.append(perfil, secNotif, secAjustes, secInfo);
     menu.append(mHeader, mContent);
+
+    menu.addEventListener('ionDidOpen', () => {
+      this._refreshStats();
+      try {
+        const prefs = JSON.parse(localStorage.getItem('pp_prefs') || '{}');
+        if (prefs.modo) this._actualizarModoChips(prefs.modo);
+      } catch (_) {}
+    });
+
     return menu;
+  }
+
+  _refreshStats() {
+    if (!this._statsEl) return;
+    const st = estadisticas();
+    const nEspecies = Object.keys(st.porEspecie).length;
+    this._statsEl.replaceChildren();
+    const statChip = (n, label) => {
+      const s = document.createElement('span');
+      s.className = 'pp-menu-stat-chip';
+      const b = document.createElement('b');
+      b.textContent = n;
+      s.append(b, document.createTextNode(' ' + label));
+      return s;
+    };
+    this._statsEl.append(
+      statChip(st.total, st.total === 1 ? 'captura' : 'capturas'),
+      statChip(nEspecies, nEspecies === 1 ? 'especie' : 'especies'),
+    );
+  }
+
+  _actualizarModoChips(modo) {
+    if (!this._modoChipsEl) return;
+    this._modoChipsEl.querySelectorAll('.pp-menu-modo-chip').forEach(c => {
+      c.classList.toggle('pp-chip-acento', c.dataset.modo === modo);
+    });
   }
 
   _menuSeccion(titulo) {

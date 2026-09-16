@@ -115,9 +115,25 @@ html, body {
   font-size: 10px; font-weight: 700; letter-spacing: 0.1em;
   color: var(--pp-texto2); padding: 8px 20px 4px;
 }
+.pp-menu-seccion-subtitulo {
+  font-size: 12px; color: var(--pp-texto2); padding: 6px 16px 2px;
+}
 .pp-menu-item { --background: transparent; --padding-start: 20px; --inner-padding-end: 16px; }
 .pp-menu-item ion-icon[slot="start"] { color: var(--ion-color-primary); font-size: 20px; margin-right: 12px; }
+.pp-menu-item-danger ion-icon[slot="start"] { color: #e05252; }
 .pp-menu-chevron { font-size: 14px; color: var(--pp-texto2); }
+
+.pp-menu-stats { display: flex; gap: 10px; margin-top: 6px; justify-content: center; }
+.pp-menu-stat-chip {
+  font-size: 12px; color: var(--pp-texto2);
+  background: rgba(255,255,255,0.06); border-radius: 8px; padding: 4px 10px;
+}
+.pp-menu-stat-chip b { color: var(--ion-color-primary); font-size: 14px; margin-right: 2px; }
+
+.pp-menu-modo-chips { display: flex; gap: 8px; padding: 6px 16px 10px; flex-wrap: wrap; }
+.pp-menu-modo-chip { font-size: 13px; }
+
+.pp-menu-about-sub { color: var(--pp-texto2); font-size: 11px; display: block; margin-top: 2px; }
 .pp-spot-textos { display: flex; flex-direction: column; min-width: 0; }
 .pp-spot-nombre { font-weight: 700; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; letter-spacing: -0.01em; }
 .pp-spot-selector small { color: var(--pp-texto2); font-size: 11px; line-height: 1.2; }

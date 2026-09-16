@@ -18,7 +18,7 @@
    - .refrescando = bool    -> anima el icono de refrescar
    Eventos emitidos: pp-cambiar-vista, pp-cambiar-spot, pp-favorito, pp-refrescar */
 
-import { svg } from '../domain/iconos.js';
+import { svg } from '../../domain/iconos.js';
 
 const VISTAS = [
   { id: 'ahora', nombre: 'Ahora', icono: 'speedometer-outline' },

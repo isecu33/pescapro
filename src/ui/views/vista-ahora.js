@@ -532,7 +532,7 @@ function cardSolLuna(st, hoy) {
   grid.appendChild(celSol('amanecer', 'Amanecer', s.amanecer ? util.fmtHora(s.amanecer) : '—'));
   grid.appendChild(celSol('atardecer', 'Ocaso', s.ocaso ? util.fmtHora(s.ocaso) : '—'));
   grid.appendChild(celSol('lunaGenerica', l.nombre.split(' ')[0], l.iluminacion + '%'));
-  grid.appendChild(celSol('lunaGenerica', 'Sale/Pone',
+  grid.appendChild(celSol('sol', 'Salida/Puesta',
     (l.salida ? util.fmtHora(l.salida) : '—') + ' / ' + (l.puesta ? util.fmtHora(l.puesta) : '—')));
 
   content.appendChild(grid);

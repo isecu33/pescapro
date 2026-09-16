@@ -53,8 +53,6 @@ export function renderAhora(contenedor, st, delta = null) {
   contenedor.appendChild(resumenDia(st, idx, delta));
   contenedor.appendChild(selectorModo(st));
   contenedor.appendChild(cardIndiceFull(idx, st));
-  const alerta = cardAlertaFactor(idx.factores, st.modo);
-  if (alerta) contenedor.appendChild(alerta);
   contenedor.appendChild(cardMarea(st));
   contenedor.appendChild(cardSolLuna(st, ahora));
   contenedor.appendChild(condicionesActuales(h));

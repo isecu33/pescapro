@@ -20,7 +20,7 @@
    decida que hacer -- igual que pp-app-shell emite pp-cambiar-vista/
    pp-cambiar-spot/etc. en vez de llamar a PP.app.* directamente. */
 import { MODOS, WMO, util } from '../../domain/config.js';
-import { svg as icoSvg, wmoIconName } from '../../domain/iconos.js';
+import { svg, wmoIconName } from '../../domain/iconos.js';
 import { indiceHora, horaMasCercana, mejoresVentanas, especiesEn } from '../../domain/indice.js';
 import { sol, luna, curvaSolunar } from '../../domain/solunar.js';
 import { espImgEl } from '../../domain/especies.js';
@@ -376,7 +376,7 @@ function condicionesActuales(h) {
     c.className = 'pp-cond';
     const ico = document.createElement('div');
     ico.className = 'pp-cond-ico';
-    const svgEl = icoSvg(icoNombre);
+    const svgEl = svg(icoNombre);
     if (svgEl) ico.appendChild(svgEl);
     const lblEl = document.createElement('div');
     lblEl.className = 'pp-cond-lbl';
@@ -497,7 +497,7 @@ function cardMarea(st) {
       const ico = document.createElement('span');
       ico.className = 'pp-marea-item-ico';
       ico.style.color = e.tipo === 'pleamar' ? '#ff7200' : 'var(--pp-texto2)';
-      const icoEl = icoSvg(e.tipo === 'pleamar' ? 'flechaSube' : 'flechaBaja');
+      const icoEl = svg(e.tipo === 'pleamar' ? 'flechaSube' : 'flechaBaja');
       if (icoEl) { icoEl.style.width = '14px'; icoEl.style.height = '14px'; ico.appendChild(icoEl); }
 
       const txt = document.createElement('span');
@@ -532,7 +532,7 @@ function cardSolLuna(st, hoy) {
     c.className = 'pp-cond';
     const icoEl = document.createElement('div');
     icoEl.className = 'pp-cond-ico';
-    const svg = icoSvg(icoNombre);
+    const svg = svg(icoNombre);
     if (svg) icoEl.appendChild(svg);
     const lblEl = document.createElement('div');
     lblEl.className = 'pp-cond-lbl';

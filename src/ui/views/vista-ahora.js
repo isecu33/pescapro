@@ -127,33 +127,22 @@ function resumenDia(st, idx, delta) {
 /* Persistente (no ion-toast): oculto (display:none) si nivel === 'ok',
    igual que el banner global del original (www/js/ui.js:27-31). */
 function bannerSeguridad(seg) {
-  const card = document.createElement('ion-card');
+  const banner = document.createElement('div');
 
   if (!seg || seg.nivel === 'ok') {
-    card.style.display = 'none';
-    return card;
+    banner.style.display = 'none';
+    return banner;
   }
 
-  card.style.display = 'block';
-  card.className = 'pp-banner-' + seg.nivel;
-  card.setAttribute('color', seg.nivel === 'rojo' ? 'danger' : 'warning');
-
-  const content = document.createElement('ion-card-content');
-  const wrapper = document.createElement('div');
-  wrapper.style.display = 'flex';
-  wrapper.style.alignItems = 'center';
-  wrapper.style.justifyContent = 'center';
-  wrapper.style.gap = '7px';
+  banner.className = 'pp-banner pp-banner-' + seg.nivel;
 
   const icoEl = svg(seg.nivel === 'rojo' ? 'stop' : 'alerta');
-  if (icoEl) wrapper.appendChild(icoEl);
+  if (icoEl) banner.appendChild(icoEl);
 
   const texto = document.createElement('span');
   texto.textContent = seg.motivos.join(' · ');
-  wrapper.appendChild(texto);
-  content.appendChild(wrapper);
-  card.appendChild(content);
-  return card;
+  banner.appendChild(texto);
+  return banner;
 }
 
 /* Selector de modalidad con chips (no ion-segment): solo re-emite el cambio

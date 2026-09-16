@@ -7,6 +7,7 @@ import { cargarTodo, desdeCache, buscarLugar } from './domain/api.js';
 import { preparar, indiceHora, horaMasCercana } from './domain/indice.js';
 import { favoritos } from './domain/cuaderno.js';
 import { abrirModal, cerrarModal } from './ui/util/modal.js';
+import { svg } from './domain/iconos.js';
 import { renderAhora } from './ui/views/vista-ahora.js';
 import { renderPrevision } from './ui/views/vista-prevision.js';
 import { crearVistaMapa } from './ui/views/vista-mapa.js';
@@ -231,17 +232,26 @@ export function crearApp(shell) {
 
   function modalBuscar() {
     const cuerpo = document.createElement('div');
+    cuerpo.className = 'pp-modal-buscar-content';
+
     const titulo = document.createElement('h3');
-    titulo.textContent = '📍 Cambiar spot';
-    const input = document.createElement('ion-input');
+    const pinIco = svg('pin');
+    if (pinIco) { pinIco.style.cssText = 'width:18px;height:18px;vertical-align:middle;margin-right:6px'; titulo.appendChild(pinIco); }
+    titulo.appendChild(document.createTextNode(' Cambiar spot'));
+    cuerpo.appendChild(titulo);
+
+    const input = document.createElement('input');
+    input.className = 'pp-input';
     input.placeholder = 'Busca un puerto, playa o pueblo…';
+    cuerpo.appendChild(input);
+
     const res = document.createElement('div');
-    cuerpo.append(titulo, input, res);
+    cuerpo.appendChild(res);
 
     let timerBusqueda = null;
-    input.addEventListener('ionInput', (e) => {
+    input.addEventListener('input', () => {
       clearTimeout(timerBusqueda);
-      const valor = (e.detail.value || '').trim();
+      const valor = input.value.trim();
       timerBusqueda = setTimeout(async () => {
         res.replaceChildren();
         if (valor.length < 2) return;
@@ -269,39 +279,46 @@ export function crearApp(shell) {
             fila.addEventListener('click', () => cambiarSpot(l));
             res.appendChild(fila);
           });
-        } catch (e) {
+        } catch (err) {
           res.replaceChildren();
           const p = document.createElement('p');
           p.className = 'pp-nota';
-          p.textContent = 'Error buscando: ' + e.message;
+          p.textContent = 'Error buscando: ' + err.message;
           res.appendChild(p);
         }
       }, 350);
     });
 
-    const gps = document.createElement('ion-button');
-    gps.setAttribute('fill', 'outline');
-    gps.textContent = '🛰️ Usar mi ubicación (GPS)';
+    const gpsSep = document.createElement('div');
+    gpsSep.className = 'pp-modal-gps-sep';
+    const gps = document.createElement('button');
+    gps.className = 'pp-chip';
+    const gpsIco = svg('ubicacion');
+    if (gpsIco) { gpsIco.style.cssText = 'width:16px;height:16px;vertical-align:middle;margin-right:5px'; gps.appendChild(gpsIco); }
+    gps.appendChild(document.createTextNode(' Usar mi ubicación (GPS)'));
     gps.addEventListener('click', () => {
       if (typeof navigator === 'undefined' || !navigator.geolocation) {
-        gps.textContent = '🛰️ GPS no disponible';
+        gps.textContent = 'GPS no disponible';
         return;
       }
-      gps.textContent = '🛰️ Localizando…';
+      gps.replaceChildren(document.createTextNode('Localizando…'));
       navigator.geolocation.getCurrentPosition(
         (pos) => cambiarSpot({ nombre: 'Mi ubicación', lat: pos.coords.latitude, lon: pos.coords.longitude }),
-        () => { gps.textContent = '🛰️ Sin permiso o sin señal GPS'; },
+        () => { gps.textContent = 'Sin permiso o sin señal GPS'; },
         { enableHighAccuracy: true, timeout: 12000 }
       );
     });
-    cuerpo.appendChild(gps);
+    gpsSep.appendChild(gps);
+    cuerpo.appendChild(gpsSep);
 
     const favs = favoritos.leer();
     if (favs.length) {
       const t = document.createElement('div');
       t.className = 'pp-campo';
       const b = document.createElement('b');
-      b.textContent = '⭐ Favoritos';
+      const favIco = svg('estrellaLlena');
+      if (favIco) { favIco.style.cssText = 'width:14px;height:14px;vertical-align:middle;margin-right:5px;color:var(--acento)'; b.appendChild(favIco); }
+      b.appendChild(document.createTextNode(' Favoritos'));
       t.appendChild(b);
       cuerpo.appendChild(t);
       favs.forEach((f, i) => {
@@ -311,7 +328,9 @@ export function crearApp(shell) {
         nombre.textContent = f.nombre;
         const borrar = document.createElement('button');
         borrar.className = 'pp-borrar';
-        borrar.textContent = '✕';
+        const cerrarIco = svg('cerrar');
+        if (cerrarIco) { cerrarIco.style.cssText = 'width:14px;height:14px'; borrar.appendChild(cerrarIco); }
+        else borrar.textContent = '✕';
         borrar.addEventListener('click', (e) => {
           e.stopPropagation();
           favoritos.borrar(i);
@@ -323,7 +342,7 @@ export function crearApp(shell) {
         cuerpo.appendChild(fila);
       });
     }
-    abrirModal(cuerpo);
+    abrirModal(cuerpo, { breakpoints: null, cssClass: 'pp-modal-buscar' });
   }
 
   /* ---------- Cabecera ---------- */

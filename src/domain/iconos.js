@@ -30,6 +30,10 @@ const TRAZOS = {
   atardecer:        '<path d="M2 18h20"/><path d="M6 18a6 6 0 0 1 12 0"/><path d="M12 6v3M4.8 10.8l1.8 1.8M19.2 10.8l-1.8 1.8"/><path d="M9.5 3.5 12 6l2.5-2.5"/>',
   alerta:           '<path d="M12 3 22 20H2Z"/><path d="M12 9v5"/><circle cx="12" cy="17" r=".9" fill="currentColor" stroke="none"/>',
   stop:             '<path d="M8 2h8l6 6v8l-6 6H8l-6-6V8Z"/><path d="M12 7v6"/><circle cx="12" cy="16.5" r=".9" fill="currentColor" stroke="none"/>',
+  pin:              '<path d="M12 21s7-7.75 7-13a7 7 0 1 0-14 0c0 5.25 7 13 7 13Z"/><circle cx="12" cy="8" r="2.4"/>',
+  ubicacion:        '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>',
+  estrellaLlena:    '<path d="M12 2l2.9 6.6 7.1.7-5 4.9 1.2 7.1L12 17.8l-6.2 3.5L7 14.2 2 9.3l7.1-.7Z" fill="currentColor"/>',
+  cerrar:           '<path d="M6 6l12 12M18 6 6 18"/>',
 };
 
 export function svg(nombre) {

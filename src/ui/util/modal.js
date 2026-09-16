@@ -14,6 +14,7 @@ export function abrirModal(cuerpoEl, opts = {}) {
 
   const modal = document.createElement('ion-modal');
   modal.id = 'pp-modal';
+  if (opts.cssClass) modal.classList.add(opts.cssClass);
 
   if (opts.breakpoints !== null) {
     const breakpoints = opts.breakpoints || [0, 0.5, 0.9];

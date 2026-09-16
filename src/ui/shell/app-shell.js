@@ -67,6 +67,7 @@ export class PpAppShell extends HTMLElement {
     const selector = document.createElement('div');
     selector.className = 'pp-spot-selector';
     this._spotNombreEl = document.createElement('span');
+    this._spotNombreEl.className = 'pp-spot-nombre';
     this._spotNombreEl.textContent = '—';
     this._actualizadoEl = document.createElement('small');
     selector.append(this._spotNombreEl, this._actualizadoEl);

@@ -97,8 +97,10 @@ html, body {
 
 /* La cabecera custom (logo/spot/acciones) vive dentro de ion-toolbar */
 .pp-logo { font-size: 20px; padding: 0 4px; }
-.pp-spot-selector { display: flex; flex-direction: column; cursor: pointer; padding: 2px 8px; }
-.pp-spot-selector small { color: var(--pp-texto2); font-size: 11px; }
+.pp-spot-selector { flex: 1; min-width: 0; cursor: pointer; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.10); border-radius: 8px; padding: 8px 12px; min-height: 44px; display: flex; flex-direction: column; justify-content: center; transition: background 0.15s ease; }
+.pp-spot-selector:active { background: rgba(255,255,255,0.10); border-color: rgba(255,114,0,0.4); }
+.pp-spot-nombre { font-weight: 700; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; letter-spacing: -0.01em; }
+.pp-spot-selector small { color: var(--pp-texto2); font-size: 11px; line-height: 1.2; }
 .pp-accion-btn { --color: var(--pp-texto2, rgba(255,255,255,0.54)); }
 
 /* Banner de seguridad: persistente mientras dure el peligro (no es un
@@ -107,6 +109,16 @@ html, body {
 .pp-banner .pp-ico { width: 17px; height: 17px; flex: none; }
 .pp-banner-rojo { background: #2a0505; color: #ff9090; border-bottom: 1px solid var(--rojo); }
 .pp-banner-amarillo { background: #2a1500; color: #ffcc60; border-bottom: 1px solid var(--acento-vivo); }
+
+/* Input de búsqueda en modales */
+.pp-input { width: 100%; box-sizing: border-box; background: rgba(255,255,255,0.06); color: inherit; border: 1px solid rgba(255,255,255,0.12); border-radius: 8px; padding: 10px 14px; font-size: 15px; font-family: inherit; }
+.pp-input:focus { outline: none; border-color: var(--acento); }
+.pp-input::placeholder { color: var(--pp-texto2); }
+
+/* Modal de búsqueda de spot centrado */
+ion-modal.pp-modal-buscar { --width: 90%; --max-width: 480px; --height: auto; --max-height: 80vh; --border-radius: 14px; }
+.pp-modal-buscar-content { padding: 16px; }
+.pp-modal-gps-sep { margin-top: 14px; }
 
 /* Nav inferior fijo (no se usa ion-tabs/router, ver app-shell.js) */
 ion-tab-bar { position: fixed; bottom: 0; left: 0; right: 0; z-index: 1500; }

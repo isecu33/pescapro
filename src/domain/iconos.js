@@ -28,6 +28,8 @@ const TRAZOS = {
   lunaGenerica:     '<path d="M15 3a9 9 0 1 0 6 15.9A9 9 0 0 1 15 3Z"/>',
   amanecer:         '<path d="M2 18h20"/><path d="M6 18a6 6 0 0 1 12 0"/><path d="M12 6v3M4.8 10.8l1.8 1.8M19.2 10.8l-1.8 1.8"/><path d="M9.5 5l2.5-2.5L14.5 5"/>',
   atardecer:        '<path d="M2 18h20"/><path d="M6 18a6 6 0 0 1 12 0"/><path d="M12 6v3M4.8 10.8l1.8 1.8M19.2 10.8l-1.8 1.8"/><path d="M9.5 3.5 12 6l2.5-2.5"/>',
+  alerta:           '<path d="M12 3 22 20H2Z"/><path d="M12 9v5"/><circle cx="12" cy="17" r=".9" fill="currentColor" stroke="none"/>',
+  stop:             '<path d="M8 2h8l6 6v8l-6 6H8l-6-6V8Z"/><path d="M12 7v6"/><circle cx="12" cy="16.5" r=".9" fill="currentColor" stroke="none"/>',
 };
 
 export function svg(nombre) {

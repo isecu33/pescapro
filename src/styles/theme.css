@@ -47,6 +47,7 @@
 
   /* Aliases para nombres clasicos usados en Shadow DOM y componentes portados */
   --acento: var(--ion-color-primary);
+  --acento-vivo: #ffab00;
   --azul: var(--ion-color-secondary);
   --verde: var(--ion-color-success);
   --ambar: var(--ion-color-warning);
@@ -101,9 +102,11 @@ html, body {
 
 /* Banner de seguridad: persistente mientras dure el peligro (no es un
    toast que se autooculte) */
-.pp-banner { padding: 8px 12px; font-weight: 600; font-size: 13.5px; text-align: center; }
-.pp-banner-rojo { background: #58151c; color: #ffb4ab; }
-.pp-banner-amarillo { background: #4d3800; color: #ffd66e; }
+.pp-banner { padding: 10px 14px; font-weight: 700; font-size: 13.5px; text-align: center; }
+.pp-banner-content { display: flex; align-items: center; justify-content: center; gap: 7px; }
+.pp-banner .pp-ico { width: 17px; height: 17px; flex: none; }
+.pp-banner-rojo { background: #2a0505; color: #ff9090; border-bottom: 1px solid var(--rojo); }
+.pp-banner-amarillo { background: #2a1500; color: #ffcc60; border-bottom: 1px solid var(--acento-vivo); }
 
 /* Nav inferior fijo (no se usa ion-tabs/router, ver app-shell.js) */
 ion-tab-bar { position: fixed; bottom: 0; left: 0; right: 0; z-index: 1500; }

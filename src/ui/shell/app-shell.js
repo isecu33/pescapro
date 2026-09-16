@@ -18,6 +18,8 @@
    - .refrescando = bool    -> anima el icono de refrescar
    Eventos emitidos: pp-cambiar-vista, pp-cambiar-spot, pp-favorito, pp-refrescar */
 
+import { svg } from '../domain/iconos.js';
+
 const VISTAS = [
   { id: 'ahora', nombre: 'Ahora', icono: 'speedometer-outline' },
   { id: 'prevision', nombre: 'Previsión', icono: 'trending-up-outline' },
@@ -155,12 +157,19 @@ export class PpAppShell extends HTMLElement {
   set seguridad(info) {
     if (!info || info.nivel === 'ok') {
       this._bannerEl.style.display = 'none';
-      this._bannerEl.textContent = '';
+      this._bannerEl.replaceChildren();
       return;
     }
     this._bannerEl.style.display = 'block';
     this._bannerEl.className = 'pp-banner pp-banner-' + info.nivel;
-    this._bannerEl.textContent = (info.nivel === 'rojo' ? '⛔ ' : '⚠️ ') + info.motivos.join(' · ');
+
+    const wrapper = document.createElement('div');
+    wrapper.className = 'pp-banner-content';
+    wrapper.appendChild(svg(info.nivel === 'rojo' ? 'stop' : 'alerta'));
+    const texto = document.createElement('span');
+    texto.textContent = info.motivos.join(' · ');
+    wrapper.appendChild(texto);
+    this._bannerEl.replaceChildren(wrapper);
   }
 
   _emit(nombre, detail) {

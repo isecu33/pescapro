@@ -138,7 +138,13 @@ function bannerSeguridad(seg) {
   card.style.display = 'block';
   card.setAttribute('color', seg.nivel === 'rojo' ? 'danger' : 'warning');
   const content = document.createElement('ion-card-content');
-  content.textContent = (seg.nivel === 'rojo' ? '⛔ ' : '⚠️ ') + seg.motivos.join(' · ');
+  const wrapper = document.createElement('div');
+  wrapper.className = 'pp-banner-content';
+  wrapper.appendChild(svg(seg.nivel === 'rojo' ? 'stop' : 'alerta'));
+  const texto = document.createElement('span');
+  texto.textContent = seg.motivos.join(' · ');
+  wrapper.appendChild(texto);
+  content.appendChild(wrapper);
   card.appendChild(content);
   return card;
 }

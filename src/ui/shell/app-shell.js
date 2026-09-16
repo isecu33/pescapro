@@ -77,6 +77,7 @@ export class PpAppShell extends HTMLElement {
     acciones.slot = 'end';
     const btnFav = document.createElement('ion-button');
     btnFav.setAttribute('fill', 'clear');
+    btnFav.className = 'pp-accion-btn';
     const icoFav = document.createElement('ion-icon');
     icoFav.setAttribute('name', 'star-outline');
     icoFav.slot = 'icon-only';
@@ -85,6 +86,7 @@ export class PpAppShell extends HTMLElement {
 
     const btnRef = document.createElement('ion-button');
     btnRef.setAttribute('fill', 'clear');
+    btnRef.className = 'pp-accion-btn';
     this._icoRefEl = document.createElement('ion-icon');
     this._icoRefEl.setAttribute('name', 'refresh-outline');
     this._icoRefEl.slot = 'icon-only';

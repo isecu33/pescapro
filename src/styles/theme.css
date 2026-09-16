@@ -99,6 +99,7 @@ html, body {
 .pp-logo { font-size: 20px; padding: 0 4px; }
 .pp-spot-selector { display: flex; flex-direction: column; cursor: pointer; padding: 2px 8px; }
 .pp-spot-selector small { color: var(--pp-texto2); font-size: 11px; }
+.pp-accion-btn { --color: var(--pp-texto2, rgba(255,255,255,0.54)); }
 
 /* Banner de seguridad: persistente mientras dure el peligro (no es un
    toast que se autooculte) */

@@ -519,8 +519,8 @@ function cardSolLuna(st, hoy) {
     c.className = 'pp-cond';
     const icoEl = document.createElement('div');
     icoEl.className = 'pp-cond-ico';
-    const svg = svg(icoNombre);
-    if (svg) icoEl.appendChild(svg);
+    const svgEl = svg(icoNombre);
+    if (svgEl) icoEl.appendChild(svgEl);
     const lblEl = document.createElement('div');
     lblEl.className = 'pp-cond-lbl';
     lblEl.textContent = lbl;

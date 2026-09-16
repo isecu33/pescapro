@@ -213,15 +213,26 @@ ion-tab-bar { position: fixed; bottom: 0; left: 0; right: 0; z-index: 1500; }
 #pp-mapa-estado { font-size: 12px; color: var(--pp-texto2); }
 .pp-leyenda { display: flex; gap: 10px; font-size: 11px; color: var(--pp-texto2); flex-wrap: wrap; }
 
-/* ── Chip / botones compactos ── */
-.pp-chip {
-  display: inline-flex; align-items: center; gap: 5px;
-  background: var(--pp-panel2); border: 1px solid var(--ion-border-color);
-  border-radius: 20px; padding: 5px 12px; font-size: 12.5px;
-  color: var(--ion-text-color); cursor: pointer;
-  transition: background .15s, border-color .15s;
+/* ── Selector de modalidad (chips) ── */
+.pp-modos {
+  display: flex; gap: 8px; margin-bottom: 12px; overflow-x: auto;
+  padding-bottom: 4px; scrollbar-width: none; -ms-overflow-style: none;
 }
-.pp-chip:active { background: rgba(255,255,255,.08); border-color: var(--ion-color-primary); }
+.pp-modos::-webkit-scrollbar { display: none; }
+
+.pp-chip {
+  background: var(--pp-panel2); border: 1.5px solid var(--ion-border-color);
+  color: var(--pp-texto2); border-radius: 999px; padding: 10px 16px;
+  font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap;
+  display: inline-flex; align-items: center; gap: 6px; min-height: 42px;
+  transition: background 200ms cubic-bezier(.25,.8,.25,1), color 200ms cubic-bezier(.25,.8,.25,1),
+    border-color 200ms cubic-bezier(.25,.8,.25,1), transform 200ms cubic-bezier(.25,.8,.25,1);
+}
+.pp-chip:active { transform: scale(.93); }
+.pp-chip.activo {
+  background: var(--ion-color-primary); border-color: var(--ion-color-primary);
+  color: #1a0800; font-weight: 800; box-shadow: 0 4px 20px rgba(255,114,0,.28);
+}
 .pp-chip-expand { margin-top: 8px; color: var(--pp-texto2); }
 
 /* ── Resumen del día (antes del selector de modo) ── */
@@ -405,74 +416,61 @@ ion-segment-button {
 }
 
 /* ── Condiciones ahora ── */
-.pp-cond-cielo {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding-bottom: 8px;
-}
-.pp-cond-ico-ion {
-  font-size: 20px;
-  color: var(--pp-texto2);
+/* ── Iconos SVG propios (pp-ico) ── */
+.pp-ico {
+  width: 20px;
+  height: 20px;
   flex-shrink: 0;
 }
-.pp-cond-ico-cielo {
-  font-size: 22px;
-}
-.pp-cond-cielo-desc {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--pp-texto2);
-  flex: 1;
-}
-.pp-cond-cielo-temp {
-  font-size: 22px;
-  font-weight: 800;
-  line-height: 1;
-  color: var(--ion-text-color);
-  font-variant-numeric: tabular-nums;
-}
-/* Cuadrícula 2×N con líneas de separación mediante gap + background */
-.pp-cond-grid3 {
+
+/* ── Condiciones ahora — layout legacy ── */
+.pp-cond-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1px;
-  background: var(--ion-border-color);
-  border-top: 1px solid var(--ion-border-color);
-  border-bottom-left-radius: 4px;
-  border-bottom-right-radius: 4px;
-  overflow: hidden;
-}
-.pp-cond-cel {
-  background: var(--pp-panel);
-  display: flex;
-  align-items: flex-start;
   gap: 8px;
-  padding: 9px 10px 9px 8px;
 }
-.pp-cond-cel .pp-cond-ico-ion {
-  margin-top: 2px;
+.pp-cond {
+  background: var(--pp-panel2);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--pp-radius-sm);
+  padding: 9px 11px;
 }
-.pp-cond-texto { min-width: 0; }
-.pp-cond-lbl2 {
-  font-size: 11px;
+.pp-cond-ico {
   color: var(--pp-texto2);
-  line-height: 1.2;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
 }
-.pp-cond-val2 {
-  font-size: 13px;
-  font-weight: 600;
-  line-height: 1.5;
-  color: var(--ion-text-color);
+.pp-cond-lbl {
+  font-size: 10px;
+  color: rgba(200, 200, 200, 0.38);
+  margin-top: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.pp-cond-val {
+  font-size: 16px;
+  font-weight: 700;
+  margin-top: 1px;
+  letter-spacing: -0.01em;
   font-variant-numeric: tabular-nums;
+  line-height: 1.2;
 }
 
 /* ── Marea (legacy classes kept for compatibility) ── */
 .pp-marea-linea { font-size: 14px; margin-bottom: 8px; line-height: 1.5; }
 .pp-marea-amp { font-size: 12.5px; color: var(--pp-texto2); margin-bottom: 8px; }
+.pp-marea-titulo {
+  font-size: 14px;
+  line-height: 1.5;
+  padding: 10px 14px 4px;
+  color: var(--ion-text-color);
+}
+.pp-marea-amp-line {
+  font-size: 12px;
+  color: var(--pp-texto2);
+  padding: 0 14px 8px;
+  line-height: 1.4;
+}
 
 /* ── Sol y solunar ── */
 .pp-sol-info-row {
@@ -576,6 +574,56 @@ span.pp-esp-cab-ico {
   filter: brightness(.88) contrast(1.06) saturate(.95);
 }
 
+/* Fila de especie en card "activas ahora" */
+.pp-esp-fila {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  cursor: pointer;
+  border-bottom: 1px solid var(--borde);
+  transition: background .18s var(--pp-ease);
+}
+.pp-esp-fila:last-of-type { border-bottom: none; }
+.pp-esp-fila:active { background: var(--pp-panel2); border-radius: var(--pp-radius-sm); }
+
+.pp-esp-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+.pp-esp-nombre {
+  font-size: 14.5px;
+  font-weight: 650;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pp-esp-motivo {
+  font-size: 12px;
+  color: var(--pp-texto2);
+  line-height: 1.2;
+}
+.pp-esp-val {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -.02em;
+  flex-shrink: 0;
+  min-width: 36px;
+  text-align: right;
+}
+.pp-esp-ver-todas {
+  margin-top: 8px;
+  margin-bottom: 0;
+  font-size: 13px;
+  color: var(--ion-color-primary);
+  text-align: right;
+  cursor: pointer;
+}
+
 /* Siluetas SVG: color blanco para destacar sobre fondos oscuros */
 img.pp-esp-card-ico[src$=".svg"],
 img.pp-esp-ico[src$=".svg"],
@@ -591,7 +639,7 @@ ion-card {
   border: 1px solid var(--ion-border-color);
   border-radius: var(--pp-radius) !important;
   box-shadow: var(--pp-shadow-card) !important;
-  margin: 0 0 10px;
+  margin: 0 12px 10px;
 }
 ion-card-title {
   font-size: 13.5px !important;
@@ -617,6 +665,40 @@ pp-curva-marea { display: block; }
 .u-wrap > canvas { display: block; max-width: 100%; }
 
 /* Tooltip interactivo del cursor */
+.pp-marea-chart-wrap {
+  position: relative;
+  width: 100%;
+  user-select: none;
+  touch-action: pan-y;
+  margin: 10px 0 4px;
+}
+.pp-marea-canvas {
+  display: block;
+  width: 100%;
+  cursor: crosshair;
+  touch-action: none;
+}
+.pp-marea-hud {
+  position: absolute;
+  bottom: 26px;
+  transform: translateX(-50%);
+  background: rgba(15, 15, 15, .96);
+  border: 1px solid rgba(255, 114, 0, 0.45);
+  border-radius: 10px;
+  padding: 7px 13px;
+  font-size: 13px;
+  display: none;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, .5);
+  z-index: 10;
+}
+.pp-marea-hud-hora { color: var(--pp-texto2); font-size: 11.5px; }
+.pp-marea-hud-val  { color: var(--ion-text-color); font-weight: 700; font-size: 15px; }
+
 .pp-marea-tooltip {
   position: absolute;
   top: 4px;
@@ -666,39 +748,50 @@ pp-curva-marea { display: block; }
   white-space: nowrap;
   opacity: 0.85;
 }
-.pp-mareas-grid {
+.pp-mareas-prox {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0;
-  padding: 4px 0 10px;
+  gap: 7px;
+  padding: 2px 14px 12px;
   border-top: 1px solid var(--ion-border-color);
+  margin-top: 10px;
 }
-.pp-marea-it {
+.pp-marea-item {
+  background: var(--pp-panel2);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  padding: 9px 10px;
+  font-size: 12.5px;
+  color: var(--pp-texto2);
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 8px 6px;
+  gap: 6px;
 }
-.pp-marea-it-ico {
-  font-size: 24px;
-  font-weight: 900;
-  line-height: 1;
+.pp-marea-item-ico {
+  font-size: 13px;
   flex-shrink: 0;
+  line-height: 1;
 }
-.pp-marea-it-info {
+
+/* ── Card Sol y Solunar: versión compacta ── */
+.pp-card-solunar-compact .pp-cond-grid { gap: 6px; margin-bottom: 6px; }
+.pp-card-solunar-compact .pp-cond { padding: 8px 10px; background: var(--pp-panel2); }
+.pp-solunar-chips {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+  padding: 6px 0;
 }
-.pp-marea-it-when {
-  font-size: 11px;
+.pp-tag {
+  background: var(--pp-panel2);
+  border: 1px solid var(--ion-border-color);
+  border-radius: 6px;
+  padding: 3px 8px;
+  font-size: 11.5px;
   color: var(--pp-texto2);
-  white-space: nowrap;
 }
-.pp-marea-it-alt {
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--ion-text-color);
-  font-variant-numeric: tabular-nums;
+.pp-tag-mayor {
+  border-color: var(--ion-color-primary);
+  color: var(--ion-color-primary);
 }

@@ -782,18 +782,26 @@ pp-curva-marea { display: block; }
   padding: 4px 6px;
   background: var(--pp-panel2);
   min-height: auto;
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
 }
 .pp-card-solunar-compact .pp-cond-ico {
   font-size: 16px;
+  flex: 0 0 16px;
+  line-height: 1;
 }
 .pp-card-solunar-compact .pp-cond-lbl {
-  font-size: 8px;
-  margin-top: 2px;
+  font-size: 7.5px;
+  margin-top: 0;
+  margin-bottom: 0;
+  line-height: 1;
 }
 .pp-card-solunar-compact .pp-cond-val {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
-  margin-top: 1px;
+  margin-top: 0;
+  line-height: 1.1;
 }
 
 /* Periodos solunares como filas compactas */

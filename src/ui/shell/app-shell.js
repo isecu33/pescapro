@@ -66,11 +66,22 @@ export class PpAppShell extends HTMLElement {
 
     const selector = document.createElement('div');
     selector.className = 'pp-spot-selector';
+
+    const pinIco = svg('pin');
+    if (pinIco) {
+      pinIco.style.cssText = 'width:16px;height:16px;flex:none;color:var(--pp-accion-color,rgba(255,255,255,0.54))';
+      selector.appendChild(pinIco);
+    }
+
+    const spotTextos = document.createElement('div');
+    spotTextos.className = 'pp-spot-textos';
     this._spotNombreEl = document.createElement('span');
     this._spotNombreEl.className = 'pp-spot-nombre';
     this._spotNombreEl.textContent = '—';
     this._actualizadoEl = document.createElement('small');
-    selector.append(this._spotNombreEl, this._actualizadoEl);
+    spotTextos.append(this._spotNombreEl, this._actualizadoEl);
+    selector.appendChild(spotTextos);
+
     selector.addEventListener('click', () => this._emit('pp-cambiar-spot'));
     toolbar.appendChild(selector);
 

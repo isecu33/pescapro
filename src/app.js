@@ -230,6 +230,54 @@ export function crearApp(shell) {
     refrescar();
   }
 
+  function modalGuardarFavorito() {
+    if (!st.spot) return;
+
+    const cuerpo = document.createElement('div');
+    cuerpo.className = 'pp-modal-buscar-content';
+
+    const titulo = document.createElement('h3');
+    const icoEl = svg('estrellaLlena');
+    if (icoEl) { icoEl.style.cssText = 'width:18px;height:18px;color:var(--acento)'; titulo.appendChild(icoEl); }
+    titulo.appendChild(document.createTextNode(' Guardar favorito'));
+    cuerpo.appendChild(titulo);
+
+    const lbl = document.createElement('div');
+    lbl.className = 'pp-campo';
+    lbl.textContent = 'Nombre del spot';
+    cuerpo.appendChild(lbl);
+
+    const input = document.createElement('input');
+    input.className = 'pp-input';
+    input.value = st.spot.nombre || '';
+    input.placeholder = 'Nombre del spot…';
+    input.style.marginTop = '6px';
+    cuerpo.appendChild(input);
+
+    const acciones = document.createElement('div');
+    acciones.style.cssText = 'display:flex;gap:8px;margin-top:16px;justify-content:flex-end';
+
+    const btnCancelar = document.createElement('button');
+    btnCancelar.className = 'pp-chip';
+    btnCancelar.textContent = 'Cancelar';
+    btnCancelar.addEventListener('click', cerrarModal);
+
+    const btnGuardar = document.createElement('button');
+    btnGuardar.className = 'pp-chip pp-chip-acento';
+    btnGuardar.textContent = 'Guardar';
+    btnGuardar.addEventListener('click', () => {
+      const nombre = input.value.trim() || st.spot.nombre;
+      favoritos.anadir({ ...st.spot, nombre });
+      cerrarModal();
+    });
+
+    acciones.append(btnCancelar, btnGuardar);
+    cuerpo.appendChild(acciones);
+
+    abrirModalCentrado(cuerpo);
+    setTimeout(() => { input.focus(); input.select(); }, 80);
+  }
+
   function modalBuscar() {
     const cuerpo = document.createElement('div');
     cuerpo.className = 'pp-modal-buscar-content';
@@ -372,9 +420,7 @@ export function crearApp(shell) {
     shell.addEventListener('pp-cambiar-vista', (e) => irA(e.detail.vista));
     shell.addEventListener('pp-cambiar-spot', modalBuscar);
     shell.addEventListener('pp-refrescar', refrescarManual);
-    shell.addEventListener('pp-favorito', () => {
-      favoritos.anadir(st.spot);
-    });
+    shell.addEventListener('pp-favorito', modalGuardarFavorito);
     shell.contenido.addEventListener('pp-cambiar-modo', (e) => cambiarModo(e.detail.modo));
   }
 

@@ -97,8 +97,8 @@ html, body {
 
 /* La cabecera custom (logo/spot/acciones) vive dentro de ion-toolbar */
 .pp-logo { font-size: 20px; padding: 0 4px; }
-.pp-spot-selector { flex: 1; min-width: 0; cursor: pointer; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.10); border-radius: 8px; padding: 8px 12px; min-height: 44px; display: flex; flex-direction: column; justify-content: center; transition: background 0.15s ease; }
-.pp-spot-selector:active { background: rgba(255,255,255,0.10); border-color: rgba(255,114,0,0.4); }
+.pp-spot-selector { flex: 1; min-width: 0; cursor: pointer; display: flex; flex-direction: row; align-items: center; gap: 6px; padding: 4px 8px; }
+.pp-spot-textos { display: flex; flex-direction: column; min-width: 0; }
 .pp-spot-nombre { font-weight: 700; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; letter-spacing: -0.01em; }
 .pp-spot-selector small { color: var(--pp-texto2); font-size: 11px; line-height: 1.2; }
 .pp-accion-btn { --color: var(--pp-texto2, rgba(255,255,255,0.54)); }
@@ -261,6 +261,7 @@ ion-tab-bar { position: fixed; bottom: 0; left: 0; right: 0; z-index: 1500; }
   color: #1a0800; font-weight: 800; box-shadow: 0 4px 20px rgba(255,114,0,.28);
 }
 .pp-chip-expand { margin-top: 8px; color: var(--pp-texto2); }
+.pp-chip-acento { background: var(--acento); border-color: var(--acento); color: #1a0800; font-weight: 700; }
 
 /* ── Resumen del día (antes del selector de modo) ── */
 .pp-resumen-dia { margin-bottom: 10px; }

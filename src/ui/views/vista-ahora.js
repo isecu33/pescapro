@@ -154,10 +154,10 @@ function selectorModo(st) {
   Object.values(MODOS).forEach(m => {
     const btn = document.createElement('button');
     btn.className = 'pp-chip' + (st.modo === m.id ? ' activo' : '');
-    const icoEl = document.createElement('img');
-    icoEl.src = m.icono;
+    const icoEl = document.createElement('span');
     icoEl.className = 'pp-modo-chip-ico';
-    icoEl.alt = '';
+    icoEl.style.webkitMaskImage = `url(${m.icono})`;
+    icoEl.style.maskImage = `url(${m.icono})`;
     btn.append(icoEl, m.nombre);
 
     btn.addEventListener('click', () => {

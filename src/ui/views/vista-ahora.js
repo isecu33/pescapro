@@ -154,7 +154,11 @@ function selectorModo(st) {
   Object.values(MODOS).forEach(m => {
     const btn = document.createElement('button');
     btn.className = 'pp-chip' + (st.modo === m.id ? ' activo' : '');
-    btn.textContent = m.icono + ' ' + m.nombre;
+    const icoEl = document.createElement('img');
+    icoEl.src = m.icono;
+    icoEl.className = 'pp-modo-chip-ico';
+    icoEl.alt = '';
+    btn.append(icoEl, m.nombre);
 
     btn.addEventListener('click', () => {
       box.dispatchEvent(new CustomEvent('pp-cambiar-modo', {
@@ -207,10 +211,7 @@ function cardIndiceFull(idx, st) {
   scoreLabel.className = 'pp-score-label';
   scoreLabel.style.color = colorVar;
   scoreLabel.textContent = util.etiquetaIndice(v).toUpperCase();
-  const scoreModo = document.createElement('div');
-  scoreModo.className = 'pp-score-modo';
-  scoreModo.textContent = MODOS[st.modo].icono + ' ' + MODOS[st.modo].nombre;
-  scorePanel.append(scoreNum, scoreDenom, scoreLabel, scoreModo);
+  scorePanel.append(scoreNum, scoreDenom, scoreLabel);
 
   // Panel derecho: top 3 factores compactos
   const factoresPanel = document.createElement('div');

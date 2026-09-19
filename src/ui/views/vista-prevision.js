@@ -40,39 +40,57 @@ function cardVentanas(st) {
 
   const vents = mejoresVentanas(st.ctx, st.modo);
   if (!vents.length) {
-    const nota = document.createElement('p');
-    nota.className = 'pp-nota';
-    nota.textContent = 'No hay ventanas buenas (índice ≥ 55) en las próximas 72 h. Revisa el gráfico para ver lo menos malo.';
-    card.appendChild(nota);
+    const vacio = document.createElement('div');
+    vacio.className = 'pp-vent-vacio';
+    const icono = document.createElement('div');
+    icono.className = 'pp-vent-vacio-ico';
+    icono.textContent = '🌧️';
+    const msg = document.createElement('p');
+    msg.textContent = 'Sin ventanas buenas en 72 h';
+    const sub = document.createElement('span');
+    sub.textContent = 'Revisa el gráfico para ver lo menos malo.';
+    vacio.append(icono, msg, sub);
+    card.appendChild(vacio);
     return card;
   }
 
-  const lista = document.createElement('ion-list');
+  const lista = document.createElement('div');
+  lista.className = 'pp-vent-lista';
   vents.forEach(v => lista.appendChild(filaVentana(v)));
   card.appendChild(lista);
   return card;
 }
 
 function filaVentana(v) {
-  const item = document.createElement('ion-item');
-  item.setAttribute('lines', 'none');
+  const item = document.createElement('div');
+  item.className = 'pp-ventana';
 
   const idx = document.createElement('div');
-  idx.className = 'pp-vent-idx';
-  idx.slot = 'start';
+  idx.className = 'pp-ventana-idx';
   idx.style.background = util.colorIndice(v.max);
   idx.textContent = String(v.max);
   item.appendChild(idx);
 
   const info = document.createElement('div');
-  info.className = 'pp-vent-info';
-  const rango = document.createElement('b');
+  info.className = 'pp-ventana-info';
+
+  const rango = document.createElement('div');
+  rango.className = 'pp-ventana-rango';
   const finVentana = new Date(v.fin.getTime() + 3600e3);
   rango.textContent = util.fmtDia(v.inicio) + ' · ' + util.fmtHora(v.inicio) + '–' + util.fmtHora(finVentana);
-  const motivo = document.createElement('span');
+  info.appendChild(rango);
+
+  const motivo = document.createElement('div');
+  motivo.className = 'pp-ventana-motivo';
   motivo.textContent = motivoVentana(v);
-  info.append(rango, motivo);
+  info.appendChild(motivo);
+
   item.appendChild(info);
+
+  const etiq = document.createElement('div');
+  etiq.className = 'pp-ventana-etiq';
+  etiq.textContent = util.etiquetaIndice(v.max);
+  item.appendChild(etiq);
 
   return item;
 }
@@ -92,23 +110,23 @@ function cardGrafico(st) {
   const card = document.createElement('div');
   card.className = 'pp-card';
 
+  const cabecera = document.createElement('div');
+  cabecera.className = 'pp-graf-cabecera';
   const titulo = document.createElement('h3');
   titulo.textContent = 'Índice hora a hora';
-  card.appendChild(titulo);
+  const nota = document.createElement('span');
+  nota.className = 'pp-graf-nota-tap';
+  nota.textContent = 'Toca una barra';
+  cabecera.append(titulo, nota);
+  card.appendChild(cabecera);
 
   card.appendChild(graficoHoras(st));
-
-  const nota = document.createElement('p');
-  nota.className = 'pp-nota';
-  nota.textContent = 'Toca una barra para ver el detalle de esa hora.';
-  card.appendChild(nota);
 
   return card;
 }
 
-/* Barras a medida (no hay componente Ionic equivalente para esto):
-   contenedor con scroll horizontal + una columna por hora, con la barra
-   coloreada segun el indice/seguridad y la hora debajo. */
+/* Barras a medida: scroll horizontal + columna por hora, coloreada segun
+   indice/seguridad. Etiqueta de hora solo cada 3h para no saturar. */
 export function graficoHoras(st) {
   const wrap = document.createElement('div');
   wrap.className = 'pp-grafico-scroll';
@@ -120,16 +138,21 @@ export function graficoHoras(st) {
   let diaActual = null;
   s.forEach(x => {
     const d = x.hora.fecha;
+    const hora = d.getHours();
+
     if (diaActual !== d.getDate()) {
       diaActual = d.getDate();
-      const dia = document.createElement('div');
-      dia.className = 'pp-graf-dia';
-      dia.textContent = util.fmtDia(d);
-      inner.appendChild(dia);
+      const sep = document.createElement('div');
+      sep.className = 'pp-graf-sep-dia';
+      const etiq = document.createElement('span');
+      etiq.textContent = util.fmtDia(d);
+      sep.appendChild(etiq);
+      inner.appendChild(sep);
     }
 
     const col = document.createElement('div');
     col.className = 'pp-graf-col';
+    col.title = util.fmtHora(d) + ' · ' + x.valor;
 
     const barra = document.createElement('div');
     barra.className = 'pp-graf-barra';
@@ -137,10 +160,11 @@ export function graficoHoras(st) {
     barra.style.background = x.seguridad.nivel === 'rojo' ? '#e03131' : util.colorIndice(x.valor);
     col.appendChild(barra);
 
-    const hora = document.createElement('div');
-    hora.className = 'pp-graf-hora';
-    hora.textContent = String(d.getHours()).padStart(2, '0');
-    col.appendChild(hora);
+    const etiqHora = document.createElement('div');
+    etiqHora.className = 'pp-graf-hora';
+    /* solo marca cada 3 horas; el resto queda en blanco para no saturar */
+    etiqHora.textContent = hora % 3 === 0 ? String(hora).padStart(2, '0') : '';
+    col.appendChild(etiqHora);
 
     col.addEventListener('click', () => modalDetalleHora(x, st));
     inner.appendChild(col);
@@ -153,11 +177,26 @@ export function graficoHoras(st) {
 function modalDetalleHora(x, st) {
   const d = x.hora;
   const cuerpo = document.createElement('div');
+  cuerpo.className = 'pp-modal-prevision';
 
+  const cabecera = document.createElement('div');
+  cabecera.className = 'pp-modal-cab';
+
+  const idx = document.createElement('div');
+  idx.className = 'pp-modal-idx';
+  idx.style.background = x.seguridad.nivel === 'rojo' ? '#e03131' : util.colorIndice(x.valor);
+  idx.textContent = String(x.valor);
+  cabecera.appendChild(idx);
+
+  const meta = document.createElement('div');
   const titulo = document.createElement('h3');
-  titulo.textContent = util.fmtDia(d.fecha) + ' · ' + util.fmtHora(d.fecha) +
-    ' — índice ' + x.valor + ' (' + util.etiquetaIndice(x.valor) + ')';
-  cuerpo.appendChild(titulo);
+  titulo.textContent = util.fmtDia(d.fecha) + ' · ' + util.fmtHora(d.fecha);
+  const etiq = document.createElement('span');
+  etiq.className = 'pp-modal-etiq';
+  etiq.textContent = util.etiquetaIndice(x.valor);
+  meta.append(titulo, etiq);
+  cabecera.appendChild(meta);
+  cuerpo.appendChild(cabecera);
 
   if (x.seguridad.nivel !== 'ok') {
     const banner = document.createElement('p');
@@ -166,51 +205,102 @@ function modalDetalleHora(x, st) {
     cuerpo.appendChild(banner);
   }
 
-  cuerpo.appendChild(listaFactores(x.factores, st.modo));
+  const secFactores = document.createElement('div');
+  secFactores.className = 'pp-modal-sec';
+  const titFactores = document.createElement('p');
+  titFactores.className = 'pp-modal-sec-titulo';
+  titFactores.textContent = 'Factores';
+  secFactores.appendChild(titFactores);
+  secFactores.appendChild(barrasFactores(x.factores, st.modo));
+  cuerpo.appendChild(secFactores);
 
   const wmo = WMO[d.codigo] || ['—', ''];
-  const resumen = document.createElement('p');
-  resumen.textContent = wmo[1] + ' ' + wmo[0] + ' · 💨 ' + Math.round(d.viento || 0) + ' km/h · 🌊 ' +
-    (d.ola != null ? d.ola.toFixed(1) : '—') + ' m · 🌡️ agua ' + (d.sst != null ? d.sst.toFixed(1) : '—') + '°C';
-  cuerpo.appendChild(resumen);
+  const secMeteo = document.createElement('div');
+  secMeteo.className = 'pp-modal-sec pp-modal-meteo';
+
+  const datosMeteo = [
+    { ico: wmo[1] || '🌤️', val: wmo[0] },
+    { ico: '💨', val: Math.round(d.viento || 0) + ' km/h' },
+    { ico: '🌊', val: (d.ola != null ? d.ola.toFixed(1) : '—') + ' m' },
+    { ico: '🌡️', val: (d.sst != null ? d.sst.toFixed(1) : '—') + '°C' },
+  ];
+  datosMeteo.forEach(({ ico, val }) => {
+    const chip = document.createElement('div');
+    chip.className = 'pp-meteo-chip';
+    const icoEl = document.createElement('span');
+    icoEl.className = 'pp-meteo-ico';
+    icoEl.textContent = ico;
+    const valEl = document.createElement('span');
+    valEl.textContent = val;
+    chip.append(icoEl, valEl);
+    secMeteo.appendChild(chip);
+  });
+  cuerpo.appendChild(secMeteo);
 
   const rank = especiesEn(d.fecha, st.ctx).slice(0, 3);
   if (rank.length) {
-    const especiesP = document.createElement('p');
-    const etiqueta = document.createElement('b');
-    etiqueta.textContent = 'Especies: ';
-    especiesP.appendChild(etiqueta);
-    especiesP.appendChild(document.createTextNode(
-      rank.map(r => r.especie.icono + ' ' + r.especie.nombre + ' (' + r.act.valor + ')').join(' · ')
-    ));
-    cuerpo.appendChild(especiesP);
+    const secEsp = document.createElement('div');
+    secEsp.className = 'pp-modal-sec';
+    const titEsp = document.createElement('p');
+    titEsp.className = 'pp-modal-sec-titulo';
+    titEsp.textContent = 'Especies activas';
+    secEsp.appendChild(titEsp);
+    const fila = document.createElement('div');
+    fila.className = 'pp-modal-especies';
+    rank.forEach(r => {
+      const chip = document.createElement('div');
+      chip.className = 'pp-esp-chip';
+      const ico = document.createElement('span');
+      ico.textContent = r.especie.icono;
+      const nombre = document.createElement('span');
+      nombre.className = 'pp-esp-chip-nombre';
+      nombre.textContent = r.especie.nombre;
+      const act = document.createElement('span');
+      act.className = 'pp-esp-chip-act';
+      act.textContent = String(r.act.valor);
+      chip.append(ico, nombre, act);
+      fila.appendChild(chip);
+    });
+    secEsp.appendChild(fila);
+    cuerpo.appendChild(secEsp);
   }
 
   abrirModal(cuerpo);
 }
 
-/* Version simplificada de desgloseFactores() (www/js/ui.js:91-107): mismos
-   datos (nombre + peso%) pero como ion-list/ion-item en vez de las barras
-   .pp-barra a mano -- el modal ya viene con su propio scroll de ion-content. */
-function listaFactores(f, modo) {
-  const lista = document.createElement('ion-list');
+/* Barras visuales de factores (como .pp-factor/.pp-barra del resto de la app)
+   en vez de ion-list con texto plano. */
+function barrasFactores(f, modo) {
+  const wrap = document.createElement('div');
+  wrap.className = 'pp-factores-wrap';
   const pesos = MODOS[modo].pesos;
   Object.keys(pesos).sort((a, b) => pesos[b] - pesos[a]).forEach(k => {
     const v = f[k] != null ? f[k] : 0.5;
-    const item = document.createElement('ion-item');
-    item.setAttribute('lines', 'inset');
+    const pct = Math.round(v * 100);
+
+    const fila = document.createElement('div');
+    fila.className = 'pp-factor';
 
     const nombre = document.createElement('span');
-    nombre.slot = 'start';
+    nombre.className = 'pp-factor-nombre';
     nombre.textContent = NOMBRES_FACTOR[k] || k;
-    item.appendChild(nombre);
+    fila.appendChild(nombre);
+
+    const barraWrap = document.createElement('div');
+    barraWrap.className = 'pp-barra';
+    const barraRel = document.createElement('div');
+    barraRel.className = 'pp-barra-rel';
+    barraRel.style.width = pct + '%';
+    barraRel.style.background = util.colorIndice(pct);
+    barraWrap.appendChild(barraRel);
+    fila.appendChild(barraWrap);
 
     const valor = document.createElement('span');
-    valor.slot = 'end';
-    valor.textContent = Math.round(v * 100) + '%';
-    item.appendChild(valor);
+    valor.className = 'pp-factor-val';
+    valor.textContent = pct + '%';
+    fila.appendChild(valor);
 
-    lista.appendChild(item);
+    wrap.appendChild(fila);
   });
-  return lista;
+  return wrap;
 }

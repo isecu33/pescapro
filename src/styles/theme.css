@@ -943,3 +943,96 @@ pp-curva-marea { display: block; }
   border-color: var(--ion-color-primary);
   color: var(--ion-color-primary);
 }
+
+/* ── Vista Trofeos: records, logros, competiciones ── */
+.pp-record-fila {
+  font-size: 13.5px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--ion-border-color);
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.pp-record-fila:last-child { border-bottom: none; }
+
+.pp-logros {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(82px, 1fr));
+  gap: 8px;
+}
+
+.pp-logro {
+  background: var(--pp-panel2);
+  border: 1px solid var(--ion-border-color);
+  border-radius: var(--pp-radius-sm);
+  padding: 12px 6px 10px;
+  text-align: center;
+  cursor: pointer;
+  opacity: .32;
+  filter: grayscale(1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 80px;
+  gap: 5px;
+  transition: opacity 200ms var(--pp-ease), filter 200ms var(--pp-ease),
+    border-color 200ms var(--pp-ease), background 200ms var(--pp-ease),
+    transform 200ms var(--pp-ease);
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.pp-logro:active { transform: scale(.95); }
+
+.pp-logro.conseguido {
+  opacity: 1;
+  filter: none;
+  border-color: rgba(255, 114, 0, 0.45);
+  background: rgba(255, 114, 0, 0.08);
+}
+
+img.pp-logro-ico {
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+  flex-shrink: 0;
+  filter: brightness(0) invert(1);
+}
+
+span.pp-logro-ico {
+  font-size: 22px;
+  line-height: 1;
+}
+
+.pp-logro-nombre {
+  font-size: 9.5px;
+  font-weight: 600;
+  color: var(--pp-texto2);
+  line-height: 1.3;
+}
+
+.pp-logro.conseguido .pp-logro-nombre { color: var(--ion-text-color); }
+
+.pp-logro-prog {
+  font-size: 9px;
+  color: var(--ion-color-primary);
+  font-variant-numeric: tabular-nums;
+  font-family: var(--pp-font-mono);
+}
+
+/* Fila de acciones en modales (botones) */
+.pp-btn-fila {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.pp-acciones {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}

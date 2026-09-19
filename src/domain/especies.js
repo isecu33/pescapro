@@ -14,7 +14,7 @@
 */
 export const ESPECIES = [
   {
-    id: 'lubina', nombre: 'Lubina', cientifico: 'Dicentrarchus labrax', icono: '🐟', imagen: './img/svg/lubina.svg', foto: './img/lubina.png',: siluetas SVG, fotos offline y reglamento Galicia)
+    id: 'lubina', nombre: 'Lubina', cientifico: 'Dicentrarchus labrax', icono: '🐟', imagen: './img/svg/lubina.svg', foto: './img/lubina.png',
     meses: [0.9, 0.85, 0.7, 0.6, 0.5, 0.45, 0.45, 0.5, 0.65, 0.85, 1.0, 1.0],
     sst: [8, 11, 18, 22],
     oleaje: [0.3, 0.8, 2.0, 3.2],
@@ -36,7 +36,7 @@ export const ESPECIES = [
     }
   },
   {
-    id: 'dorada', nombre: 'Dorada', cientifico: 'Sparus aurata', icono: '🐠', imagen: './img/svg/dorada.svg', foto: './img/dorada.png',: siluetas SVG, fotos offline y reglamento Galicia)
+    id: 'dorada', nombre: 'Dorada', cientifico: 'Sparus aurata', icono: '🐠', imagen: './img/svg/dorada.svg', foto: './img/dorada.png',
     meses: [0.15, 0.15, 0.3, 0.5, 0.75, 0.9, 1.0, 1.0, 0.95, 0.8, 0.5, 0.2],
     sst: [13, 16, 24, 27],
     oleaje: [0, 0.2, 1.2, 2.2],
@@ -58,7 +58,7 @@ export const ESPECIES = [
     }
   },
   {
-    id: 'sargo', nombre: 'Sargo', cientifico: 'Diplodus sargus', icono: '🐡', imagen: './img/svg/sargo.svg', foto: null,: siluetas SVG, fotos offline y reglamento Galicia)
+    id: 'sargo', nombre: 'Sargo', cientifico: 'Diplodus sargus', icono: '🐡', imagen: './img/svg/sargo.svg', foto: null,
     meses: [0.7, 0.8, 0.95, 1.0, 0.9, 0.7, 0.6, 0.6, 0.8, 0.95, 0.9, 0.75],
     sst: [10, 13, 21, 24],
     oleaje: [0.2, 0.5, 1.6, 2.6],
@@ -80,7 +80,7 @@ export const ESPECIES = [
     }
   },
   {
-    id: 'jurel', nombre: 'Jurel / Chicharro', cientifico: 'Trachurus trachurus', icono: '🐟', imagen: './img/svg/jurel-chicharro.svg', foto: './img/jurel-chicharro.png',: siluetas SVG, fotos offline y reglamento Galicia)
+    id: 'jurel', nombre: 'Jurel / Chicharro', cientifico: 'Trachurus trachurus', icono: '🐟', imagen: './img/svg/jurel-chicharro.svg', foto: './img/jurel-chicharro.png',
     meses: [0.3, 0.3, 0.5, 0.7, 0.9, 1.0, 1.0, 1.0, 0.95, 0.8, 0.5, 0.35],
     sst: [12, 14, 21, 24],
     oleaje: [0, 0.1, 1.0, 1.8],
@@ -102,7 +102,7 @@ export const ESPECIES = [
     }
   },
   {
-    id: 'caballa', nombre: 'Caballa / Verdel', cientifico: 'Scomber scombrus', icono: '🐟', imagen: './img/svg/caballa-verdel.svg', foto: './img/caballa-verdel.png',: siluetas SVG, fotos offline y reglamento Galicia)
+    id: 'caballa', nombre: 'Caballa / Verdel', cientifico: 'Scomber scombrus', icono: '🐟', imagen: './img/svg/caballa-verdel.svg', foto: './img/caballa-verdel.png',
     meses: [0.2, 0.4, 0.9, 1.0, 1.0, 0.8, 0.5, 0.4, 0.4, 0.3, 0.2, 0.2],
     sst: [10, 12, 18, 21],
     oleaje: [0, 0.1, 1.2, 2.0],
@@ -124,7 +124,7 @@ export const ESPECIES = [
     }
   },
   {
-    id: 'lisa', nombre: 'Lisa / Muble', cientifico: 'Chelon labrosus', icono: '🐟', imagen: './img/svg/lisa-muble.svg', foto: './img/lisa-muble.png',: siluetas SVG, fotos offline y reglamento Galicia)
+    id: 'lisa', nombre: 'Lisa / Muble', cientifico: 'Chelon labrosus', icono: '🐟', imagen: './img/svg/lisa-muble.svg', foto: './img/lisa-muble.png',
     meses: [0.7, 0.7, 0.8, 0.9, 1.0, 1.0, 1.0, 1.0, 0.9, 0.8, 0.7, 0.7],
     sst: [8, 12, 24, 28],
     oleaje: [0, 0, 0.6, 1.2],
@@ -146,7 +146,7 @@ export const ESPECIES = [
     }
   },
   {
-    id: 'congrio', nombre: 'Congrio', cientifico: 'Conger conger', icono: '🐍', imagen: './img/svg/congrio.svg', foto: './img/congrio.png',: siluetas SVG, fotos offline y reglamento Galicia)
+    id: 'congrio', nombre: 'Congrio', cientifico: 'Conger conger', icono: '🐍', imagen: './img/svg/congrio.svg', foto: './img/congrio.png',
     meses: [0.9, 0.9, 0.85, 0.8, 0.7, 0.6, 0.6, 0.6, 0.7, 0.8, 0.9, 0.95],
     sst: [8, 10, 18, 22],
     oleaje: [0, 0.2, 1.5, 2.5],
@@ -168,7 +168,7 @@ export const ESPECIES = [
     }
   },
   {
-    id: 'faneca', nombre: 'Faneca', cientifico: 'Trisopterus luscus', icono: '🐟', imagen: './img/svg/faneca.svg', foto: './img/faneca.png',: siluetas SVG, fotos offline y reglamento Galicia)
+    id: 'faneca', nombre: 'Faneca', cientifico: 'Trisopterus luscus', icono: '🐟', imagen: './img/svg/faneca.svg', foto: './img/faneca.png',
     meses: [1.0, 1.0, 0.9, 0.7, 0.5, 0.35, 0.3, 0.3, 0.5, 0.8, 0.95, 1.0],
     sst: [8, 10, 16, 19],
     oleaje: [0.1, 0.3, 1.4, 2.4],
@@ -190,7 +190,7 @@ export const ESPECIES = [
     }
   },
   {
-    id: 'salmonete', nombre: 'Salmonete', cientifico: 'Mullus surmuletus', icono: '🐠', imagen: './img/svg/salmonete.svg', foto: './img/salmonete.png',: siluetas SVG, fotos offline y reglamento Galicia)
+    id: 'salmonete', nombre: 'Salmonete', cientifico: 'Mullus surmuletus', icono: '🐠', imagen: './img/svg/salmonete.svg', foto: './img/salmonete.png',
     meses: [0.3, 0.3, 0.4, 0.6, 0.8, 1.0, 1.0, 1.0, 0.9, 0.7, 0.5, 0.35],
     sst: [12, 15, 22, 25],
     oleaje: [0, 0.1, 0.9, 1.6],
@@ -212,7 +212,7 @@ export const ESPECIES = [
     }
   },
   {
-    id: 'calamar', nombre: 'Calamar', cientifico: 'Loligo vulgaris', icono: '🦑', imagen: './img/svg/calamar.svg', foto: './img/calamar.png',: siluetas SVG, fotos offline y reglamento Galicia)
+    id: 'calamar', nombre: 'Calamar', cientifico: 'Loligo vulgaris', icono: '🦑', imagen: './img/svg/calamar.svg', foto: './img/calamar.png',
     meses: [0.9, 0.7, 0.5, 0.3, 0.15, 0.1, 0.15, 0.3, 0.7, 1.0, 1.0, 1.0],
     sst: [10, 12, 18, 20],
     oleaje: [0, 0, 0.5, 1.0],
@@ -234,7 +234,7 @@ export const ESPECIES = [
     }
   },
   {
-    id: 'sepia', nombre: 'Sepia / Choco', cientifico: 'Sepia officinalis', icono: '🦑', imagen: './img/svg/sepia.svg', foto: './img/sepia.png',: siluetas SVG, fotos offline y reglamento Galicia)
+    id: 'sepia', nombre: 'Sepia / Choco', cientifico: 'Sepia officinalis', icono: '🦑', imagen: './img/svg/sepia.svg', foto: './img/sepia.png',
     meses: [0.5, 0.8, 1.0, 1.0, 0.8, 0.4, 0.2, 0.2, 0.4, 0.6, 0.6, 0.5],
     sst: [10, 12, 20, 23],
     oleaje: [0, 0, 0.6, 1.2],
@@ -256,7 +256,7 @@ export const ESPECIES = [
     }
   },
   {
-    id: 'pulpo', nombre: 'Pulpo', cientifico: 'Octopus vulgaris', icono: '🐙', imagen: './img/svg/pulpo.svg', foto: './img/pulpo.png',: siluetas SVG, fotos offline y reglamento Galicia)
+    id: 'pulpo', nombre: 'Pulpo', cientifico: 'Octopus vulgaris', icono: '🐙', imagen: './img/svg/pulpo.svg', foto: './img/pulpo.png',
     meses: [0.7, 0.6, 0.5, 0.4, 0.4, 0.5, 0.8, 1.0, 1.0, 1.0, 0.9, 0.8],
     sst: [10, 12, 20, 24],
     oleaje: [0, 0, 0.7, 1.3],

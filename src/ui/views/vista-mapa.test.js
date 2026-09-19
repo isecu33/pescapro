@@ -67,11 +67,11 @@ describe('crearVistaMapa: construccion del DOM (init-once)', () => {
     vi.restoreAllMocks();
   });
 
-  it('monta un <pp-mapa>, ion-range, dos ion-checkbox y la leyenda de colores', () => {
+  it('monta un <pp-mapa>, ion-range, dos botones de toggle y la leyenda de colores', () => {
     crearVistaMapa(contenedor, st, {});
     expect(contenedor.querySelector('pp-mapa')).not.toBeNull();
     expect(contenedor.querySelector('ion-range')).not.toBeNull();
-    expect(contenedor.querySelectorAll('ion-checkbox')).toHaveLength(2);
+    expect(contenedor.querySelectorAll('.pp-mapa-toggle-btn')).toHaveLength(2);
     const leyenda = contenedor.querySelector('.pp-leyenda');
     expect(leyenda).not.toBeNull();
     expect(leyenda.textContent).toContain('débil');
@@ -86,16 +86,16 @@ describe('crearVistaMapa: construccion del DOM (init-once)', () => {
     expect(range.value).toBe(0);
   });
 
-  it('el checkbox de viento arranca marcado y el de carta nautica desmarcado', () => {
+  it('el boton de viento arranca activo y el de carta nautica inactivo', () => {
     crearVistaMapa(contenedor, st, {});
-    const checks = contenedor.querySelectorAll('ion-checkbox');
-    expect(checks[0].checked).toBe(true); // viento
-    expect(checks[1].checked).toBe(false); // carta nautica
+    const btns = contenedor.querySelectorAll('.pp-mapa-toggle-btn');
+    expect(btns[0].checked).toBe(true); // viento
+    expect(btns[1].checked).toBe(false); // carta nautica
   });
 
   it('la etiqueta de hora y el estado arrancan vacios/con guion', () => {
     crearVistaMapa(contenedor, st, {});
-    expect(contenedor.querySelector('#pp-mapa-hora').textContent).toBe('—');
+    expect(contenedor.querySelector('#pp-mapa-hora').textContent).toBe('-');
     expect(contenedor.querySelector('#pp-mapa-estado').textContent).toBe('');
   });
 
@@ -215,8 +215,8 @@ describe('crearVistaMapa: controlador -- onCambioHora (listener del ion-range)',
     expect(spyViento).toHaveBeenCalledWith(st.spot.lat, st.spot.lon, 18, 310);
   });
 
-  it('onCambioHora() no pinta viento si el checkbox de viento esta desmarcado', () => {
-    contenedor.querySelectorAll('ion-checkbox')[0].checked = false;
+  it('onCambioHora() no pinta viento si el boton de viento esta desmarcado', () => {
+    contenedor.querySelectorAll('.pp-mapa-toggle-btn')[0].checked = false;
     const spyViento = vi.spyOn(mapaEl, 'pintarViento');
     controlador.onCambioHora(1, st);
     expect(spyViento).toHaveBeenCalledWith(st.spot.lat, st.spot.lon, null, null);
@@ -247,18 +247,18 @@ describe('crearVistaMapa: controlador -- toggles de viento y carta nautica', () 
     vi.restoreAllMocks();
   });
 
-  it('el checkbox de carta nautica llama a mapaEl.toggleSeamark() con el valor marcado', () => {
+  it('el boton de carta nautica llama a mapaEl.toggleSeamark() con el valor marcado', () => {
     const spy = vi.spyOn(mapaEl, 'toggleSeamark');
-    const checkSeamark = contenedor.querySelectorAll('ion-checkbox')[1];
-    checkSeamark.dispatchEvent(new CustomEvent('ionChange', { detail: { checked: true } }));
+    const btnSeamark = contenedor.querySelectorAll('.pp-mapa-toggle-btn')[1];
+    btnSeamark.dispatchEvent(new CustomEvent('ionChange', { detail: { checked: true } }));
     expect(spy).toHaveBeenCalledWith(true);
   });
 
-  it('desmarcar el checkbox de viento limpia la flecha de viento en el mapa', () => {
+  it('desmarcar el boton de viento limpia la flecha de viento en el mapa', () => {
     const spy = vi.spyOn(mapaEl, 'pintarViento');
-    const checkViento = contenedor.querySelectorAll('ion-checkbox')[0];
-    checkViento.checked = false;
-    checkViento.dispatchEvent(new CustomEvent('ionChange', { detail: { checked: false } }));
+    const btnViento = contenedor.querySelectorAll('.pp-mapa-toggle-btn')[0];
+    btnViento.checked = false;
+    btnViento.dispatchEvent(new CustomEvent('ionChange', { detail: { checked: false } }));
     expect(spy).toHaveBeenCalledWith(st.spot.lat, st.spot.lon, null, null);
   });
 });

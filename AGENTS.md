@@ -14,22 +14,32 @@
 
 ```
 pescapro/
-├── www/                    [src]  webDir de Capacitor — la app entera, sin src/ separado
+├── www/                    [src]  webDir de Capacitor — la app entera; se abre directamente en el navegador
 │   ├── index.html           [src]  shell HTML + orden de carga de <script> (define el grafo de dependencias)
-│   ├── css/app.css          [src]  único CSS, tema/colores en :root
-│   ├── js/                  [src]  13 módulos planos, cada uno cuelga de window.PP (ver §4)
-│   └── lib/                 [ext]  vendored a mano (no npm): leaflet/ (leaflet.js, leaflet.css, images/), suncalc.js
+│   ├── css/app.css          [src]  único CSS legacy, tema/colores en :root
+│   ├── js/                  [src]  módulos planos window.PP (ver §4) + nuevos: api_meteogalicia.js
+│   ├── img/                 [src]  assets visuales de especies desplegados:
+│   │   ├── svg/             [src]  siluetas SVG de especie (iconos en tarjetas/cabecera)
+│   │   └── *.png            [src]  fotos PNG naturales (imagen principal del modal de ficha)
+│   └── lib/                 [ext]  vendored a mano: leaflet/, suncalc.js
+├── src/                    [src]  componentes y dominio en migración — coexisten con www/js/
+│   ├── domain/              [src]  config.js, especies.js (espImgEl aquí), solunar.js, indice.js
+│   └── ui/
+│       ├── components/      [src]  Custom Elements: pp-curva-marea, pp-curva-solunar, pp-gauge, pp-captura-card...
+│       └── views/           [src]  renderizadores de vista: vista-ahora, vista-especies, vista-mapa
+├── img/                    [src]  fuentes originales de los assets de especie (SVGs + PNGs)
+│   └── svg/                 [src]  fuentes SVG (se despliegan a www/img/svg/ con cap sync)
+├── src/styles/theme.css    [src]  CSS para los componentes de src/ (complementa www/css/app.css)
 ├── test/                   [src]  tests planos de Node, sin framework (ver §3)
-├── node_modules/           [ext]  deps de @capacitor/cli y @capacitor/android — no editar
-├── android/                [gen]  NO existe en este checkout; se genera con `npx cap add android`, gitignored
-├── package.json            [cfg]  scripts npm + deps Capacitor
+├── node_modules/           [ext]  deps Capacitor + uPlot — no editar
+├── android/                [gen]  NO existe hasta `npx cap add android`, gitignored
+├── package.json            [cfg]  scripts npm + deps (Capacitor, uPlot)
 ├── capacitor.config.json   [cfg]  appId, webDir=www, config Android
-├── .gitignore              [cfg]  excluye node_modules/, android/, dist/, .gradle/, keystores
-├── README.md                [doc]  detalle funcional completo (mareas, solunar, índice, especies, cuaderno, trofeos, publicación en Play)
-└── CLAUDE.md                [doc]  guía de orientación específica del repo (arquitectura, gotchas, convenciones)
+├── README.md                [doc]  detalle funcional completo
+└── CLAUDE.md                [doc]  convenciones y gotchas específicos del repo
 ```
 
-No hay `docs/`, `.env*`, `tsconfig.json`, `.eslintrc*`, `vite.config.*`, `webpack.config.*` ni `ionic.config.json` en la raíz.
+No hay `tsconfig.json`, `.eslintrc*`, `webpack.config.*` ni `ionic.config.json` en la raíz.
 
 ## 2. Arranque y comandos
 
@@ -46,13 +56,19 @@ No hay `docs/`, `.env*`, `tsconfig.json`, `.eslintrc*`, `vite.config.*`, `webpac
 |---|---|
 | pantalla/lógica web nueva | `www/js/` (nuevo módulo `PP.nombre = (function(){...})();`) + registrar `<script>` en `www/index.html` en la posición correcta según dependencias |
 | ajustar pesos del índice de pesca / umbrales de seguridad | `www/js/config.js` (`PP.MODOS`, `PP.SEGURIDAD`) |
-| alta/edición de especies | `www/js/especies.js` |
-| tema visual / colores | `www/css/app.css` (`:root`) |
+| alta/edición de especies — datos de dominio | `src/domain/especies.js` (fuente de verdad: campos `imagen`, `foto`, parámetros de actividad) |
+| iconos de especie en componentes nuevos | `espImgEl(esp, clase)` de `src/domain/especies.js` — único punto de renderizado |
+| iconos de especie en código legacy (www/js/ui.js) | `FOTOS_ESPECIE` (→ SVG) para tarjetas; `FOTOS_NATURAL` (→ PNG) para modal de ficha |
+| añadir foto natural de una especie | Campo `foto` en `src/domain/especies.js` + copiar el PNG a `img/` y a `www/img/` + añadir entrada en `FOTOS_NATURAL` de `www/js/ui.js` |
+| añadir silueta SVG de una especie | Campo `imagen` en `src/domain/especies.js` + copiar el SVG a `img/svg/` y a `www/img/svg/` + actualizar `FOTOS_ESPECIE` en `www/js/ui.js` |
+| tema visual / colores (legacy) | `www/css/app.css` (`:root`) |
+| tema visual / colores (componentes src/) | `src/styles/theme.css` |
 | llamadas a Open-Meteo / caché | `www/js/api.js` |
 | cálculo de mareas / solunar / índice | `www/js/mareas.js` · `www/js/solunar.js` · `www/js/indice.js` |
 | cuaderno de capturas / fotos / récords / trofeos | `www/js/cuaderno.js` · `www/js/fotos.js` · `www/js/records.js` · `www/js/trofeos.js` |
 | mapa (viento/corrientes/carta náutica) | `www/js/mapa.js` |
-| render de vistas / UI | `www/js/ui.js` (módulo más grande del proyecto) |
+| render de vistas / UI (legacy) | `www/js/ui.js` |
+| componentes web reutilizables | `src/ui/components/` (Custom Elements: pp-curva-marea, pp-curva-solunar, pp-gauge, …) |
 | orquestación / arranque / navegación entre vistas | `www/js/app.js` (se carga último) |
 | config nativa Android | `capacitor.config.json` (+ `android/app/src/main/AndroidManifest.xml` tras `cap add android`, p.ej. permiso de ubicación) |
 | test de un módulo | `test/test_<módulo>.js` (convención `test_<módulo>.js`, no `*.test.js`/`*.spec.js`) + añadir al script `test` de `package.json` si debe correr en CI |

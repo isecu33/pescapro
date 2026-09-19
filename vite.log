@@ -1,0 +1,526 @@
+
+  VITE v8.3.0  ready in 273 ms
+
+  ➜  Local:   http://localhost:5173/
+  ➜  Network: use --host to expose
+0:54:02 [vite] (client) hmr update /src/styles/theme.css
+14:00:20 [vite] (client) page reload src/ui/components/pp-curva-marea.js
+14:00:26 [vite] (client) [optimizer] bundling dependencies...
+14:00:27 [vite] (client) dependency optimized: uplot
+14:00:27 [vite] (client) optimized dependencies changed. reloading
+14:00:37 [vite] (client) page reload src/ui/views/vista-ahora.js
+14:00:37 [vite] (client) [Unhandled error] ReferenceError: cardCurvaMarea is not defined
+ > renderAhora src/ui/views/vista-ahora.js?t=1789473637506:53:14
+ > renderVistaActiva src/app.js?t=1789473637506:168:31
+ > iniciar src/app.js?t=1789473637506:86:7
+ > crearApp src/app.js?t=1789473637506:367:3
+ > HTMLDocument.<anonymous> src/main.js?t=1789473637506:47:3
+
+14:00:43 [vite] (client) page reload src/ui/views/vista-ahora.js
+14:00:43 [vite] (client) [Unhandled error] ReferenceError: cardCurvaMarea is not defined
+ > renderAhora src/ui/views/vista-ahora.js?t=1789473643321:53:14
+ > renderVistaActiva src/app.js?t=1789473643321:168:31
+ > iniciar src/app.js?t=1789473643321:86:7
+ > crearApp src/app.js?t=1789473643321:367:3
+ > HTMLDocument.<anonymous> src/main.js?t=1789473643321:47:3
+
+14:00:49 [vite] (client) page reload src/ui/views/vista-ahora.js
+14:01:20 [vite] (client) hmr update /src/styles/theme.css
+14:01:20 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+14:30:49 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+14:44:33 [vite] (client) page reload src/ui/components/pp-curva-marea.js
+14:44:33 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+14:44:40 [vite] (client) page reload src/ui/views/vista-ahora.js
+14:45:09 [vite] (client) page reload src/ui/views/vista-ahora.js
+14:45:09 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+14:45:29 [vite] (client) hmr update /src/styles/theme.css
+15:15:10 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+15:45:10 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+16:15:10 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+16:45:10 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+17:15:10 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+17:45:10 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+18:15:10 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+18:45:10 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+19:15:10 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+19:21:56 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+19:24:55 [vite] (client) page reload src/ui/views/vista-ahora.js
+19:24:55 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+19:25:04 [vite] (client) page reload src/ui/views/vista-ahora.js
+19:25:05 [vite] (client) [Unhandled error] ReferenceError: cardIndiceFull is not defined
+ > renderAhora src/ui/views/vista-ahora.js?t=1789493104908:51:14
+ > renderVistaActiva src/app.js?t=1789493104908:168:31
+ > iniciar src/app.js?t=1789493104908:86:7
+ > crearApp src/app.js?t=1789493104908:367:3
+ > HTMLDocument.<anonymous> src/main.js?t=1789493104908:47:3
+
+19:26:02 [vite] (client) page reload src/ui/views/vista-ahora.js
+19:26:02 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+19:26:19 [vite] (client) page reload src/ui/views/vista-ahora.js
+19:26:19 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+19:26:37 [vite] (client) page reload src/ui/views/vista-ahora.js
+19:26:38 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+19:26:43 [vite] (client) page reload src/ui/views/vista-ahora.js
+19:26:43 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+19:27:19 [vite] (client) hmr update /src/styles/theme.css
+19:27:31 [vite] (client) hmr update /src/styles/theme.css
+19:27:40 [vite] (client) hmr update /src/styles/theme.css
+19:27:48 [vite] (client) hmr update /src/styles/theme.css
+19:27:49 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+19:27:51 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+19:27:58 [vite] (client) hmr update /src/styles/theme.css
+19:34:23 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+19:34:29 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+19:34:30 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+19:48:57 [vite] (client) page reload src/ui/views/vista-ahora.js
+19:48:57 [vite] (client) [Unhandled error] ReferenceError: itemCondicion is not defined
+ > src/ui/views/vista-ahora.js?t=1789494537137:523:42
+ > cardSolLuna src/ui/views/vista-ahora.js?t=1789494537137:523:9
+ > renderAhora src/ui/views/vista-ahora.js?t=1789494537137:56:26
+ > renderVistaActiva src/app.js?t=1789494537137:168:31
+ > iniciar src/app.js?t=1789494537137:86:7
+ > crearApp src/app.js?t=1789494537137:367:3
+ > HTMLDocument.<anonymous> src/main.js?t=1789494537137:47:3
+
+19:48:57 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+19:50:06 [vite] (client) page reload src/ui/views/vista-ahora.js
+19:50:06 [vite] (client) [Unhandled error] ReferenceError: itemCondicion is not defined
+ > src/ui/views/vista-ahora.js?t=1789494606536:543:42
+ > cardSolLuna src/ui/views/vista-ahora.js?t=1789494606536:543:9
+ > renderAhora src/ui/views/vista-ahora.js?t=1789494606536:56:26
+ > renderVistaActiva src/app.js?t=1789494606536:168:31
+ > iniciar src/app.js?t=1789494606536:86:7
+ > crearApp src/app.js?t=1789494606536:367:3
+ > HTMLDocument.<anonymous> src/main.js?t=1789494606536:47:3
+
+19:50:06 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+19:50:42 [vite] (client) page reload src/ui/views/vista-ahora.js
+19:50:42 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+19:50:42 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+19:50:59 [vite] (client) hmr update /src/styles/theme.css
+19:51:13 [vite] (client) hmr update /src/styles/theme.css
+20:20:42 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+20:33:14 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+20:35:02 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+20:39:52 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+20:41:23 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+20:41:28 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+20:41:31 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+20:41:37 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+20:41:42 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+20:41:47 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+20:41:48 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+20:42:25 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+20:42:45 [vite] (client) page reload src/domain/solunar.js
+20:42:46 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+20:42:47 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+20:42:48 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+20:42:50 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+20:42:56 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+20:43:01 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+20:43:04 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+20:43:05 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+20:43:24 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+20:43:35 [vite] (client) page reload src/domain/especies.js
+20:43:36 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+20:43:36 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+20:43:41 [vite] (client) page reload src/domain/especies.js
+20:43:41 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+20:43:42 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+20:43:43 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+20:43:44 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+20:43:44 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+20:43:45 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+20:43:46 [vite] (client) page reload src/domain/especies.js
+20:43:47 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+20:43:47 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+20:43:52 [vite] (client) page reload src/domain/especies.js
+20:43:52 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+20:43:53 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+20:43:57 [vite] (client) page reload src/domain/especies.js
+20:43:58 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+20:43:58 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+20:44:03 [vite] (client) page reload src/domain/especies.js
+20:44:03 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+20:44:04 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+20:44:09 [vite] (client) page reload src/domain/especies.js
+20:44:09 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+20:44:10 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+20:44:14 [vite] (client) page reload src/domain/especies.js
+20:44:15 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+20:44:16 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+20:44:20 [vite] (client) page reload src/domain/especies.js
+20:44:20 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+20:44:21 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+20:44:25 [vite] (client) page reload src/domain/especies.js
+20:44:26 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+20:44:26 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+20:44:31 [vite] (client) page reload src/domain/especies.js
+20:44:32 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+20:44:33 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+20:44:36 [vite] (client) page reload src/domain/especies.js
+20:44:37 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+20:44:38 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+20:44:46 [vite] (client) page reload src/domain/especies.js
+20:44:46 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+20:44:47 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+20:44:55 [vite] (client) page reload src/ui/views/vista-ahora.js
+20:44:55 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+20:44:56 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+20:45:29 [vite] (client) page reload src/ui/views/vista-ahora.js
+20:45:30 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+20:45:31 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+20:45:36 [vite] (client) page reload src/ui/views/vista-ahora.js
+20:45:37 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+20:45:38 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+20:45:43 [vite] (client) page reload src/ui/views/vista-especies.js
+20:45:44 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+20:45:44 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+20:45:48 [vite] (client) page reload src/ui/views/vista-especies.js
+20:45:49 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+20:45:49 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+20:45:55 [vite] (client) page reload src/ui/views/vista-especies.js
+20:45:55 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+20:45:56 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+20:46:00 [vite] (client) page reload src/ui/components/pp-captura-card.js
+20:46:01 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+20:46:01 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+20:46:06 [vite] (client) page reload src/ui/components/pp-captura-card.js
+20:46:06 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+20:46:07 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+20:46:18 [vite] (client) hmr update /src/styles/theme.css
+20:46:18 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+20:46:18 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+20:46:32 [vite] (client) hmr update /src/styles/theme.css
+21:06:58 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+21:16:06 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+21:21:55 [vite] (client) page reload src/domain/especies.js
+21:22:01 [vite] (client) page reload src/domain/especies.js
+21:22:06 [vite] (client) page reload src/domain/especies.js
+21:22:12 [vite] (client) page reload src/domain/especies.js
+21:22:17 [vite] (client) page reload src/domain/especies.js
+21:22:23 [vite] (client) page reload src/domain/especies.js
+21:22:28 [vite] (client) page reload src/domain/especies.js
+21:22:32 [vite] (client) page reload src/domain/especies.js
+21:22:38 [vite] (client) page reload src/domain/especies.js
+21:22:44 [vite] (client) page reload src/domain/especies.js
+21:23:00 [vite] (client) hmr update /src/styles/theme.css
+21:28:39 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+21:32:45 [vite] (client) hmr update /src/styles/theme.css
+21:43:00 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+21:43:05 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+21:43:07 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+21:43:09 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+21:43:10 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+21:52:46 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+0:53:45 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+0:54:20 [vite] (client) page reload src/domain/especies.js
+0:54:27 [vite] (client) page reload src/domain/especies.js
+0:54:34 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+0:54:35 [vite] (client) page reload src/domain/especies.js
+0:54:38 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+0:54:43 [vite] (client) page reload src/domain/especies.js
+0:54:45 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+0:54:48 [vite] (client) page reload src/domain/especies.js
+0:54:50 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+0:54:50 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+0:54:55 [vite] (client) page reload src/domain/especies.js
+0:54:57 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+0:54:57 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+0:55:00 [vite] (client) page reload src/domain/especies.js
+0:55:03 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+0:55:07 [vite] (client) page reload src/domain/especies.js
+0:55:09 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+0:55:11 [vite] (client) page reload src/domain/especies.js
+0:55:13 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+0:55:13 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+0:55:17 [vite] (client) page reload src/domain/especies.js
+0:55:19 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+0:55:22 [vite] (client) page reload src/domain/especies.js
+0:55:24 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+0:55:27 [vite] (client) page reload src/domain/especies.js
+0:55:28 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+0:55:34 [vite] (client) page reload src/ui/views/vista-especies.js
+0:55:37 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+0:55:41 [vite] (client) hmr update /src/styles/theme.css
+1:25:36 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+1:25:36 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+1:25:39 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+1:25:40 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+1:33:13 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+1:37:22 [vite] (client) page reload src/ui/views/vista-especies.js
+1:37:26 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+1:37:28 [vite] (client) page reload src/ui/views/vista-ahora.js
+1:37:29 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+1:37:29 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+1:37:42 [vite] (client) page reload src/ui/views/vista-ahora.js
+1:37:44 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+1:37:53 [vite] (client) hmr update /src/styles/theme.css
+1:38:26 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+
+1:40:11 [vite] (client) [Unhandled error] Error: ResizeObserver loop completed with undelivered notifications.
+ > ../../@vite/client:305:50
+

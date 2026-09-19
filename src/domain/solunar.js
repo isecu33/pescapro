@@ -73,6 +73,20 @@ export function periodos(fecha, lat, lon) {
   return out.sort((a, b) => a.inicio - b.inicio);
 }
 
+/* Datos de altitud sol + luna para 24h (cada 20 min) — alimenta pp-curva-solunar */
+export function curvaSolunar(fecha, lat, lon) {
+  const ini = new Date(fecha); ini.setHours(0, 0, 0, 0);
+  const PASO = 20 * 60 * 1000;
+  const xData = [], solData = [], lunaData = [];
+  for (let i = 0; i <= 72; i++) {
+    const t = new Date(ini.getTime() + i * PASO);
+    xData.push(t.getTime() / 1000);
+    solData.push(SunCalc.getPosition(t, lat, lon).altitude * 180 / Math.PI);
+    lunaData.push(SunCalc.getMoonPosition(t, lat, lon).altitude * 180 / Math.PI);
+  }
+  return { xData, solData, lunaData };
+}
+
 /* Factor solunar 0..1 en un instante (1 = periodo mayor) */
 export function factorSolunar(fecha, periodosDia) {
   for (const p of periodosDia) {

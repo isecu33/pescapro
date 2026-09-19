@@ -15,11 +15,11 @@ export class PpRankFila extends HTMLElement {
     const style = document.createElement('style');
     style.textContent = `
       :host { display: flex; align-items: center; gap: 8px; padding: 8px 6px;
-        border-bottom: 1px solid var(--borde, #24374a); font-size: 14px; }
+        border-bottom: 1px solid var(--borde, #242424); font-size: 14px; }
       :host(.yo) { background: rgba(255, 176, 32, .08); border-radius: 8px; }
       .pos { flex: 0 0 34px; font-size: 16px; }
       .nombre { flex: 1; font-weight: 650; }
-      .detalle { color: var(--texto2, #9fb3c4); font-size: 12.5px; text-align: right; }
+      .detalle { color: var(--texto2, #888888); font-size: 12.5px; text-align: right; }
     `;
     shadow.appendChild(style);
     this._root = document.createElement('div');

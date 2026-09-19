@@ -29,13 +29,13 @@ export class PpLigaItem extends HTMLElement {
     const shadow = this.attachShadow({ mode: 'open' });
     const style = document.createElement('style');
     style.textContent = `
-      :host { display: block; border: 1px solid var(--borde, #24374a); border-radius: 12px;
-        padding: 10px; margin-top: 8px; cursor: pointer; background: var(--panel2, #1c2b3a); }
+      :host { display: block; border: 1px solid var(--borde, #242424); border-radius: 12px;
+        padding: 10px; margin-top: 8px; cursor: pointer; background: var(--panel2, #1a1a1a); }
       .cab { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-      .tag { border: 1px solid var(--borde, #24374a); border-radius: 8px; padding: 3px 8px; font-size: 12px; }
-      .tag-activa { color: var(--verde, #2fb344); border-color: var(--verde, #2fb344); }
-      .tag-finalizada { color: var(--texto2, #9fb3c4); }
-      .sub, .cond { font-size: 12px; color: var(--texto2, #9fb3c4); margin-top: 2px; }
+      .tag { border: 1px solid var(--borde, #242424); border-radius: 8px; padding: 3px 8px; font-size: 12px; }
+      .tag-activa { color: var(--acento, #ff7200); border-color: var(--acento, #ff7200); }
+      .tag-finalizada { color: var(--texto2, #888888); }
+      .sub, .cond { font-size: 12px; color: var(--texto2, #888888); margin-top: 2px; }
     `;
     shadow.appendChild(style);
     this._root = document.createElement('div');

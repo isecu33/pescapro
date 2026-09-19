@@ -4,37 +4,37 @@
    look que ya tenia la app (ver www/css/app.css :root, valores
    originales conservados). Solo tema oscuro: uso nocturno/exterior. */
 :root {
-  --ion-background-color: #0a1520;
-  --ion-background-color-rgb: 10, 21, 32;
-  --ion-text-color: #dde8f2;
-  --ion-text-color-rgb: 221, 232, 242;
+  --ion-background-color: #080808;
+  --ion-background-color-rgb: 8, 8, 8;
+  --ion-text-color: #f0f0f0;
+  --ion-text-color-rgb: 240, 240, 240;
 
-  --ion-color-primary: #ffa500;
-  --ion-color-primary-rgb: 255, 165, 0;
-  --ion-color-primary-contrast: #0a1520;
-  --ion-color-primary-contrast-rgb: 10, 21, 32;
-  --ion-color-primary-shade: #e09400;
-  --ion-color-primary-tint: #ffb833;
+  --ion-color-primary: #ff7200;
+  --ion-color-primary-rgb: 255, 114, 0;
+  --ion-color-primary-contrast: #000000;
+  --ion-color-primary-contrast-rgb: 0, 0, 0;
+  --ion-color-primary-shade: #e06500;
+  --ion-color-primary-tint: #ffac00;
 
-  --ion-color-secondary: #3d9be8;
-  --ion-color-secondary-contrast: #0a1520;
+  --ion-color-secondary: #e07000;
+  --ion-color-secondary-contrast: #000000;
 
-  --ion-color-success: #27a83c;
-  --ion-color-success-contrast: #ffffff;
+  --ion-color-success: #ff9500;
+  --ion-color-success-contrast: #000000;
 
-  --ion-color-warning: #f0cc00;
-  --ion-color-warning-contrast: #0a1520;
+  --ion-color-warning: #ffac00;
+  --ion-color-warning-contrast: #000000;
 
   --ion-color-danger: #d42b2b;
   --ion-color-danger-contrast: #ffffff;
 
-  --ion-toolbar-background: #0e1d2c;
-  --ion-item-background: #132030;
-  --ion-border-color: #1e3347;
+  --ion-toolbar-background: #111111;
+  --ion-item-background: #131313;
+  --ion-border-color: #242424;
 
-  --pp-panel: #132030;
-  --pp-panel2: #192a3a;
-  --pp-texto2: #7a96aa;
+  --pp-panel: #121212;
+  --pp-panel2: #1a1a1a;
+  --pp-texto2: #888888;
 
   /* Tokens de diseño propios */
   --pp-shadow-card: 0 2px 12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.04);
@@ -47,12 +47,44 @@
 
   /* Aliases para nombres clasicos usados en Shadow DOM y componentes portados */
   --acento: var(--ion-color-primary);
+  --acento-vivo: #ffab00;
   --azul: var(--ion-color-secondary);
   --verde: var(--ion-color-success);
   --ambar: var(--ion-color-warning);
   --rojo: var(--ion-color-danger);
   --borde: var(--ion-border-color);
   --texto2: var(--pp-texto2);
+  --panel: var(--pp-panel);
+  --panel2: var(--pp-panel2);
+}
+
+/* dark.always.css aplica --ion-card-background, --ion-item-background,
+   --ion-toolbar-background y --ion-tab-bar-background en :root.ios y
+   :root.md con mayor especificidad que :root. Este bloque los anula. */
+:root.ios,
+:root.md {
+  --ion-background-color: #080808;
+  --ion-background-color-rgb: 8, 8, 8;
+  --ion-text-color: #f0f0f0;
+  --ion-text-color-rgb: 240, 240, 240;
+  --ion-card-background: #121212;
+  --ion-item-background: #131313;
+  --ion-toolbar-background: #111111;
+  --ion-tab-bar-background: #111111;
+  --ion-tab-bar-background-focused: #1a1a1a;
+}
+
+/* Explícito en el host de ion-card-content por si el Shadow DOM no hereda
+   --ion-card-background correctamente en alguna versión de Ionic. */
+ion-card-content {
+  --background: var(--pp-panel);
+  --color: var(--ion-text-color);
+}
+
+ion-item {
+  --background: var(--pp-panel);
+  --color: var(--ion-text-color);
+  --border-color: var(--ion-border-color);
 }
 
 html, body {
@@ -64,15 +96,76 @@ html, body {
 }
 
 /* La cabecera custom (logo/spot/acciones) vive dentro de ion-toolbar */
-.pp-logo { font-size: 20px; padding: 0 4px; }
-.pp-spot-selector { display: flex; flex-direction: column; cursor: pointer; padding: 2px 8px; }
-.pp-spot-selector small { color: var(--pp-texto2); font-size: 11px; }
+.pp-logo { padding: 0 4px; display: flex; align-items: center; }
+.pp-logo img { height: 40px; width: auto; display: block; }
+.pp-spot-selector { flex: 1; min-width: 0; cursor: pointer; display: flex; flex-direction: row; align-items: center; gap: 6px; padding: 4px 8px; }
+
+/* ── Menú lateral ─────────────────────────────────────── */
+.pp-menu-perfil {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 32px 16px 24px;
+  border-bottom: 1px solid var(--pp-borde, rgba(255,255,255,0.08));
+}
+.pp-menu-avatar { font-size: 72px; color: var(--ion-color-primary); line-height: 1; }
+.pp-menu-perfil-nombre { font-size: 17px; font-weight: 700; margin-top: 8px; }
+.pp-menu-perfil-sub { font-size: 13px; color: var(--pp-texto2); margin-top: 2px; }
+
+.pp-menu-seccion { padding-top: 8px; }
+.pp-menu-seccion-titulo {
+  font-size: 10px; font-weight: 700; letter-spacing: 0.1em;
+  color: var(--pp-texto2); padding: 8px 20px 4px;
+}
+.pp-menu-seccion-subtitulo {
+  font-size: 12px; color: var(--pp-texto2); padding: 6px 16px 2px;
+}
+.pp-menu-item { --background: transparent; --padding-start: 20px; --inner-padding-end: 16px; }
+.pp-menu-item ion-icon[slot="start"] { color: var(--ion-color-primary); font-size: 20px; margin-right: 12px; }
+.pp-menu-item-danger ion-icon[slot="start"] { color: #e05252; }
+.pp-menu-chevron { font-size: 14px; color: var(--pp-texto2); }
+
+.pp-menu-stats { display: flex; gap: 10px; margin-top: 6px; justify-content: center; }
+.pp-menu-stat-chip {
+  font-size: 12px; color: var(--pp-texto2);
+  background: rgba(255,255,255,0.06); border-radius: 8px; padding: 4px 10px;
+}
+.pp-menu-stat-chip b { color: var(--ion-color-primary); font-size: 14px; margin-right: 2px; }
+
+.pp-menu-modo-chips { display: flex; gap: 8px; padding: 6px 16px 10px; flex-wrap: wrap; }
+.pp-menu-modo-chip { font-size: 13px; }
+
+.pp-menu-about-sub { color: var(--pp-texto2); font-size: 11px; display: block; margin-top: 2px; }
+.pp-spot-textos { display: flex; flex-direction: column; min-width: 0; }
+.pp-spot-nombre { font-weight: 700; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; letter-spacing: -0.01em; }
+.pp-spot-selector small { color: var(--pp-texto2); font-size: 11px; line-height: 1.2; }
+.pp-accion-btn { --color: var(--pp-texto2, rgba(255,255,255,0.54)); }
 
 /* Banner de seguridad: persistente mientras dure el peligro (no es un
    toast que se autooculte) */
-.pp-banner { padding: 8px 12px; font-weight: 600; font-size: 13.5px; text-align: center; }
-.pp-banner-rojo { background: #58151c; color: #ffb4ab; }
-.pp-banner-amarillo { background: #4d3800; color: #ffd66e; }
+.pp-banner { padding: 10px 14px; font-weight: 700; font-size: 13.5px; text-align: center; display: flex; align-items: center; justify-content: center; gap: 7px; margin-bottom: 12px; }
+.pp-banner .pp-ico { width: 17px; height: 17px; flex: none; }
+.pp-banner-rojo { background: #2a0505; color: #ff9090; border-bottom: 1px solid var(--rojo); }
+.pp-banner-amarillo { background: #2a1500; color: #ffcc60; border-bottom: 1px solid var(--acento-vivo); }
+
+/* Input de búsqueda en modales */
+.pp-input { width: 100%; box-sizing: border-box; background: rgba(255,255,255,0.06); color: inherit; border: 1px solid rgba(255,255,255,0.12); border-radius: 8px; padding: 10px 14px; font-size: 15px; font-family: inherit; }
+.pp-input:focus { outline: none; border-color: var(--acento); }
+.pp-input::placeholder { color: var(--pp-texto2); }
+
+/* Modal centrado (div-based, equivalente al modal() legacy pero centrado) */
+.pp-modal-fondo { position: fixed; inset: 0; background: rgba(0,0,0,0.72); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 0 16px; }
+.pp-modal { position: relative; background: var(--pp-panel); border: 1px solid var(--ion-border-color); border-radius: 14px; padding: 20px 16px 16px; width: 100%; max-width: 480px; max-height: 80vh; overflow-y: auto; }
+.pp-modal h3 { margin: 0 0 14px; font-size: 18px; font-weight: 800; display: flex; align-items: center; gap: 6px; }
+.pp-modal-x { position: absolute; right: 12px; top: 12px; background: rgba(255,255,255,0.08); color: inherit; border: 1px solid rgba(255,255,255,0.12); border-radius: 50%; width: 32px; height: 32px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.pp-modal-x .pp-ico { width: 14px; height: 14px; }
+
+/* Filas de resultado / favoritos en modales */
+.pp-lugar { padding: 13px 10px; border-bottom: 1px solid rgba(255,255,255,0.08); cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 52px; }
+.pp-lugar:active { background: rgba(255,255,255,0.06); border-radius: 6px; }
+.pp-lugar small { color: var(--pp-texto2); font-size: 12px; display: block; }
+.pp-borrar { background: none; border: none; color: var(--pp-texto2); cursor: pointer; padding: 4px; display: flex; align-items: center; flex-shrink: 0; }
+.pp-borrar:hover { color: var(--rojo); }
+.pp-modal-buscar-content { padding: 0; }
+.pp-modal-gps-sep { margin-top: 14px; }
 
 /* Nav inferior fijo (no se usa ion-tabs/router, ver app-shell.js) */
 ion-tab-bar { position: fixed; bottom: 0; left: 0; right: 0; z-index: 1500; }
@@ -89,6 +182,7 @@ ion-tab-bar { position: fixed; bottom: 0; left: 0; right: 0; z-index: 1500; }
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
+  padding-top: 10px;
   padding-bottom: calc(56px + env(safe-area-inset-bottom));
 }
 
@@ -126,7 +220,7 @@ ion-tab-bar { position: fixed; bottom: 0; left: 0; right: 0; z-index: 1500; }
 .pp-mejor-hora { font-size: 13px; padding: 3px 0; }
 
 /* Vista Prevision: mejores ventanas */
-.pp-vent-idx { flex: 0 0 44px; height: 44px; border-radius: 10px; color: #14202d;
+.pp-vent-idx { flex: 0 0 44px; height: 44px; border-radius: 10px; color: #000000;
   font-weight: 800; font-size: 17px; display: flex; align-items: center; justify-content: center; }
 .pp-vent-info { display: flex; flex-direction: column; gap: 2px; font-size: 13.5px; }
 .pp-vent-info span { color: var(--pp-texto2); font-size: 12px; }
@@ -173,7 +267,7 @@ ion-tab-bar { position: fixed; bottom: 0; left: 0; right: 0; z-index: 1500; }
    #mapa / .pp-mapa-controles / .pp-leyenda de www/css/app.css, adaptadas
    a las variables de tema nuevas. */
 .pp-vista-mapa { display: flex; flex-direction: column; height: 100%; }
-.pp-vista-mapa-lienzo { flex: 1; min-height: 320px; background: #0a141e; }
+.pp-vista-mapa-lienzo { flex: 1; min-height: 320px; background: #0a0a0a; }
 .pp-mapa-controles { padding: 10px 12px; background: var(--pp-panel); border-top: 1px solid var(--ion-border-color); }
 .pp-mapa-fila { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; font-size: 13px; }
 .pp-mapa-fila ion-range { flex: 1; }
@@ -182,16 +276,28 @@ ion-tab-bar { position: fixed; bottom: 0; left: 0; right: 0; z-index: 1500; }
 #pp-mapa-estado { font-size: 12px; color: var(--pp-texto2); }
 .pp-leyenda { display: flex; gap: 10px; font-size: 11px; color: var(--pp-texto2); flex-wrap: wrap; }
 
-/* ── Chip / botones compactos ── */
-.pp-chip {
-  display: inline-flex; align-items: center; gap: 5px;
-  background: var(--pp-panel2); border: 1px solid var(--ion-border-color);
-  border-radius: 20px; padding: 5px 12px; font-size: 12.5px;
-  color: var(--ion-text-color); cursor: pointer;
-  transition: background .15s, border-color .15s;
+/* ── Selector de modalidad (chips) ── */
+.pp-modos {
+  display: flex; justify-content: center; gap: 8px; margin-bottom: 12px; overflow-x: auto;
+  padding-bottom: 4px; scrollbar-width: none; -ms-overflow-style: none;
 }
-.pp-chip:active { background: rgba(255,255,255,.08); border-color: var(--ion-color-primary); }
+.pp-modos::-webkit-scrollbar { display: none; }
+
+.pp-chip {
+  background: var(--pp-panel2); border: 1.5px solid var(--ion-border-color);
+  color: var(--pp-texto2); border-radius: 999px; padding: 10px 16px;
+  font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap;
+  display: inline-flex; align-items: center; gap: 6px; min-height: 42px;
+  transition: background 200ms cubic-bezier(.25,.8,.25,1), color 200ms cubic-bezier(.25,.8,.25,1),
+    border-color 200ms cubic-bezier(.25,.8,.25,1), transform 200ms cubic-bezier(.25,.8,.25,1);
+}
+.pp-chip:active { transform: scale(.93); }
+.pp-chip.activo {
+  background: var(--ion-color-primary); border-color: var(--ion-color-primary);
+  color: #1a0800; font-weight: 800; box-shadow: 0 4px 20px rgba(255,114,0,.28);
+}
 .pp-chip-expand { margin-top: 8px; color: var(--pp-texto2); }
+.pp-chip-acento { background: var(--acento); border-color: var(--acento); color: #1a0800; font-weight: 700; }
 
 /* ── Resumen del día (antes del selector de modo) ── */
 .pp-resumen-dia { margin-bottom: 10px; }
@@ -206,19 +312,152 @@ ion-tab-bar { position: fixed; bottom: 0; left: 0; right: 0; z-index: 1500; }
   font-size: 12.5px; color: var(--pp-texto2); margin-top: 3px;
 }
 .pp-delta { font-size: 11.5px; font-weight: 700; }
-.pp-delta-sube { color: var(--verde); }
+.pp-delta-sube { color: var(--acento); }
 .pp-delta-baja { color: var(--rojo); }
 
-/* ── Índice principal (vista-ahora) ── */
-.pp-card-indice { display: flex; align-items: center; gap: 18px; }
-pp-gauge { width: 124px; flex: 0 0 124px; }
-.pp-indice-info { flex: 1; min-width: 0; }
-.pp-indice-etiqueta {
-  font-size: 26px; font-weight: 800; letter-spacing: -.02em;
-  line-height: 1.1;
+/* ── Índice de pesca: card unificada ── */
+.pp-card-indice-full ion-card-content { padding: 0 !important; }
+
+.pp-card-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
 }
-.pp-indice-sub {
-  color: var(--pp-texto2); margin-top: 6px; font-size: 13px; line-height: 1.4;
+.pp-btn-info {
+  background: none;
+  border: 1px solid var(--ion-border-color);
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  font-size: 13px;
+  color: var(--pp-texto2);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: 0;
+  transition: border-color .15s, color .15s;
+}
+.pp-btn-info:active,
+.pp-btn-info--activo {
+  border-color: var(--ion-color-primary);
+  color: var(--ion-color-primary);
+}
+
+.pp-indice-split {
+  display: flex;
+  min-height: 130px;
+}
+
+/* Panel izquierdo: número grande */
+.pp-score-panel {
+  flex: 0 0 42%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 16px 10px;
+  border-right: 1px solid var(--ion-border-color);
+}
+.pp-score-num {
+  font-size: 62px;
+  font-weight: 900;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  font-family: var(--pp-font-mono);
+}
+.pp-score-denom {
+  font-size: 13px;
+  color: var(--pp-texto2);
+  margin-top: 1px;
+  font-variant-numeric: tabular-nums;
+}
+.pp-score-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  margin-top: 6px;
+}
+.pp-modo-chip-ico { display: inline-block; width: 20px; height: 20px; background-color: white; -webkit-mask-size: contain; -webkit-mask-repeat: no-repeat; -webkit-mask-position: center; mask-size: contain; mask-repeat: no-repeat; mask-position: center; vertical-align: middle; margin-right: 5px; }
+
+/* Panel derecho: factores mini */
+.pp-factores-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 14px 12px 14px 14px;
+  gap: 10px;
+  min-width: 0;
+}
+.pp-factor-mini {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.pp-factor-mini-nombre {
+  flex: 0 0 52px;
+  font-size: 11px;
+  color: var(--pp-texto2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pp-factor-mini-barra {
+  flex: 1;
+  height: 5px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.pp-factor-mini-rel {
+  height: 100%;
+  border-radius: 3px;
+  transition: width .4s var(--pp-ease);
+}
+.pp-factor-mini-val {
+  flex: 0 0 30px;
+  text-align: right;
+  font-size: 11px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Sección expandible con todos los factores */
+.pp-factores-todos {
+  padding: 10px 12px 4px;
+  border-top: 1px solid var(--ion-border-color);
+}
+
+/* ── Alerta de factor muy negativo ── */
+.pp-alerta-factor {
+  background: rgba(212, 43, 43, 0.07) !important;
+  border-color: rgba(212, 43, 43, 0.35) !important;
+  padding: 0;
+}
+.pp-alerta-factor-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  gap: 8px;
+}
+.pp-alerta-factor-row + .pp-alerta-factor-row {
+  border-top: 1px solid rgba(212, 43, 43, 0.2);
+}
+.pp-alerta-factor-titulo {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--rojo);
+}
+.pp-alerta-factor-val {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--rojo);
+  font-variant-numeric: tabular-nums;
 }
 
 /* Selector de modalidad */
@@ -236,35 +475,89 @@ ion-segment-button {
   font-weight: 600;
 }
 
-/* ── Condiciones grid (2 columnas) ── */
-.pp-cond-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+/* ── Condiciones ahora ── */
+/* ── Iconos SVG propios (pp-ico) ── */
+.pp-ico {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+/* ── Condiciones ahora — layout legacy ── */
+.pp-cond-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
 .pp-cond {
   background: var(--pp-panel2);
-  border: 1px solid var(--ion-border-color);
+  border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: var(--pp-radius-sm);
-  box-shadow: var(--pp-shadow-inset);
-  padding: 10px 12px;
+  padding: 9px 11px;
 }
-.pp-cond-ico { font-size: 17px; line-height: 1; }
-.pp-cond-lbl { font-size: 11px; color: var(--pp-texto2); margin-top: 5px; line-height: 1.3; }
+.pp-cond-ico {
+  color: var(--pp-texto2);
+  display: flex;
+  align-items: center;
+}
+.pp-cond-lbl {
+  font-size: 10px;
+  color: rgba(200, 200, 200, 0.38);
+  margin-top: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
 .pp-cond-val {
-  font-size: 14px; font-weight: 650; margin-top: 2px;
+  font-size: 16px;
+  font-weight: 700;
+  margin-top: 1px;
+  letter-spacing: -0.01em;
   font-variant-numeric: tabular-nums;
+  line-height: 1.2;
 }
 
-/* ── Marea ── */
+/* ── Marea (legacy classes kept for compatibility) ── */
 .pp-marea-linea { font-size: 14px; margin-bottom: 8px; line-height: 1.5; }
 .pp-marea-amp { font-size: 12.5px; color: var(--pp-texto2); margin-bottom: 8px; }
-.pp-mareas-prox { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 10px; }
-.pp-marea-item {
-  background: var(--pp-panel2);
-  border: 1px solid var(--ion-border-color);
-  border-radius: var(--pp-radius-sm);
-  padding: 7px 10px; font-size: 12px; color: var(--pp-texto2); line-height: 1.6;
+.pp-marea-titulo {
+  font-size: 14px;
+  line-height: 1.5;
+  padding: 10px 14px 4px;
+  color: var(--ion-text-color);
+}
+.pp-marea-amp-line {
+  font-size: 12px;
+  color: var(--pp-texto2);
+  padding: 0 14px 8px;
+  line-height: 1.4;
 }
 
-/* ── Sol, luna y solunar ── */
-.pp-solunar { font-size: 13px; margin-top: 12px; line-height: 2.2; }
+/* ── Sol y solunar ── */
+.pp-sol-info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.pp-sol-dato-lbl {
+  font-size: 11px;
+  color: var(--pp-texto2);
+  line-height: 1.3;
+}
+.pp-sol-dato-val {
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.5;
+}
+pp-curva-solunar { display: block; width: 100%; margin-bottom: 4px; }
+.pp-solunar-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 6px;
+  margin-top: 6px;
+}
 .pp-tag {
   display: inline-block;
   background: var(--pp-panel2);
@@ -275,7 +568,128 @@ ion-segment-button {
 .pp-tag-mayor {
   border-color: var(--ion-color-primary);
   color: var(--ion-color-primary);
-  background: rgba(255, 165, 0, 0.08);
+  background: rgba(255, 114, 0, 0.08);
+}
+
+/* ── Imágenes de especies ── */
+/* Card grid (vista-especies): silueta arriba de la tarjeta */
+.pp-esp-card-ico {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: contain;
+  border-radius: 6px 6px 0 0;
+  display: block;
+  padding: 6px 10px;
+}
+/* Fallback emoji en card: centrado y grande */
+span.pp-esp-card-ico {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  line-height: 1;
+}
+/* Lista de especies activas (vista-ahora): icono pequeño inline */
+img.pp-esp-ico {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+span.pp-esp-ico {
+  font-size: 20px;
+  flex-shrink: 0;
+}
+/* Modal de especie: imagen junto al título */
+img.pp-esp-modal-ico {
+  width: 44px;
+  height: 36px;
+  object-fit: contain;
+  vertical-align: middle;
+  margin-right: 6px;
+}
+span.pp-esp-modal-ico {
+  font-size: 22px;
+  vertical-align: middle;
+  margin-right: 4px;
+}
+/* Cabecera de captura en cuaderno: icono pequeño inline */
+img.pp-esp-cab-ico {
+  width: 20px;
+  height: 16px;
+  object-fit: contain;
+  vertical-align: middle;
+}
+span.pp-esp-cab-ico {
+  font-size: 14px;
+  vertical-align: middle;
+}
+/* Foto realista en ficha modal de especie */
+.pp-esp-ficha-foto {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: 10px;
+  margin: 6px 0 12px;
+  filter: brightness(.88) contrast(1.06) saturate(.95);
+}
+
+/* Fila de especie en card "activas ahora" */
+.pp-esp-fila {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  cursor: pointer;
+  border-bottom: 1px solid var(--borde);
+  transition: background .18s var(--pp-ease);
+}
+.pp-esp-fila:last-of-type { border-bottom: none; }
+.pp-esp-fila:active { background: var(--pp-panel2); border-radius: var(--pp-radius-sm); }
+
+.pp-esp-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+.pp-esp-nombre {
+  font-size: 14.5px;
+  font-weight: 650;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pp-esp-motivo {
+  font-size: 12px;
+  color: var(--pp-texto2);
+  line-height: 1.2;
+}
+.pp-esp-val {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -.02em;
+  flex-shrink: 0;
+  min-width: 36px;
+  text-align: right;
+}
+.pp-esp-ver-todas {
+  margin-top: 8px;
+  margin-bottom: 0;
+  font-size: 13px;
+  color: var(--ion-color-primary);
+  text-align: right;
+  cursor: pointer;
+}
+
+/* Siluetas SVG: color blanco para destacar sobre fondos oscuros */
+img.pp-esp-card-ico[src$=".svg"],
+img.pp-esp-ico[src$=".svg"],
+img.pp-esp-modal-ico[src$=".svg"],
+img.pp-esp-cab-ico[src$=".svg"] {
+  filter: brightness(0) invert(1);
 }
 
 /* ── ion-card visual override ── */
@@ -285,7 +699,7 @@ ion-card {
   border: 1px solid var(--ion-border-color);
   border-radius: var(--pp-radius) !important;
   box-shadow: var(--pp-shadow-card) !important;
-  margin: 0 0 10px;
+  margin: 0 12px 10px;
 }
 ion-card-title {
   font-size: 13.5px !important;
@@ -294,4 +708,238 @@ ion-card-title {
   text-transform: uppercase;
   color: var(--pp-texto2) !important;
 }
-ion-card-content { padding-top: 6px !important; }
+ion-card-header { padding-bottom: 4px !important; }
+ion-card-content { padding: 8px 12px 12px !important; }
+
+/* ── uPlot: curva de marea ── */
+pp-curva-marea { display: block; }
+
+.u-wrap { background: transparent !important; }
+
+/* Línea vertical del cursor: sutil, no compite con la línea "ahora" naranja */
+.u-cursor-x { border-left: 1.5px solid rgba(255, 255, 255, 0.18) !important; }
+.u-cursor-y,
+.u-cursor-pt,
+.u-legend          { display: none !important; }
+
+.u-wrap > canvas { display: block; max-width: 100%; }
+
+/* Tooltip interactivo del cursor */
+.pp-marea-chart-wrap {
+  position: relative;
+  width: 100%;
+  user-select: none;
+  touch-action: pan-y;
+  margin: 10px 0 4px;
+}
+.pp-marea-canvas {
+  display: block;
+  width: 100%;
+  cursor: crosshair;
+  touch-action: none;
+}
+.pp-marea-hud {
+  position: absolute;
+  bottom: 26px;
+  transform: translateX(-50%);
+  background: rgba(15, 15, 15, .96);
+  border: 1px solid rgba(255, 114, 0, 0.45);
+  border-radius: 10px;
+  padding: 7px 13px;
+  font-size: 13px;
+  display: none;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, .5);
+  z-index: 10;
+}
+.pp-marea-hud-hora { color: var(--pp-texto2); font-size: 11.5px; }
+.pp-marea-hud-val  { color: var(--ion-text-color); font-weight: 700; font-size: 15px; }
+
+.pp-marea-tooltip {
+  position: absolute;
+  top: 4px;
+  background: rgba(18, 18, 18, 0.94);
+  border: 1px solid rgba(255, 114, 0, 0.55);
+  border-radius: 8px;
+  padding: 3px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #f0f0f0;
+  pointer-events: none;
+  display: none;
+  white-space: nowrap;
+  z-index: 10;
+  letter-spacing: 0.02em;
+}
+
+/* ── Tarjeta unificada de Marea ── */
+.pp-card-marea ion-card-content {
+  padding: 0 !important;
+}
+.pp-card-marea .pp-marea-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 10px 14px;
+}
+.pp-marea-dir {
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--ion-color-primary);
+  white-space: nowrap;
+}
+.pp-marea-next {
+  font-size: 13px;
+  color: var(--ion-text-color);
+  white-space: nowrap;
+  flex: 1;
+}
+.pp-marea-amp-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border: 1px solid;
+  border-radius: 20px;
+  white-space: nowrap;
+  opacity: 0.85;
+}
+.pp-mareas-prox {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 7px;
+  padding: 2px 14px 12px;
+  border-top: 1px solid var(--ion-border-color);
+  margin-top: 10px;
+}
+.pp-marea-item {
+  background: var(--pp-panel2);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  padding: 9px 10px;
+  font-size: 12.5px;
+  color: var(--pp-texto2);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.pp-marea-item-ico {
+  font-size: 13px;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+/* ── Card Sol y Solunar: versión compacta ── */
+.pp-card-solunar-compact .pp-cond-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.pp-card-solunar-compact .pp-cond {
+  padding: 6px 8px;
+  background: var(--pp-panel2);
+  min-height: auto;
+  display: grid;
+  grid-template-columns: 28px 1fr;
+  grid-template-rows: auto auto;
+  gap: 2px 8px;
+  align-items: center;
+}
+.pp-card-solunar-compact .pp-cond-ico {
+  font-size: 24px;
+  line-height: 1;
+  grid-row: 1 / 3;
+  grid-column: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.pp-card-solunar-compact .pp-cond-lbl {
+  font-size: 9px;
+  margin: 0;
+  line-height: 1.1;
+  grid-row: 1;
+  grid-column: 2;
+  color: rgba(200, 200, 200, 0.6);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.pp-card-solunar-compact .pp-cond-val {
+  font-size: 13px;
+  font-weight: 600;
+  margin: 0;
+  line-height: 1.2;
+  grid-row: 2;
+  grid-column: 2;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Subtítulo "Períodos solunares" encima de columnas */
+.pp-solunar-subtitle {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--pp-texto2);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin-bottom: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, .08);
+}
+
+/* Periodos solunares en dos columnas: Mayor y Menor actividad */
+.pp-solunar-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.pp-solunar-col {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.pp-solunar-col-header {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--pp-texto2);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin-bottom: 2px;
+}
+.pp-solunar-row {
+  font-family: var(--pp-font-mono);
+  font-size: 11px;
+  padding: 4px 6px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.01em;
+}
+.pp-solunar-major {
+  background: rgba(255, 114, 0, 0.1);
+  color: var(--ion-color-primary);
+  border-color: rgba(255, 114, 0, 0.2);
+}
+.pp-solunar-minor {
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--pp-texto2);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+/* Legacy chip styles (kept for backwards compat if needed elsewhere) */
+.pp-tag {
+  background: var(--pp-panel2);
+  border: 1px solid var(--ion-border-color);
+  border-radius: 6px;
+  padding: 3px 8px;
+  font-size: 11.5px;
+  color: var(--pp-texto2);
+}
+.pp-tag-mayor {
+  border-color: var(--ion-color-primary);
+  color: var(--ion-color-primary);
+}

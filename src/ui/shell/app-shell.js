@@ -16,7 +16,11 @@
    - .actualizado = string  -> "hace 5 min" etc., junto al spot
    - .seguridad = {nivel, motivos} | null -> banner de seguridad
    - .refrescando = bool    -> anima el icono de refrescar
+   - .esFavorito = bool     -> togglea el icono de estrella (filled vs outline)
    Eventos emitidos: pp-cambiar-vista, pp-cambiar-spot, pp-favorito, pp-refrescar */
+import { svg } from '../../domain/iconos.js';
+import { estadisticas } from '../../domain/cuaderno.js';
+import { MODOS } from '../../domain/config.js';
 
 const VISTAS = [
   { id: 'ahora', nombre: 'Ahora', icono: 'speedometer-outline' },
@@ -59,15 +63,29 @@ export class PpAppShell extends HTMLElement {
     const logo = document.createElement('div');
     logo.slot = 'start';
     logo.className = 'pp-logo';
-    logo.textContent = '🐟';
+    const logoImg = document.createElement('img');
+    logoImg.src = './img/logo-marante.png';
+    logoImg.alt = 'Marante';
+    logo.appendChild(logoImg);
     toolbar.appendChild(logo);
 
     const selector = document.createElement('div');
     selector.className = 'pp-spot-selector';
+
+    const pinIco = svg('pin');
+    if (pinIco) {
+      pinIco.style.cssText = 'width:16px;height:16px;flex:none;color:var(--pp-accion-color,rgba(255,255,255,0.54))';
+      selector.appendChild(pinIco);
+    }
+
+    const spotTextos = document.createElement('div');
+    spotTextos.className = 'pp-spot-textos';
     this._spotNombreEl = document.createElement('span');
+    this._spotNombreEl.className = 'pp-spot-nombre';
     this._spotNombreEl.textContent = '—';
-    this._actualizadoEl = document.createElement('small');
-    selector.append(this._spotNombreEl, this._actualizadoEl);
+    spotTextos.append(this._spotNombreEl);
+    selector.appendChild(spotTextos);
+
     selector.addEventListener('click', () => this._emit('pp-cambiar-spot'));
     toolbar.appendChild(selector);
 
@@ -75,30 +93,41 @@ export class PpAppShell extends HTMLElement {
     acciones.slot = 'end';
     const btnFav = document.createElement('ion-button');
     btnFav.setAttribute('fill', 'clear');
-    const icoFav = document.createElement('ion-icon');
-    icoFav.setAttribute('name', 'star-outline');
-    icoFav.slot = 'icon-only';
-    btnFav.appendChild(icoFav);
+    btnFav.className = 'pp-accion-btn';
+    this._icoFavEl = document.createElement('ion-icon');
+    this._icoFavEl.setAttribute('name', 'star-outline');
+    this._icoFavEl.slot = 'icon-only';
+    btnFav.appendChild(this._icoFavEl);
     btnFav.addEventListener('click', () => this._emit('pp-favorito'));
 
     const btnRef = document.createElement('ion-button');
     btnRef.setAttribute('fill', 'clear');
+    btnRef.className = 'pp-accion-btn';
     this._icoRefEl = document.createElement('ion-icon');
     this._icoRefEl.setAttribute('name', 'refresh-outline');
     this._icoRefEl.slot = 'icon-only';
     btnRef.appendChild(this._icoRefEl);
     btnRef.addEventListener('click', () => this._emit('pp-refrescar'));
 
-    acciones.append(btnFav, btnRef);
+    const btnMenu = document.createElement('ion-button');
+    btnMenu.setAttribute('fill', 'clear');
+    btnMenu.className = 'pp-accion-btn';
+    const icoMenu = document.createElement('ion-icon');
+    icoMenu.setAttribute('name', 'menu-outline');
+    icoMenu.slot = 'icon-only';
+    btnMenu.appendChild(icoMenu);
+    btnMenu.addEventListener('click', () => {
+      const m = this.querySelector('ion-menu');
+      if (m) m.toggle();
+    });
+
+    acciones.append(btnFav, btnRef, btnMenu);
     toolbar.appendChild(acciones);
     header.appendChild(toolbar);
 
-    this._bannerEl = document.createElement('div');
-    this._bannerEl.className = 'pp-banner';
-    this._bannerEl.style.display = 'none';
-
     this._contenido = document.createElement('main');
     this._contenido.className = 'pp-contenido';
+    this._contenido.id = 'pp-contenido';
 
     const tabBar = document.createElement('ion-tab-bar');
     VISTAS.forEach(v => {
@@ -114,9 +143,196 @@ export class PpAppShell extends HTMLElement {
       this._botones[v.id] = btn;
     });
 
-    app.append(header, this._bannerEl, this._contenido, tabBar);
+    const menuLateral = this._buildMenu();
+    app.append(menuLateral, header, this._contenido, tabBar);
     this.appendChild(app);
     this._actualizarTabSeleccionado();
+  }
+
+  _buildMenu() {
+    const menu = document.createElement('ion-menu');
+    menu.setAttribute('side', 'end');
+    menu.setAttribute('menu-id', 'pp-menu-lateral');
+    menu.setAttribute('content-id', 'pp-contenido');
+
+    const mHeader = document.createElement('ion-header');
+    const mToolbar = document.createElement('ion-toolbar');
+    const mTitle = document.createElement('ion-title');
+    mTitle.textContent = 'Marante';
+    mToolbar.appendChild(mTitle);
+    mHeader.appendChild(mToolbar);
+
+    const mContent = document.createElement('ion-content');
+    mContent.className = 'pp-menu-content';
+
+    // ── Perfil ────────────────────────────────────────
+    const perfil = document.createElement('div');
+    perfil.className = 'pp-menu-perfil';
+    const avatarWrap = document.createElement('div');
+    avatarWrap.className = 'pp-menu-avatar';
+    const avatarIco = document.createElement('ion-icon');
+    avatarIco.setAttribute('name', 'person-circle-outline');
+    avatarWrap.appendChild(avatarIco);
+    const perfilNombre = document.createElement('div');
+    perfilNombre.className = 'pp-menu-perfil-nombre';
+    perfilNombre.textContent = 'Pescador local';
+    this._statsEl = document.createElement('div');
+    this._statsEl.className = 'pp-menu-stats';
+    perfil.append(avatarWrap, perfilNombre, this._statsEl);
+
+    // ── Notificaciones ────────────────────────────────
+    const secNotif = this._menuSeccion('Notificaciones');
+    const listNotif = secNotif.querySelector('ion-list');
+    const itemNotif = document.createElement('ion-item');
+    itemNotif.className = 'pp-menu-item';
+    const icoNotif = document.createElement('ion-icon');
+    icoNotif.setAttribute('name', 'notifications-outline');
+    icoNotif.slot = 'start';
+    const lblNotif = document.createElement('ion-label');
+    lblNotif.textContent = 'Alertas de condiciones';
+    const toggleNotif = document.createElement('ion-toggle');
+    toggleNotif.slot = 'end';
+    try { toggleNotif.checked = localStorage.getItem('pp_notif') === '1'; } catch (_) {}
+    toggleNotif.addEventListener('ionChange', (e) => {
+      try { localStorage.setItem('pp_notif', e.detail.checked ? '1' : '0'); } catch (_) {}
+    });
+    itemNotif.append(icoNotif, lblNotif, toggleNotif);
+    listNotif.appendChild(itemNotif);
+
+    // ── Ajustes ───────────────────────────────────────
+    const secAjustes = this._menuSeccion('Ajustes');
+    const listAjustes = secAjustes.querySelector('ion-list');
+
+    // Modalidad por defecto
+    const lblModo = document.createElement('div');
+    lblModo.className = 'pp-menu-seccion-subtitulo';
+    lblModo.textContent = 'Modalidad';
+    this._modoChipsEl = document.createElement('div');
+    this._modoChipsEl.className = 'pp-menu-modo-chips';
+    Object.values(MODOS).forEach(m => {
+      const chip = document.createElement('button');
+      chip.className = 'pp-chip pp-menu-modo-chip';
+      chip.dataset.modo = m.id;
+      chip.textContent = m.nombre;
+      chip.addEventListener('click', () => {
+        this._emit('pp-menu-modo', { modo: m.id });
+        this._actualizarModoChips(m.id);
+      });
+      this._modoChipsEl.appendChild(chip);
+    });
+    listAjustes.append(lblModo, this._modoChipsEl);
+
+    // Borrar caché
+    const itemCache = document.createElement('ion-item');
+    itemCache.setAttribute('button', 'true');
+    itemCache.setAttribute('detail', 'false');
+    itemCache.className = 'pp-menu-item pp-menu-item-danger';
+    const icoCache = document.createElement('ion-icon');
+    icoCache.setAttribute('name', 'cloud-download-outline');
+    icoCache.slot = 'start';
+    const lblCache = document.createElement('ion-label');
+    lblCache.textContent = 'Borrar caché de datos';
+    itemCache.append(icoCache, lblCache);
+    itemCache.addEventListener('click', () => {
+      if (window.confirm('¿Borrar los datos en caché?\nLa app los descargará de nuevo al conectar.')) {
+        try { localStorage.removeItem('pp_datos'); } catch (_) {}
+        menu.close();
+        this._emit('pp-refrescar');
+      }
+    });
+    listAjustes.appendChild(itemCache);
+
+    // ── Acerca de ─────────────────────────────────────
+    const secInfo = this._menuSeccion('Acerca de');
+    const listInfo = secInfo.querySelector('ion-list');
+    const itemAbout = document.createElement('ion-item');
+    itemAbout.className = 'pp-menu-item';
+    const icoAbout = document.createElement('ion-icon');
+    icoAbout.setAttribute('name', 'information-circle-outline');
+    icoAbout.slot = 'start';
+    const lblAbout = document.createElement('ion-label');
+    const aboutTitulo = document.createElement('b');
+    aboutTitulo.textContent = 'Marante · v0.1';
+    const aboutSub = document.createElement('small');
+    aboutSub.className = 'pp-menu-about-sub';
+    aboutSub.textContent = 'Datos: Open-Meteo · Nominatim · SunCalc · Sin servidor · 100% local';
+    lblAbout.append(aboutTitulo, document.createElement('br'), aboutSub);
+    itemAbout.append(icoAbout, lblAbout);
+    listInfo.appendChild(itemAbout);
+
+    mContent.append(perfil, secNotif, secAjustes, secInfo);
+    menu.append(mHeader, mContent);
+
+    menu.addEventListener('ionDidOpen', () => {
+      this._refreshStats();
+      try {
+        const prefs = JSON.parse(localStorage.getItem('pp_prefs') || '{}');
+        if (prefs.modo) this._actualizarModoChips(prefs.modo);
+      } catch (_) {}
+    });
+
+    return menu;
+  }
+
+  _refreshStats() {
+    if (!this._statsEl) return;
+    const st = estadisticas();
+    const nEspecies = Object.keys(st.porEspecie).length;
+    this._statsEl.replaceChildren();
+    const statChip = (n, label) => {
+      const s = document.createElement('span');
+      s.className = 'pp-menu-stat-chip';
+      const b = document.createElement('b');
+      b.textContent = n;
+      s.append(b, document.createTextNode(' ' + label));
+      return s;
+    };
+    this._statsEl.append(
+      statChip(st.total, st.total === 1 ? 'captura' : 'capturas'),
+      statChip(nEspecies, nEspecies === 1 ? 'especie' : 'especies'),
+    );
+  }
+
+  _actualizarModoChips(modo) {
+    if (!this._modoChipsEl) return;
+    this._modoChipsEl.querySelectorAll('.pp-menu-modo-chip').forEach(c => {
+      c.classList.toggle('pp-chip-acento', c.dataset.modo === modo);
+    });
+  }
+
+  _menuSeccion(titulo) {
+    const wrap = document.createElement('div');
+    wrap.className = 'pp-menu-seccion';
+    const label = document.createElement('div');
+    label.className = 'pp-menu-seccion-titulo';
+    label.textContent = titulo.toUpperCase();
+    const list = document.createElement('ion-list');
+    list.setAttribute('lines', 'none');
+    wrap.append(label, list);
+    return wrap;
+  }
+
+  _menuItem(icono, texto, onClick) {
+    const item = document.createElement('ion-item');
+    item.setAttribute('button', 'true');
+    item.setAttribute('detail', 'false');
+    item.className = 'pp-menu-item';
+    const ico = document.createElement('ion-icon');
+    ico.setAttribute('name', icono);
+    ico.slot = 'start';
+    const lbl = document.createElement('ion-label');
+    lbl.textContent = texto;
+    const chevron = document.createElement('ion-icon');
+    chevron.setAttribute('name', 'chevron-forward-outline');
+    chevron.slot = 'end';
+    chevron.className = 'pp-menu-chevron';
+    item.append(ico, lbl, chevron);
+    item.addEventListener('click', () => {
+      const m = this.querySelector('ion-menu');
+      if (m) m.close();
+      onClick();
+    });
+    return item;
   }
 
   get contenido() { return this._contenido; }
@@ -140,9 +356,11 @@ export class PpAppShell extends HTMLElement {
     this._spotNombreEl.textContent = (info && info.nombre) ? info.nombre : '—';
   }
 
-  set actualizado(texto) {
-    this._actualizadoEl.textContent = texto || '';
+  set esFavorito(val) {
+    if (this._icoFavEl) this._icoFavEl.setAttribute('name', val ? 'star' : 'star-outline');
   }
+
+  set actualizado(_texto) { /* eliminado: timestamp no aporta info útil */ }
 
   set refrescando(activo) {
     this._icoRefEl.classList.toggle('girando', !!activo);
@@ -152,15 +370,8 @@ export class PpAppShell extends HTMLElement {
      Los motivos vienen de PP.indice.seguridad() (texto fijo del propio
      dominio, no input de usuario), pero se usa textContent igualmente
      por consistencia con el resto de componentes. */
-  set seguridad(info) {
-    if (!info || info.nivel === 'ok') {
-      this._bannerEl.style.display = 'none';
-      this._bannerEl.textContent = '';
-      return;
-    }
-    this._bannerEl.style.display = 'block';
-    this._bannerEl.className = 'pp-banner pp-banner-' + info.nivel;
-    this._bannerEl.textContent = (info.nivel === 'rojo' ? '⛔ ' : '⚠️ ') + info.motivos.join(' · ');
+  set seguridad(_info) {
+    // El banner de seguridad se renderiza dentro de cada vista, no en el shell
   }
 
   _emit(nombre, detail) {

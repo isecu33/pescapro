@@ -55,9 +55,9 @@ function crearLeyenda() {
   titulo.textContent = 'Corriente:';
   leyenda.appendChild(titulo);
   [
-    ['#7f8fa0', '— débil'],
-    ['#4dabf7', '— moderada'],
-    ['#f59f00', '— fuerte'],
+    ['#666666', '— débil'],
+    ['#cc6600', '— moderada'],
+    ['#ff7200', '— fuerte'],
     ['#e03131', '— muy fuerte']
   ].forEach(([color, texto]) => {
     const span = document.createElement('span');

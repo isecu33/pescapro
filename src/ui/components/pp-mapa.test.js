@@ -13,9 +13,9 @@ import { colorPorVelocidad, calcularFlecha, crearPopupFavorito, PpMapa } from '.
 
 describe('pp-mapa: funciones puras extraidas de www/js/mapa.js', () => {
   it('colorPorVelocidad reproduce los mismos umbrales que dibujarFlecha()', () => {
-    expect(colorPorVelocidad(0.10)).toBe('#7f8fa0');
-    expect(colorPorVelocidad(0.20)).toBe('#4dabf7');
-    expect(colorPorVelocidad(0.45)).toBe('#f59f00');
+    expect(colorPorVelocidad(0.10)).toBe('#666666');
+    expect(colorPorVelocidad(0.20)).toBe('#cc6600');
+    expect(colorPorVelocidad(0.45)).toBe('#ff7200');
     expect(colorPorVelocidad(0.80)).toBe('#e03131');
   });
 

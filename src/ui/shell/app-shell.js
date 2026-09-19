@@ -16,8 +16,8 @@
    - .actualizado = string  -> "hace 5 min" etc., junto al spot
    - .seguridad = {nivel, motivos} | null -> banner de seguridad
    - .refrescando = bool    -> anima el icono de refrescar
+   - .esFavorito = bool     -> togglea el icono de estrella (filled vs outline)
    Eventos emitidos: pp-cambiar-vista, pp-cambiar-spot, pp-favorito, pp-refrescar */
-
 import { svg } from '../../domain/iconos.js';
 import { estadisticas } from '../../domain/cuaderno.js';
 import { MODOS } from '../../domain/config.js';
@@ -94,10 +94,10 @@ export class PpAppShell extends HTMLElement {
     const btnFav = document.createElement('ion-button');
     btnFav.setAttribute('fill', 'clear');
     btnFav.className = 'pp-accion-btn';
-    const icoFav = document.createElement('ion-icon');
-    icoFav.setAttribute('name', 'star-outline');
-    icoFav.slot = 'icon-only';
-    btnFav.appendChild(icoFav);
+    this._icoFavEl = document.createElement('ion-icon');
+    this._icoFavEl.setAttribute('name', 'star-outline');
+    this._icoFavEl.slot = 'icon-only';
+    btnFav.appendChild(this._icoFavEl);
     btnFav.addEventListener('click', () => this._emit('pp-favorito'));
 
     const btnRef = document.createElement('ion-button');
@@ -354,6 +354,10 @@ export class PpAppShell extends HTMLElement {
 
   set spot(info) {
     this._spotNombreEl.textContent = (info && info.nombre) ? info.nombre : '—';
+  }
+
+  set esFavorito(val) {
+    if (this._icoFavEl) this._icoFavEl.setAttribute('name', val ? 'star' : 'star-outline');
   }
 
   set actualizado(_texto) { /* eliminado: timestamp no aporta info útil */ }

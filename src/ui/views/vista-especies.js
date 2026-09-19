@@ -1,17 +1,13 @@
 /* Vista Especies -- grid de tarjetas con la actividad actual (0..100) de
    cada especie del Cantabrico, y un modal de ficha completa al pulsar una.
 
-   Reemplaza renderEspecies()/modalEspecie() de www/js/ui.js:347-408. Alli
-   el modal se montaba con `cuerpo.appendChild(el('h3', null, '... <small>...'))`
-   y variantes que inyectaban HTML (`'<b>' + k + ':</b> ' + v`) via innerHTML
-   -- inocuo hoy porque todos los datos vienen del dominio propio (ESPECIES,
-   nunca de usuario), pero se reescribe con createElement/textContent para
-   mantener consistencia con el resto de la migracion (ver pp-captura-card.js,
-   que si corrige un CRITICAL real de XSS con datos de usuario).
+   Cambios respecto al original:
+   - La tarjeta muestra la silueta SVG de la especie en vez del emoji `icono`
+   - El modal incluye foto real (bundleada, offline) y datos reglamentarios
+     de Galicia (reglamento.{tallaMin, pesoMin, cupo, veda, nota})
+   - Etiquetas de camposFicha sin emoji (usar texto puro)
 
-   API: renderEspecies(contenedor, st) -- limpia `contenedor` y lo reconstruye
-   por completo, igual que hacian las demas renderX(st) originales con
-   `cont.innerHTML = ''`. */
+   API: renderEspecies(contenedor, st) */
 import { especiesEn, mejoresHorasEspecie } from '../../domain/indice.js';
 import { util } from '../../domain/config.js';
 import { abrirModal } from '../util/modal.js';
@@ -33,7 +29,7 @@ export function renderEspecies(contenedor, st) {
 
   const nota = document.createElement('p');
   nota.className = 'pp-nota pp-pad';
-  nota.textContent = 'Actividad estimada AHORA en tu spot. Toca una especie para ver ficha completa, temporada y mejores horas.';
+  nota.textContent = 'Actividad estimada ahora en tu spot. Toca una especie para ver ficha completa, temporada y mejores horas.';
   contenedor.appendChild(nota);
 
   const grid = document.createElement('div');
@@ -79,8 +75,10 @@ function crearTarjeta(r, st) {
 
 export function abrirModalEspecie(esp, st) {
   const cuerpo = document.createElement('div');
+  cuerpo.className = 'pp-esp-modal';
 
   const titulo = document.createElement('h3');
+  titulo.className = 'pp-esp-modal-titulo';
   titulo.appendChild(espImgEl(esp, 'pp-esp-modal-ico'));
   titulo.append(' ' + esp.nombre + ' ');
   const cientifico = document.createElement('small');
@@ -89,12 +87,18 @@ export function abrirModalEspecie(esp, st) {
   cuerpo.appendChild(titulo);
 
   if (esp.foto) {
-    const foto = document.createElement('img');
-    foto.src = esp.foto;
-    foto.alt = esp.nombre;
-    foto.className = 'pp-esp-ficha-foto';
-    foto.onerror = function () { this.style.display = 'none'; };
-    cuerpo.appendChild(foto);
+    const fotoWrap = document.createElement('div');
+    fotoWrap.className = 'pp-esp-modal-foto';
+    const img = document.createElement('img');
+    img.src = esp.foto;
+    img.alt = esp.nombre;
+    img.onerror = () => { fotoWrap.style.display = 'none'; };
+    img.style.width = '100%';
+    img.style.borderRadius = '8px';
+    img.style.objectFit = 'cover';
+    img.style.maxHeight = '200px';
+    fotoWrap.appendChild(img);
+    cuerpo.appendChild(fotoWrap);
   }
 
   const cabeceraTemporada = document.createElement('div');
@@ -107,6 +111,9 @@ export function abrirModalEspecie(esp, st) {
 
   camposFicha(esp).forEach(([etiqueta, valor]) => cuerpo.appendChild(crearCampo(etiqueta, valor)));
 
+  const regla = crearSeccionReglamento(esp);
+  if (regla) cuerpo.appendChild(regla);
+
   if (st.ctx) cuerpo.appendChild(crearMejoresHoras(esp, st.ctx));
 
   abrirModal(cuerpo);
@@ -114,20 +121,53 @@ export function abrirModalEspecie(esp, st) {
 
 function camposFicha(esp) {
   return [
-    ['📍 Zonas', esp.zonas],
-    ['🎣 Técnicas', esp.tecnicas],
-    ['🪱 Cebos/señuelos', esp.cebos],
-    ['🌡️ Agua óptima', esp.sst[1] + '–' + esp.sst[2] + ' °C'],
-    ['🌊 Mar óptimo', esp.oleaje[1] + '–' + esp.oleaje[2] + ' m'],
-    ['📏 Talla mínima', tallaMinTexto(esp)],
-    ['💡 Consejo', esp.notas]
+    ['Zonas', esp.zonas],
+    ['Técnicas', esp.tecnicas],
+    ['Cebos / señuelos', esp.cebos],
+    ['Agua óptima', esp.sst[1] + '–' + esp.sst[2] + ' °C'],
+    ['Mar óptimo', esp.oleaje[1] + '–' + esp.oleaje[2] + ' m'],
+    ['Consejo', esp.notas]
   ];
 }
 
-function tallaMinTexto(esp) {
-  if (esp.tallaMin) return esp.tallaMin + ' cm (orientativa: verifica la normativa de tu comunidad)';
-  if (esp.pesoMin) return esp.pesoMin + ' kg mínimo (orientativo)';
-  return 'Consulta la normativa local';
+function crearSeccionReglamento(esp) {
+  const reg = esp.reglamento;
+  if (!reg) return null;
+
+  const sec = document.createElement('div');
+  sec.className = 'pp-reglamento';
+
+  const titulo = document.createElement('div');
+  titulo.className = 'pp-campo';
+  const b = document.createElement('b');
+  b.textContent = 'Reglamento Galicia';
+  titulo.appendChild(b);
+  sec.appendChild(titulo);
+
+  const filas = [];
+  if (reg.tallaMin) filas.push(['Talla mínima', reg.tallaMin + ' cm']);
+  if (reg.pesoMin)  filas.push(['Peso mínimo', reg.pesoMin + ' kg']);
+  if (reg.cupo)     filas.push(['Cupo diario', reg.cupo + ' ejemplares']);
+  if (reg.veda)     filas.push(['Veda', reg.veda]);
+
+  filas.forEach(([k, v]) => {
+    const fila = document.createElement('div');
+    fila.className = 'pp-campo';
+    const bk = document.createElement('b');
+    bk.textContent = k + ':';
+    fila.appendChild(bk);
+    fila.append(' ' + v);
+    sec.appendChild(fila);
+  });
+
+  if (reg.nota) {
+    const nota = document.createElement('p');
+    nota.className = 'pp-nota pp-nota-reglamento';
+    nota.textContent = reg.nota;
+    sec.appendChild(nota);
+  }
+
+  return sec;
 }
 
 function crearCampo(etiqueta, valor) {
@@ -161,7 +201,7 @@ function crearMejoresHoras(esp, ctx) {
   const cabecera = document.createElement('div');
   cabecera.className = 'pp-campo';
   const b = document.createElement('b');
-  b.textContent = '⏰ Mejores momentos (72 h):';
+  b.textContent = 'Mejores momentos (72 h):';
   cabecera.appendChild(b);
   cont.appendChild(cabecera);
 

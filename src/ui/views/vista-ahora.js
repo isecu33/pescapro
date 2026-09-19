@@ -356,6 +356,7 @@ function condicionesActuales(h) {
   const { card, content } = crearCard('Condiciones ahora');
   const wmo = WMO[h.codigo] || ['—', ''];
 
+
   const grid = document.createElement('div');
   grid.className = 'pp-cond-grid';
 

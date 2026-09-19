@@ -45,7 +45,8 @@ describe('renderEspecies: grid de tarjetas + modal de ficha por especie', () => 
     expect(tarjetas.length).toBe(rank.length);
     tarjetas.forEach((card, i) => {
       const r = rank[i];
-      expect(card.querySelector('.pp-esp-card-ico').textContent).toBe(r.especie.icono);
+      // icono es ahora un SVG (silhoueta), no emoji — verificamos que hay un svg en el contenedor
+      if (r.especie.silhoueta) expect(card.querySelector('.pp-esp-card-ico svg')).toBeTruthy();
       expect(card.querySelector('.pp-esp-card-nombre').textContent).toBe(r.especie.nombre);
       expect(card.querySelector('.pp-esp-card-val').textContent).toBe(String(r.act.valor));
       expect(card.querySelector('.pp-esp-card-motivo').textContent).toBe(r.act.motivo);

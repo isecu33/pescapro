@@ -28,6 +28,7 @@
     "@capacitor/core": "^8.0.0",
     "@ionic/core": "^9.0.3",
     "firebase": "^12.19.0",
+    "chart.js": "^4.5.1",
     "ionicons": "^8.1.0",
     "leaflet": "^1.9.4",
     "uplot": "^1.6.32"

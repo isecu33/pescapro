@@ -33,41 +33,64 @@
 import { fetchCorrientesGrid } from '../../domain/api.js';
 import { util } from '../../domain/config.js';
 import { horaMasCercana } from '../../domain/indice.js';
+import { svg } from '../../domain/iconos.js';
 import '../components/pp-mapa.js';
 
-function crearFilaToggle(emoji, texto, marcadoPorDefecto) {
-  const item = document.createElement('ion-item');
-  item.setAttribute('lines', 'none');
-  item.className = 'pp-mapa-toggle';
-  const check = document.createElement('ion-checkbox');
-  check.slot = 'start';
-  check.checked = !!marcadoPorDefecto;
-  const label = document.createElement('ion-label');
-  label.textContent = emoji + ' ' + texto;
-  item.append(check, label);
-  return { item, check };
+function crearFilaToggle(iconNombre, texto, marcadoPorDefecto) {
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'pp-mapa-toggle-btn' + (marcadoPorDefecto ? ' activo' : '');
+  const ico = svg(iconNombre);
+  if (ico) {
+    ico.style.cssText = 'width:14px;height:14px;flex:none;pointer-events:none';
+    btn.appendChild(ico);
+  }
+  const lbl = document.createElement('span');
+  lbl.textContent = texto;
+  btn.appendChild(lbl);
+  let _checked = !!marcadoPorDefecto;
+  Object.defineProperty(btn, 'checked', {
+    get() { return _checked; },
+    set(v) { _checked = !!v; btn.classList.toggle('activo', _checked); }
+  });
+  btn.addEventListener('click', () => {
+    _checked = !_checked;
+    btn.classList.toggle('activo', _checked);
+    btn.dispatchEvent(new CustomEvent('ionChange', { detail: { checked: _checked }, bubbles: false }));
+  });
+  const check = {
+    get checked() { return _checked; },
+    set checked(v) { _checked = !!v; btn.classList.toggle('activo', _checked); },
+    addEventListener: (ev, fn) => btn.addEventListener(ev, fn)
+  };
+  return { item: btn, check };
 }
 
 function crearLeyenda() {
   const leyenda = document.createElement('div');
   leyenda.className = 'pp-leyenda';
-  const titulo = document.createElement('span');
-  titulo.textContent = 'Corriente:';
-  leyenda.appendChild(titulo);
+  const fila = document.createElement('div');
+  fila.className = 'pp-leyenda-fila';
   [
-    ['#666666', '— débil'],
-    ['#cc6600', '— moderada'],
-    ['#ff7200', '— fuerte'],
-    ['#e03131', '— muy fuerte']
+    ['#666666', 'débil'],
+    ['#cc6600', 'moderada'],
+    ['#ff7200', 'fuerte'],
+    ['#e03131', 'muy fuerte']
   ].forEach(([color, texto]) => {
-    const span = document.createElement('span');
-    span.style.color = color;
-    span.textContent = texto;
-    leyenda.appendChild(span);
+    const item = document.createElement('span');
+    item.className = 'pp-leyenda-item';
+    const dot = document.createElement('span');
+    dot.className = 'pp-leyenda-dot';
+    dot.style.background = color;
+    const lbl = document.createElement('span');
+    lbl.textContent = texto;
+    item.append(dot, lbl);
+    fila.appendChild(item);
   });
-  const nota = document.createElement('span');
-  nota.textContent = '· Desliza la hora para ver el patrón con la marea';
-  leyenda.appendChild(nota);
+  const nota = document.createElement('p');
+  nota.className = 'pp-leyenda-nota';
+  nota.textContent = 'Desliza para ver el patrón con la marea';
+  leyenda.append(fila, nota);
   return leyenda;
 }
 
@@ -81,8 +104,8 @@ export function crearVistaMapa(contenedor, st, callbacks) {
 
   const filaHora = document.createElement('div');
   filaHora.className = 'pp-mapa-fila';
-  const icoHora = document.createElement('span');
-  icoHora.textContent = '🕐';
+  const icoHora = svg('reloj');
+  if (icoHora) icoHora.style.cssText = 'width:16px;height:16px;flex:none;color:var(--pp-texto2)';
   const range = document.createElement('ion-range');
   range.min = 0;
   range.max = 71;
@@ -90,11 +113,12 @@ export function crearVistaMapa(contenedor, st, callbacks) {
   range.value = 0;
   const etiquetaHora = document.createElement('span');
   etiquetaHora.id = 'pp-mapa-hora';
-  etiquetaHora.textContent = '—';
-  filaHora.append(icoHora, range, etiquetaHora);
+  etiquetaHora.textContent = '-';
+  if (icoHora) filaHora.append(icoHora, range, etiquetaHora);
+  else filaHora.append(range, etiquetaHora);
 
-  const { item: itemViento, check: checkViento } = crearFilaToggle('💨', 'Viento', true);
-  const { item: itemSeamark, check: checkSeamark } = crearFilaToggle('⚓', 'Carta náutica', false);
+  const { item: itemViento, check: checkViento } = crearFilaToggle('viento', 'Viento', true);
+  const { item: itemSeamark, check: checkSeamark } = crearFilaToggle('ancla', 'Carta náutica', false);
 
   const estado = document.createElement('span');
   estado.id = 'pp-mapa-estado';

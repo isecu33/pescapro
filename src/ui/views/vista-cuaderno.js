@@ -336,7 +336,7 @@ function abrirModalCaptura(contenedor, st) {
   Object.values(MODOS).forEach(m => {
     const o = document.createElement('ion-select-option');
     o.value = m.id;
-    o.textContent = m.icono + ' ' + m.nombre;
+    o.textContent = m.nombre;
     selModo.appendChild(o);
   });
   selModo.value = st.modo;

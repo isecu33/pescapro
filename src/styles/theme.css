@@ -381,11 +381,7 @@ ion-tab-bar { position: fixed; bottom: 0; left: 0; right: 0; z-index: 1500; }
   text-transform: uppercase;
   margin-top: 6px;
 }
-.pp-score-modo {
-  font-size: 11px;
-  color: var(--pp-texto2);
-  margin-top: 3px;
-}
+.pp-modo-chip-ico { display: inline-block; width: 20px; height: 20px; background-color: white; -webkit-mask-size: contain; -webkit-mask-repeat: no-repeat; -webkit-mask-position: center; mask-size: contain; mask-repeat: no-repeat; mask-position: center; vertical-align: middle; margin-right: 5px; }
 
 /* Panel derecho: factores mini */
 .pp-factores-panel {

@@ -39,7 +39,8 @@ export class PpCapturaCard extends HTMLElement {
       .sub, .cond { font-size: 12px; color: var(--texto2, #888888); margin-top: 2px; }
       .notas { font-size: 12.5px; margin-top: 3px; font-style: italic; }
       .borrar { margin-left: auto; background: none; border: none; color: var(--texto2, #888888);
-        cursor: pointer; font-size: 13px; }
+        cursor: pointer; font-size: 18px; display: flex; align-items: center; padding: 0 2px; }
+      ion-icon { font-size: 14px; vertical-align: -2px; display: inline-block; }
     `;
     shadow.appendChild(style);
     this._root = document.createElement('div');
@@ -84,7 +85,9 @@ export class PpCapturaCard extends HTMLElement {
     const borrar = document.createElement('button');
     borrar.className = 'borrar';
     borrar.title = 'Borrar';
-    borrar.textContent = '✕';
+    const borrarIco = document.createElement('ion-icon');
+    borrarIco.setAttribute('name', 'close-outline');
+    borrar.appendChild(borrarIco);
     borrar.addEventListener('click', (ev) => { ev.stopPropagation(); this._emit('pp-borrar'); });
     cab.appendChild(borrar);
     cuerpo.appendChild(cab);
@@ -98,14 +101,27 @@ export class PpCapturaCard extends HTMLElement {
     cuerpo.appendChild(sub);
 
     const cond = c.condiciones || {};
-    if (cond.faseMarea) {
+    if (cond.faseMarea || cond.luna || cond.viento != null || cond.indice != null) {
       const condDiv = document.createElement('div');
       condDiv.className = 'cond';
-      let t = '🌊 ' + cond.faseMarea;
-      if (cond.luna) t += ' · ' + cond.luna;
-      if (cond.viento != null) t += ' · 💨 ' + Math.round(cond.viento) + ' km/h';
-      if (cond.indice != null) t += ' · índice ' + cond.indice;
-      condDiv.textContent = t;
+      let sep = false;
+      const add = (nodes) => {
+        if (sep) condDiv.appendChild(document.createTextNode(' · '));
+        nodes.forEach(n => condDiv.appendChild(n));
+        sep = true;
+      };
+      if (cond.faseMarea) {
+        const ico = document.createElement('ion-icon');
+        ico.setAttribute('name', 'water-outline');
+        add([ico, document.createTextNode(' ' + cond.faseMarea)]);
+      }
+      if (cond.luna) add([document.createTextNode(cond.luna)]);
+      if (cond.viento != null) {
+        const ico = document.createElement('ion-icon');
+        ico.setAttribute('name', 'navigate-outline');
+        add([ico, document.createTextNode(' ' + Math.round(cond.viento) + ' km/h')]);
+      }
+      if (cond.indice != null) add([document.createTextNode('índice ' + cond.indice)]);
       cuerpo.appendChild(condDiv);
     }
 

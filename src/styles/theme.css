@@ -994,11 +994,15 @@ pp-curva-marea { display: block; }
 }
 
 img.pp-logro-ico {
-  width: 26px;
-  height: 26px;
+  width: 40px;
+  height: 40px;
   object-fit: contain;
   flex-shrink: 0;
   filter: brightness(0) invert(1);
+}
+
+img.pp-logro-ico-png {
+  filter: none;
 }
 
 span.pp-logro-ico {
@@ -1035,4 +1039,107 @@ span.pp-logro-ico {
   gap: 8px;
   flex-wrap: wrap;
   margin-top: 10px;
+}
+
+/* Modal informativo de logro (al pulsar un logro del grid) */
+.pp-modal-logro { text-align: center; }
+.pp-modal-logro-img {
+  width: 96px;
+  height: 96px;
+  object-fit: contain;
+  margin: 0 auto 12px;
+  display: block;
+}
+.pp-modal-logro-ico {
+  font-size: 60px;
+  line-height: 1;
+  margin-bottom: 12px;
+}
+
+/* Toast de celebración — logro recién conseguido */
+.pp-celebracion-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.55);
+  opacity: 0;
+  transition: opacity 280ms var(--pp-ease);
+  pointer-events: none;
+}
+.pp-celebracion-overlay.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.pp-celebracion-tarjeta {
+  background: var(--pp-panel);
+  border: 1px solid rgba(255, 114, 0, 0.5);
+  border-radius: 20px;
+  padding: 28px 24px 20px;
+  text-align: center;
+  max-width: 280px;
+  width: 90%;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 114, 0, 0.2);
+  transform: scale(0.88) translateY(16px);
+  transition: transform 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  animation: pp-confetti-glow 2s ease-in-out infinite alternate;
+}
+.pp-celebracion-overlay.visible .pp-celebracion-tarjeta {
+  transform: scale(1) translateY(0);
+}
+
+@keyframes pp-confetti-glow {
+  from { box-shadow: 0 8px 40px rgba(0,0,0,.5), 0 0 18px rgba(255,114,0,.2); }
+  to   { box-shadow: 0 8px 40px rgba(0,0,0,.5), 0 0 36px rgba(255,114,0,.45); }
+}
+
+.pp-celebracion-cabecera {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--ion-color-primary);
+  margin-bottom: 16px;
+}
+
+.pp-celebracion-img {
+  width: 100px;
+  height: 100px;
+  object-fit: contain;
+  margin: 0 auto 14px;
+  display: block;
+  animation: pp-logro-bounce 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.pp-celebracion-ico {
+  font-size: 64px;
+  line-height: 1;
+  margin-bottom: 14px;
+  animation: pp-logro-bounce 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes pp-logro-bounce {
+  from { transform: scale(0.4); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}
+
+.pp-celebracion-nombre {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ion-text-color);
+  margin-bottom: 6px;
+}
+
+.pp-celebracion-desc {
+  font-size: 13px;
+  color: var(--pp-texto2);
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+
+.pp-celebracion-ok {
+  --border-radius: 12px;
 }

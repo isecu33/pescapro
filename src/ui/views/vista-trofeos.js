@@ -75,6 +75,7 @@ export function renderTrofeos(contenedor, st) {
   contenedor.appendChild(seccionRecords(capturas));
   contenedor.appendChild(seccionLogros(capturas));
   contenedor.appendChild(seccionLigas(repintar));
+  notificarNuevosLogros(capturas);
 }
 
 /* ============ RECORDS ============ */
@@ -139,6 +140,42 @@ function seccionRecords(capturas) {
 
 /* ============ LOGROS ============ */
 
+const KEY_LOGROS_VISTOS = 'pp_logros_vistos';
+
+function logrosVistos() {
+  try { return new Set(JSON.parse(localStorage.getItem(KEY_LOGROS_VISTOS) || '[]')); }
+  catch (e) { return new Set(); }
+}
+
+function marcarLogrosVistos(ids) {
+  try {
+    const vistos = logrosVistos();
+    ids.forEach(id => vistos.add(id));
+    localStorage.setItem(KEY_LOGROS_VISTOS, JSON.stringify([...vistos]));
+  } catch (e) { /* silencioso: si falla, volverá a mostrar en la próxima visita */ }
+}
+
+function crearIcoLogro(l) {
+  if (l.img) {
+    const img = document.createElement('img');
+    img.className = 'pp-logro-ico pp-logro-ico-png';
+    img.src = l.img;
+    img.alt = l.nombre;
+    img.onerror = () => {
+      img.onerror = null;
+      const fb = document.createElement('span');
+      fb.className = 'pp-logro-ico';
+      fb.textContent = l.icono;
+      img.replaceWith(fb);
+    };
+    return img;
+  }
+  const span = document.createElement('span');
+  span.className = 'pp-logro-ico';
+  span.textContent = l.icono;
+  return span;
+}
+
 function seccionLogros(capturas) {
   const card = document.createElement('div');
   card.className = 'pp-card';
@@ -152,24 +189,12 @@ function seccionLogros(capturas) {
   logros.forEach(l => {
     const c = document.createElement('div');
     c.className = 'pp-logro' + (l.conseguido ? ' conseguido' : '');
-
-    const ico = document.createElement('img');
-    ico.className = 'pp-logro-ico';
-    ico.src = './img/logros/' + l.id + '.svg';
-    ico.alt = l.nombre;
-    ico.onerror = () => {
-      ico.onerror = null;
-      const fb = document.createElement('span');
-      fb.className = 'pp-logro-ico';
-      fb.textContent = l.icono;
-      ico.replaceWith(fb);
-    };
+    c.append(crearIcoLogro(l));
 
     const nombre = document.createElement('div');
     nombre.className = 'pp-logro-nombre';
     nombre.textContent = l.nombre;
-
-    c.append(ico, nombre);
+    c.appendChild(nombre);
 
     if (!l.conseguido && l.progreso) {
       const prog = document.createElement('div');
@@ -187,14 +212,98 @@ function seccionLogros(capturas) {
 
 function modalLogro(l) {
   const cuerpo = document.createElement('div');
+  cuerpo.className = 'pp-modal-logro';
+  if (l.img) {
+    const img = document.createElement('img');
+    img.className = 'pp-modal-logro-img';
+    img.src = l.img;
+    img.alt = l.nombre;
+    cuerpo.appendChild(img);
+  } else {
+    const ico = document.createElement('div');
+    ico.className = 'pp-modal-logro-ico';
+    ico.textContent = l.icono;
+    cuerpo.appendChild(ico);
+  }
   cuerpo.appendChild(crearTitulo(l.nombre));
   const desc = document.createElement('p');
   desc.textContent = l.desc;
   cuerpo.appendChild(desc);
   cuerpo.appendChild(crearNota(l.conseguido
-    ? 'Conseguido'
+    ? '✓ Conseguido'
     : (l.progreso ? 'Progreso: ' + l.progreso[0] + ' de ' + l.progreso[1] : 'Aún pendiente')));
   abrirModal(cuerpo);
+}
+
+/* Muestra un toast de celebración para cada logro recién conseguido.
+   Se ejecuta al entrar en la pestaña de Trofeos; los logros ya vistos
+   se guardan en localStorage para no repetir la notificación. */
+export function notificarNuevosLogros(capturas) {
+  const logros = evaluarLogros(capturas);
+  const vistos = logrosVistos();
+  const nuevos = logros.filter(l => l.conseguido && !vistos.has(l.id));
+  if (!nuevos.length) return;
+  marcarLogrosVistos(nuevos.map(l => l.id));
+  mostrarCelebracionEnCola(nuevos, 0);
+}
+
+function mostrarCelebracionEnCola(lista, idx) {
+  if (idx >= lista.length) return;
+  const l = lista[idx];
+  const overlay = document.createElement('div');
+  overlay.className = 'pp-celebracion-overlay';
+
+  const tarjeta = document.createElement('div');
+  tarjeta.className = 'pp-celebracion-tarjeta';
+
+  const cabecera = document.createElement('div');
+  cabecera.className = 'pp-celebracion-cabecera';
+  cabecera.textContent = '¡Logro conseguido!';
+
+  if (l.img) {
+    const img = document.createElement('img');
+    img.className = 'pp-celebracion-img';
+    img.src = l.img;
+    img.alt = l.nombre;
+    tarjeta.appendChild(img);
+  } else {
+    const ico = document.createElement('div');
+    ico.className = 'pp-celebracion-ico';
+    ico.textContent = l.icono;
+    tarjeta.appendChild(ico);
+  }
+
+  const nombre = document.createElement('div');
+  nombre.className = 'pp-celebracion-nombre';
+  nombre.textContent = l.nombre;
+
+  const desc = document.createElement('div');
+  desc.className = 'pp-celebracion-desc';
+  desc.textContent = l.desc;
+
+  const bOk = document.createElement('ion-button');
+  bOk.textContent = '¡Genial!';
+  bOk.setAttribute('fill', 'solid');
+  bOk.className = 'pp-celebracion-ok';
+
+  tarjeta.append(cabecera, nombre, desc, bOk);
+  overlay.appendChild(tarjeta);
+  document.body.appendChild(overlay);
+
+  requestAnimationFrame(() => overlay.classList.add('visible'));
+
+  function cerrar() {
+    clearTimeout(timer);
+    overlay.classList.remove('visible');
+    overlay.addEventListener('transitionend', () => {
+      overlay.remove();
+      mostrarCelebracionEnCola(lista, idx + 1);
+    }, { once: true });
+  }
+
+  const timer = setTimeout(cerrar, 4000);
+  bOk.addEventListener('click', cerrar);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) cerrar(); });
 }
 
 /* ============ COMPETICIONES ============ */

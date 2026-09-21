@@ -57,17 +57,23 @@ export const LISTA = [
     nombre: 'Ave nocturna', desc: 'Captura entre las 3:00 y las 7:00',
     check: (st, caps) => caps.some(c => { const h = horaDe(c); return h >= 3 && h < 7; }) },
 
+  // === DÍA PERFECTO ===
+  { id: 'dia-perfecto-plata', icono: '🔥', nombre: 'Día perfecto', desc: '3 capturas en un mismo día',
+    check: (st) => !!(st.mejorDia && st.mejorDia.n >= 3), prog: (st) => [Math.min(st.mejorDia ? st.mejorDia.n : 0, 3), 3] },
+  { id: 'dia-perfecto-oro', icono: '🔥', nombre: 'Día perfecto', desc: '5 capturas en un mismo día',
+    check: (st) => !!(st.mejorDia && st.mejorDia.n >= 5), prog: (st) => [Math.min(st.mejorDia ? st.mejorDia.n : 0, 5), 5] },
+  { id: 'dia-perfecto-platino', icono: '🔥', nombre: 'Día perfecto', desc: '10 capturas en un mismo día',
+    check: (st) => !!(st.mejorDia && st.mejorDia.n >= 10), prog: (st) => [Math.min(st.mejorDia ? st.mejorDia.n : 0, 10), 10] },
+
   // === SIN PNG POR AHORA ===
   { id: 'trofeo-lubina', icono: '🏆', nombre: 'Lubina de trofeo', desc: 'Una lubina de 50 cm o más',
     check: (st) => !!(st.porEspecie.lubina && st.porEspecie.lubina.talla && st.porEspecie.lubina.talla.valor >= 50) },
   { id: 'contracorriente', icono: '⛈️', nombre: 'Contra pronóstico', desc: 'Captura con índice de pesca < 30',
     check: (st, caps) => caps.some(c => c.condiciones && c.condiciones.indice != null && c.condiciones.indice < 30) },
-  { id: 'dia-perfecto', icono: '🔥', nombre: 'Día perfecto', desc: '5 capturas en un mismo día',
-    check: (st) => !!(st.mejorDia && st.mejorDia.n >= 5), prog: (st) => [Math.min(st.mejorDia ? st.mejorDia.n : 0, 5), 5] },
-  { id: 'fotografo', icono: '📸', nombre: 'Fotógrafo', desc: '5 capturas con foto',
+  { id: 'fotografo', img: './img/camara.png', icono: '📸', nombre: 'Fotógrafo', desc: '5 capturas con foto',
     check: (st) => st.conFoto >= 5, prog: (st) => [Math.min(st.conFoto, 5), 5] },
-  { id: 'viajero', icono: '🧭', nombre: 'Explorador de costas', desc: 'Capturas en 3 spots distintos',
-    check: (st) => st.spotsDistintos >= 3, prog: (st) => [Math.min(st.spotsDistintos, 3), 3] }
+  { id: 'viajero', img: './img/viajero.png', icono: '🧭', nombre: 'Explorador de costas', desc: 'Capturas en 5 spots distintos',
+    check: (st) => st.spotsDistintos >= 5, prog: (st) => [Math.min(st.spotsDistintos, 5), 5] }
 ];
 
 function cefalopodos(st) {

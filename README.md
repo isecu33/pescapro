@@ -1,6 +1,14 @@
 # 🐟 PescaPro
 
+![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=flat&logo=javascript&logoColor=black)
+![Platform](https://img.shields.io/badge/Platform-Android-3DDC84?style=flat&logo=android&logoColor=white)
+![Status](https://img.shields.io/badge/Status-Active%20Development-brightgreen?style=flat)
+
 App Android de condiciones de pesca para costa: **marea, viento, oleaje, clima, temperatura del agua y corrientes**, con un **índice de pesca (0-100)** por modalidad y **predicción de actividad por especie** (lubina, dorada, sargo, calamar, sepia, pulpo...). Todo calculado con **reglas transparentes, sin IA**, y con **datos gratuitos de Open-Meteo sin API key**.
+
+## Screenshots
+
+> TODO: add app screenshots here
 
 ## Cómo funciona
 
@@ -75,3 +83,7 @@ Cada vez que cambies algo en `www/`, ejecuta `npx cap sync android` y vuelve a c
 - Las corrientes del mapa son previsión del modelo oceánico, orientativas cerca de costa; deslizando las horas ves el patrón típico de la zona con el ciclo de marea.
 - Las tallas mínimas son orientativas: **verifica siempre la normativa de tu comunidad autónoma** (y las vedas, p. ej. el pulpo).
 - El índice orienta, no promete peces. El mar siempre tiene la última palabra 🌊.
+
+## English Summary
+
+PescaPro is an Android fishing-conditions app for coastal anglers, built with Capacitor and vanilla JavaScript. It combines free, no-API-key Open-Meteo data (weather, marine, and geocoding) with locally computed tide, sun/moon, and current analysis to produce a transparent, rule-based 0-100 fishing index tailored to each technique (spinning, eging, surfcasting) and predicted activity per species. It also includes an offline-first fishing log with photos stored on-device, automatic personal records and unlockable achievements, and a serverless friend-to-friend league/competition system — all without collecting or transmitting any personal data.

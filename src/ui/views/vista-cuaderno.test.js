@@ -146,7 +146,7 @@ describe('renderCuaderno: vista Cuaderno (registro, galeria, stats, historial, e
     document.body.appendChild(cont);
     renderCuaderno(cont, stBase());
 
-    const chips = cont.querySelectorAll('ion-chip');
+    const chips = cont.querySelectorAll('ion-button');
     const exportarChip = Array.from(chips).find(c => c.textContent.includes('Exportar'));
     exportarChip.click();
     await Promise.resolve();
@@ -164,7 +164,7 @@ describe('renderCuaderno: vista Cuaderno (registro, galeria, stats, historial, e
     document.body.appendChild(cont);
     renderCuaderno(cont, stBase());
 
-    const chips = cont.querySelectorAll('ion-chip');
+    const chips = cont.querySelectorAll('ion-button');
     const importarChip = Array.from(chips).find(c => c.textContent.includes('Importar'));
     importarChip.click();
 
@@ -180,7 +180,7 @@ describe('renderCuaderno: vista Cuaderno (registro, galeria, stats, historial, e
     document.body.appendChild(cont);
     renderCuaderno(cont, stBase());
 
-    const chips = cont.querySelectorAll('ion-chip');
+    const chips = cont.querySelectorAll('ion-button');
     const importarChip = Array.from(chips).find(c => c.textContent.includes('Importar'));
     importarChip.click();
 

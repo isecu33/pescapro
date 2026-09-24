@@ -286,7 +286,9 @@ ion-tab-button[selected] {
 .pp-foto-grande { width: 100%; max-height: 60vh; object-fit: contain; border-radius: 12px; background: var(--pp-panel2); min-height: 120px; }
 
 .pp-captura-sub, .pp-captura-cond { font-size: 12px; color: var(--pp-texto2); margin-top: 2px; }
+.pp-captura-cond ion-icon, .pp-captura-sub ion-icon { font-size: 13px; vertical-align: -2px; }
 .pp-captura-notas { font-size: 12.5px; margin-top: 3px; font-style: italic; }
+.pp-export-fila { display: flex; gap: 8px; margin-bottom: 8px; }
 
 /* Vista Mapa (ver src/ui/views/vista-mapa.js) -- equivalente a las reglas
    #mapa / .pp-mapa-controles / .pp-leyenda de www/css/app.css, adaptadas

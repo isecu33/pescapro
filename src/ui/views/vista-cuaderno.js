@@ -17,7 +17,7 @@
 import '../components/pp-captura-card.js';
 import { leer, anadir, borrar as borrarCaptura, estadisticas, exportar, importar } from '../../domain/cuaderno.js';
 import { obtener as obtenerFoto, comprimir as comprimirFoto, guardar as guardarFoto } from '../../domain/fotos.js';
-import { ESPECIES, especiePorId } from '../../domain/especies.js';
+import { ESPECIES, especiePorId, espImgEl } from '../../domain/especies.js';
 import { MODOS } from '../../domain/config.js';
 import { horaMasCercana, indiceHora } from '../../domain/indice.js';
 import { luna as lunaEn, momentoDelDia } from '../../domain/solunar.js';
@@ -87,13 +87,9 @@ function crearTarjetaStats(stats) {
   card.appendChild(statsBarras('Por luna', stats.porLuna));
   card.appendChild(statsBarras('Por especie', stats.porEspecie, null, (k) => {
     const e = especiePorId(k);
-    return e ? e.icono + ' ' + e.nombre : k;
+    return e ? e.nombre : k;
   }));
 
-  const nota = document.createElement('p');
-  nota.className = 'pp-nota';
-  nota.textContent = 'Tu historial es tu mejor predictor: repite lo que te funciona.';
-  card.appendChild(nota);
   return card;
 }
 
@@ -201,8 +197,9 @@ function abrirModalFoto(c) {
 
   const campo = document.createElement('div');
   campo.className = 'pp-campo';
+  if (especie) campo.appendChild(espImgEl(especie, 'pp-esp-cab-ico'));
   const b = document.createElement('b');
-  b.textContent = especie ? especie.icono + ' ' + especie.nombre : c.especie;
+  b.textContent = especie ? especie.nombre : c.especie;
   campo.appendChild(b);
   if (c.talla) campo.appendChild(document.createTextNode(' · ' + c.talla + ' cm'));
   if (c.peso) campo.appendChild(document.createTextNode(' · ' + c.peso + ' kg'));
@@ -210,22 +207,41 @@ function abrirModalFoto(c) {
 
   const sub = document.createElement('div');
   sub.className = 'pp-captura-sub';
-  let subTexto = new Date(c.fecha).toLocaleString('es-ES',
+  const fechaTxt = new Date(c.fecha).toLocaleString('es-ES',
     { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' });
-  if (c.spot && c.spot.nombre) subTexto += ' · 📍 ' + c.spot.nombre;
-  sub.textContent = subTexto;
+  sub.appendChild(document.createTextNode(fechaTxt));
+  if (c.spot && c.spot.nombre) {
+    sub.appendChild(document.createTextNode(' · '));
+    const locIco = document.createElement('ion-icon');
+    locIco.setAttribute('name', 'location-outline');
+    sub.appendChild(locIco);
+    sub.appendChild(document.createTextNode(' ' + c.spot.nombre));
+  }
   cuerpo.appendChild(sub);
 
   const cond = c.condiciones || {};
-  if (cond.faseMarea || cond.luna) {
+  if (cond.faseMarea || cond.luna || cond.viento != null || cond.ola != null || cond.indice != null) {
     const condDiv = document.createElement('div');
     condDiv.className = 'pp-captura-cond';
-    let t = '🌊 Marea ' + (cond.faseMarea || '—');
-    if (cond.luna) t += ' · ' + cond.luna;
-    if (cond.viento != null) t += ' · 💨 ' + Math.round(cond.viento) + ' km/h';
-    if (cond.ola != null) t += ' · 🌊 ' + Number(cond.ola).toFixed(1) + ' m';
-    if (cond.indice != null) t += ' · índice ' + cond.indice;
-    condDiv.textContent = t;
+    let sep = false;
+    const add = (nodes) => {
+      if (sep) condDiv.appendChild(document.createTextNode(' · '));
+      nodes.forEach(n => condDiv.appendChild(n));
+      sep = true;
+    };
+    if (cond.faseMarea) {
+      const ico = document.createElement('ion-icon');
+      ico.setAttribute('name', 'water-outline');
+      add([ico, document.createTextNode(' Marea ' + cond.faseMarea)]);
+    }
+    if (cond.luna) add([document.createTextNode(cond.luna)]);
+    if (cond.viento != null) {
+      const ico = document.createElement('ion-icon');
+      ico.setAttribute('name', 'navigate-outline');
+      add([ico, document.createTextNode(' ' + Math.round(cond.viento) + ' km/h')]);
+    }
+    if (cond.ola != null) add([document.createTextNode(Number(cond.ola).toFixed(1) + ' m')]);
+    if (cond.indice != null) add([document.createTextNode('índice ' + cond.indice)]);
     cuerpo.appendChild(condDiv);
   }
 
@@ -252,8 +268,16 @@ function crearExportImport(contenedor, st) {
   const card = document.createElement('div');
   card.className = 'pp-card';
 
-  const be = document.createElement('ion-chip');
-  be.textContent = '⬇ Exportar (copiar JSON)';
+  const fila = document.createElement('div');
+  fila.className = 'pp-export-fila';
+
+  const be = document.createElement('ion-button');
+  be.setAttribute('fill', 'outline');
+  be.setAttribute('size', 'small');
+  const icoExp = document.createElement('ion-icon');
+  icoExp.setAttribute('name', 'cloud-download-outline');
+  icoExp.slot = 'start';
+  be.append(icoExp, document.createTextNode('Exportar'));
   be.addEventListener('click', async () => {
     const json = exportar();
     try {
@@ -264,8 +288,13 @@ function crearExportImport(contenedor, st) {
     }
   });
 
-  const bi = document.createElement('ion-chip');
-  bi.textContent = '⬆ Importar';
+  const bi = document.createElement('ion-button');
+  bi.setAttribute('fill', 'outline');
+  bi.setAttribute('size', 'small');
+  const icoImp = document.createElement('ion-icon');
+  icoImp.setAttribute('name', 'cloud-upload-outline');
+  icoImp.slot = 'start';
+  bi.append(icoImp, document.createTextNode('Importar'));
   bi.addEventListener('click', () => {
     const txt = window.prompt('Pega el JSON del cuaderno:');
     if (!txt) return;
@@ -277,7 +306,8 @@ function crearExportImport(contenedor, st) {
     }
   });
 
-  card.append(be, bi);
+  fila.append(be, bi);
+  card.appendChild(fila);
   const nota = document.createElement('p');
   nota.className = 'pp-nota';
   nota.textContent = 'La exportación lleva los datos de las capturas; las fotos permanecen en este dispositivo.';
@@ -310,7 +340,7 @@ function abrirModalCaptura(contenedor, st) {
   ESPECIES.forEach(e => {
     const o = document.createElement('ion-select-option');
     o.value = e.id;
-    o.textContent = e.icono + ' ' + e.nombre;
+    o.textContent = e.nombre;
     selEsp.appendChild(o);
   });
   const oOtra = document.createElement('ion-select-option');
@@ -383,7 +413,7 @@ function abrirModalCaptura(contenedor, st) {
 
   const guardar = document.createElement('ion-button');
   guardar.setAttribute('expand', 'block');
-  guardar.textContent = 'Guardar con condiciones actuales';
+  guardar.textContent = 'Guardar captura';
   guardar.addEventListener('click', async () => {
     guardar.disabled = true;
     let condiciones = null;

@@ -9,7 +9,8 @@ import {
   refreshOutline, starOutline, starSharp, closeOutline, addOutline, addCircleOutline,
   cameraOutline, locationOutline, trashOutline,
   menuOutline, personCircleOutline, notificationsOutline, settingsOutline, informationCircleOutline,
-  chevronForwardOutline, moonOutline, sunnyOutline, cloudDownloadOutline
+  chevronForwardOutline, moonOutline, sunnyOutline, cloudDownloadOutline,
+  waterOutline, navigateOutline, cloudUploadOutline
 } from 'ionicons/icons';
 
 import '@ionic/core/css/core.css';
@@ -48,7 +49,10 @@ addIcons({
   'chevron-forward-outline': chevronForwardOutline,
   'moon-outline': moonOutline,
   'sunny-outline': sunnyOutline,
-  'cloud-download-outline': cloudDownloadOutline
+  'cloud-download-outline': cloudDownloadOutline,
+  'water-outline': waterOutline,
+  'navigate-outline': navigateOutline,
+  'cloud-upload-outline': cloudUploadOutline
 });
 
 defineCustomElements(window);

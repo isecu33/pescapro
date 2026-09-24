@@ -1,18 +1,20 @@
 // @vitest-environment happy-dom
-import { describe, it, expect, vi, beforeAll } from 'vitest';
-
-// Chart.js no puede renderizar en happy-dom (sin canvas real), así que lo
-// mock-eamos a nivel de módulo — solo verificamos el ciclo de vida del
-// componente, no el rendering interno de Chart.js.
-vi.mock('chart.js', () => {
-  const Chart = vi.fn(function () {
-    this.destroy = vi.fn();
-  });
-  Chart.register = vi.fn();
-  return { Chart, registerables: [] };
-});
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 import './pp-curva-marea.js';
+
+// happy-dom no implementa el contexto 2D real de <canvas>, así que mockeamos
+// getContext('2d') con un objeto que registra las llamadas — el componente
+// dibuja con canvas nativo (sin Chart.js), no hay librería que mockear.
+function crearCtxMock() {
+  return {
+    moveTo: vi.fn(), lineTo: vi.fn(), bezierCurveTo: vi.fn(),
+    beginPath: vi.fn(), closePath: vi.fn(), fill: vi.fn(), stroke: vi.fn(),
+    arc: vi.fn(), fillText: vi.fn(), save: vi.fn(), restore: vi.fn(),
+    setLineDash: vi.fn(),
+    createLinearGradient: vi.fn(() => ({ addColorStop: vi.fn() }))
+  };
+}
 
 function datosDePrueba() {
   const ahora = Date.now();
@@ -27,49 +29,48 @@ function datosDePrueba() {
   return { puntos, extremos, ahora };
 }
 
-describe('<pp-curva-marea>: curva Chart.js con área suave', () => {
+describe('<pp-curva-marea>: curva de nivel del mar dibujada en canvas', () => {
+  let ctx;
+
+  beforeEach(() => {
+    ctx = crearCtxMock();
+    vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockImplementation(() => ctx);
+  });
+
   it('se registra como custom element', () => {
     expect(customElements.get('pp-curva-marea')).toBeTruthy();
   });
 
-  it('tiene un <canvas> en el shadowRoot', () => {
+  it('tiene un <canvas> en su DOM interno', () => {
     const el = document.createElement('pp-curva-marea');
     document.body.appendChild(el);
-    expect(el.shadowRoot.querySelector('canvas')).not.toBeNull();
+    expect(el.querySelector('canvas')).not.toBeNull();
     el.remove();
   });
 
-  it('no crea un Chart si hay menos de 4 puntos', async () => {
-    const { Chart } = await import('chart.js');
-    Chart.mockClear();
+  it('no dibuja si hay menos de 4 puntos', () => {
     const el = document.createElement('pp-curva-marea');
     document.body.appendChild(el);
     el.data = { puntos: [{ t: 1, nivel: 0 }], extremos: [] };
-    expect(Chart).not.toHaveBeenCalled();
+    expect(ctx.stroke).not.toHaveBeenCalled();
     el.remove();
   });
 
-  it('crea un Chart al recibir datos suficientes', async () => {
-    const { Chart } = await import('chart.js');
-    Chart.mockClear();
+  it('dibuja la curva (gradiente + línea) al recibir datos suficientes', () => {
     const el = document.createElement('pp-curva-marea');
     document.body.appendChild(el);
     el.data = datosDePrueba();
-    expect(Chart).toHaveBeenCalledTimes(1);
+    expect(ctx.createLinearGradient).toHaveBeenCalledTimes(1);
+    expect(ctx.stroke).toHaveBeenCalled();
     el.remove();
   });
 
-  it('destruye el Chart anterior al re-renderizar', async () => {
-    const { Chart } = await import('chart.js');
-    Chart.mockClear();
+  it('redibuja al recibir nuevos datos', () => {
     const el = document.createElement('pp-curva-marea');
     document.body.appendChild(el);
     el.data = datosDePrueba();
-    const destroyFn = el._chart?.destroy;
     el.data = datosDePrueba();
-    // destroyFn fue llamado antes de crear el nuevo chart
-    if (destroyFn) expect(destroyFn).toHaveBeenCalled();
-    expect(Chart).toHaveBeenCalledTimes(2);
+    expect(ctx.createLinearGradient).toHaveBeenCalledTimes(2);
     el.remove();
   });
 });

@@ -16,7 +16,7 @@ import { abrirModal, cerrarModal } from '../util/modal.js';
 import { leer as leerCuaderno } from '../../domain/cuaderno.js';
 import { calcular as calcularRecords } from '../../domain/records/records.js';
 import { evaluar as evaluarLogros } from '../../domain/records/logros.js';
-import { especiePorId } from '../../domain/especies.js';
+import { especiePorId, espImgEl } from '../../domain/especies.js';
 import {
   MODOS_LIGA,
   perfil as perfilLiga,
@@ -75,6 +75,7 @@ export function renderTrofeos(contenedor, st) {
   contenedor.appendChild(seccionRecords(capturas));
   contenedor.appendChild(seccionLogros(capturas));
   contenedor.appendChild(seccionLigas(repintar));
+  notificarNuevosLogros(capturas);
 }
 
 /* ============ RECORDS ============ */
@@ -82,20 +83,20 @@ export function renderTrofeos(contenedor, st) {
 function seccionRecords(capturas) {
   const card = document.createElement('div');
   card.className = 'pp-card';
-  card.appendChild(crearTitulo('🏅 Récords personales'));
+  card.appendChild(crearTitulo('Récords personales'));
 
   const r = calcularRecords(capturas);
   const lista = document.createElement('ion-list');
   const items = [
-    ['🎣', 'Capturas totales', String(r.total)],
-    ['🐟', 'Especies distintas', String(r.especiesDistintas)],
-    ['🔥', 'Mejor día', r.mejorDia ? r.mejorDia.n + ' (' + fmtDia(r.mejorDia.dia) + ')' : '—'],
-    ['🧭', 'Spots con capturas', String(r.spotsDistintos)]
+    ['Capturas totales', String(r.total)],
+    ['Especies distintas', String(r.especiesDistintas)],
+    ['Mejor día', r.mejorDia ? r.mejorDia.n + ' (' + fmtDia(r.mejorDia.dia) + ')' : '—'],
+    ['Spots con capturas', String(r.spotsDistintos)]
   ];
-  items.forEach(([ico, etiqueta, valor]) => {
+  items.forEach(([etiqueta, valor]) => {
     const item = document.createElement('ion-item');
     item.setAttribute('lines', 'none');
-    item.textContent = ico + ' ' + etiqueta + ': ' + valor;
+    item.textContent = etiqueta + ': ' + valor;
     lista.appendChild(item);
   });
   card.appendChild(lista);
@@ -121,8 +122,14 @@ function seccionRecords(capturas) {
         if (d.peso) partes.push(d.peso.valor + ' kg');
         const fila = document.createElement('div');
         fila.className = 'pp-record-fila';
-        fila.textContent = (especie ? especie.icono + ' ' + especie.nombre : id) + ' · ' + d.n + ' uds' +
-          (partes.length ? ' · ' + partes.join(' · ') : '');
+        if (especie) {
+          fila.appendChild(espImgEl(especie, 'pp-esp-cab-ico'));
+          const txt = document.createElement('span');
+          txt.textContent = especie.nombre + ' · ' + d.n + ' uds' + (partes.length ? ' · ' + partes.join(' · ') : '');
+          fila.appendChild(txt);
+        } else {
+          fila.textContent = id + ' · ' + d.n + ' uds' + (partes.length ? ' · ' + partes.join(' · ') : '');
+        }
         card.appendChild(fila);
       });
   } else {
@@ -133,45 +140,69 @@ function seccionRecords(capturas) {
 
 /* ============ LOGROS ============ */
 
+const KEY_LOGROS_VISTOS = 'pp_logros_vistos';
+
+function logrosVistos() {
+  try { return new Set(JSON.parse(localStorage.getItem(KEY_LOGROS_VISTOS) || '[]')); }
+  catch (e) { return new Set(); }
+}
+
+function marcarLogrosVistos(ids) {
+  try {
+    const vistos = logrosVistos();
+    ids.forEach(id => vistos.add(id));
+    localStorage.setItem(KEY_LOGROS_VISTOS, JSON.stringify([...vistos]));
+  } catch (e) { /* silencioso: si falla, volverá a mostrar en la próxima visita */ }
+}
+
+function crearIcoLogro(l) {
+  if (l.img) {
+    const img = document.createElement('img');
+    img.className = 'pp-logro-ico pp-logro-ico-png';
+    img.src = l.img;
+    img.alt = l.nombre;
+    img.onerror = () => {
+      img.onerror = null;
+      const fb = document.createElement('span');
+      fb.className = 'pp-logro-ico';
+      fb.textContent = l.icono;
+      img.replaceWith(fb);
+    };
+    return img;
+  }
+  const span = document.createElement('span');
+  span.className = 'pp-logro-ico';
+  span.textContent = l.icono;
+  return span;
+}
+
 function seccionLogros(capturas) {
   const card = document.createElement('div');
   card.className = 'pp-card';
   const logros = evaluarLogros(capturas);
   const conseguidos = logros.filter(l => l.conseguido).length;
-  card.appendChild(crearTitulo('🎖️ Logros (' + conseguidos + '/' + logros.length + ')'));
+  card.appendChild(crearTitulo('Logros (' + conseguidos + '/' + logros.length + ')'));
 
   const grid = document.createElement('div');
   grid.className = 'pp-logros';
-  grid.style.display = 'grid';
-  grid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(110px, 1fr))';
-  grid.style.gap = '8px';
 
   logros.forEach(l => {
-    const c = document.createElement('ion-card');
-    c.button = true;
-    c.style.margin = '0';
-    if (!l.conseguido) { c.style.opacity = '0.55'; c.style.filter = 'grayscale(1)'; }
-
-    const contenido = document.createElement('ion-card-content');
-    contenido.style.textAlign = 'center';
-
-    const ico = document.createElement('div');
-    ico.style.fontSize = '28px';
-    ico.textContent = l.icono;
+    const c = document.createElement('div');
+    c.className = 'pp-logro' + (l.conseguido ? ' conseguido' : '');
+    c.append(crearIcoLogro(l));
 
     const nombre = document.createElement('div');
-    nombre.style.fontSize = '12px';
+    nombre.className = 'pp-logro-nombre';
     nombre.textContent = l.nombre;
-
-    contenido.append(ico, nombre);
+    c.appendChild(nombre);
 
     if (!l.conseguido && l.progreso) {
-      const badge = document.createElement('ion-badge');
-      badge.textContent = l.progreso[0] + '/' + l.progreso[1];
-      contenido.appendChild(badge);
+      const prog = document.createElement('div');
+      prog.className = 'pp-logro-prog';
+      prog.textContent = l.progreso[0] + '/' + l.progreso[1];
+      c.appendChild(prog);
     }
 
-    c.appendChild(contenido);
     c.addEventListener('click', () => modalLogro(l));
     grid.appendChild(c);
   });
@@ -181,14 +212,98 @@ function seccionLogros(capturas) {
 
 function modalLogro(l) {
   const cuerpo = document.createElement('div');
-  cuerpo.appendChild(crearTitulo(l.icono + ' ' + l.nombre));
+  cuerpo.className = 'pp-modal-logro';
+  if (l.img) {
+    const img = document.createElement('img');
+    img.className = 'pp-modal-logro-img';
+    img.src = l.img;
+    img.alt = l.nombre;
+    cuerpo.appendChild(img);
+  } else {
+    const ico = document.createElement('div');
+    ico.className = 'pp-modal-logro-ico';
+    ico.textContent = l.icono;
+    cuerpo.appendChild(ico);
+  }
+  cuerpo.appendChild(crearTitulo(l.nombre));
   const desc = document.createElement('p');
   desc.textContent = l.desc;
   cuerpo.appendChild(desc);
   cuerpo.appendChild(crearNota(l.conseguido
-    ? '✅ Conseguido'
+    ? '✓ Conseguido'
     : (l.progreso ? 'Progreso: ' + l.progreso[0] + ' de ' + l.progreso[1] : 'Aún pendiente')));
   abrirModal(cuerpo);
+}
+
+/* Muestra un toast de celebración para cada logro recién conseguido.
+   Se ejecuta al entrar en la pestaña de Trofeos; los logros ya vistos
+   se guardan en localStorage para no repetir la notificación. */
+export function notificarNuevosLogros(capturas) {
+  const logros = evaluarLogros(capturas);
+  const vistos = logrosVistos();
+  const nuevos = logros.filter(l => l.conseguido && !vistos.has(l.id));
+  if (!nuevos.length) return;
+  marcarLogrosVistos(nuevos.map(l => l.id));
+  mostrarCelebracionEnCola(nuevos, 0);
+}
+
+function mostrarCelebracionEnCola(lista, idx) {
+  if (idx >= lista.length) return;
+  const l = lista[idx];
+  const overlay = document.createElement('div');
+  overlay.className = 'pp-celebracion-overlay';
+
+  const tarjeta = document.createElement('div');
+  tarjeta.className = 'pp-celebracion-tarjeta';
+
+  const cabecera = document.createElement('div');
+  cabecera.className = 'pp-celebracion-cabecera';
+  cabecera.textContent = '¡Logro conseguido!';
+
+  if (l.img) {
+    const img = document.createElement('img');
+    img.className = 'pp-celebracion-img';
+    img.src = l.img;
+    img.alt = l.nombre;
+    tarjeta.appendChild(img);
+  } else {
+    const ico = document.createElement('div');
+    ico.className = 'pp-celebracion-ico';
+    ico.textContent = l.icono;
+    tarjeta.appendChild(ico);
+  }
+
+  const nombre = document.createElement('div');
+  nombre.className = 'pp-celebracion-nombre';
+  nombre.textContent = l.nombre;
+
+  const desc = document.createElement('div');
+  desc.className = 'pp-celebracion-desc';
+  desc.textContent = l.desc;
+
+  const bOk = document.createElement('ion-button');
+  bOk.textContent = '¡Genial!';
+  bOk.setAttribute('fill', 'solid');
+  bOk.className = 'pp-celebracion-ok';
+
+  tarjeta.append(cabecera, nombre, desc, bOk);
+  overlay.appendChild(tarjeta);
+  document.body.appendChild(overlay);
+
+  requestAnimationFrame(() => overlay.classList.add('visible'));
+
+  function cerrar() {
+    clearTimeout(timer);
+    overlay.classList.remove('visible');
+    overlay.addEventListener('transitionend', () => {
+      overlay.remove();
+      mostrarCelebracionEnCola(lista, idx + 1);
+    }, { once: true });
+  }
+
+  const timer = setTimeout(cerrar, 4000);
+  bOk.addEventListener('click', cerrar);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) cerrar(); });
 }
 
 /* ============ COMPETICIONES ============ */
@@ -196,17 +311,14 @@ function modalLogro(l) {
 function seccionLigas(repintar) {
   const card = document.createElement('div');
   card.className = 'pp-card';
-  card.appendChild(crearTitulo('⚔️ Competiciones con amigos'));
+  card.appendChild(crearTitulo('Competiciones con amigos'));
 
   const fila = document.createElement('div');
-  fila.style.display = 'flex';
-  fila.style.gap = '8px';
-  fila.style.flexWrap = 'wrap';
-  fila.style.marginBottom = '8px';
+  fila.className = 'pp-btn-fila';
 
-  const bCrear = crearBoton('➕ Crear');
+  const bCrear = crearBoton('Crear');
   bCrear.addEventListener('click', () => conNombre(() => modalCrear(repintar)));
-  const bUnirse = crearBoton('📥 Unirse / añadir código');
+  const bUnirse = crearBoton('Unirse / añadir código');
   bUnirse.addEventListener('click', () => conNombre(() => modalImportar(repintar)));
   fila.append(bCrear, bUnirse);
   card.appendChild(fila);
@@ -236,7 +348,7 @@ function conNombre(sigue) {
   if (p && p.nombre) { sigue(); return; }
 
   const cuerpo = document.createElement('div');
-  cuerpo.appendChild(crearTitulo('🪪 Tu nombre de pescador'));
+  cuerpo.appendChild(crearTitulo('Tu nombre de pescador'));
   cuerpo.appendChild(crearNota('Aparecerá en los rankings que compartas con tus amigos.'));
   const input = document.createElement('ion-input');
   input.setAttribute('placeholder', 'P. ej. Iker');
@@ -257,7 +369,7 @@ function conNombre(sigue) {
 
 function modalCrear(repintar) {
   const cuerpo = document.createElement('div');
-  cuerpo.appendChild(crearTitulo('➕ Nueva competición'));
+  cuerpo.appendChild(crearTitulo('Nueva competición'));
 
   const nombre = document.createElement('ion-input');
   nombre.setAttribute('placeholder', 'Nombre (p. ej. Liga de agosto)');
@@ -317,7 +429,7 @@ function modalCrear(repintar) {
 
 function modalImportar(repintar) {
   const cuerpo = document.createElement('div');
-  cuerpo.appendChild(crearTitulo('📥 Pegar código'));
+  cuerpo.appendChild(crearTitulo('Pegar código'));
   cuerpo.appendChild(crearNota(
     'Vale tanto un código de invitación (para unirte) como un código de resultado de un amigo (para actualizar el ranking).'));
 
@@ -355,7 +467,7 @@ function modalLiga(id, repintar) {
 
   const cuerpo = document.createElement('div');
   const est = estadoLiga(liga);
-  cuerpo.appendChild(crearTitulo('⚔️ ' + liga.nombre + ' · ' + est));
+  cuerpo.appendChild(crearTitulo(liga.nombre + ' · ' + est));
   const modoNombre = MODOS_LIGA[liga.modo] ? MODOS_LIGA[liga.modo].nombre : liga.modo;
   cuerpo.appendChild(crearNota(fmtDia(liga.desde) + ' → ' + fmtDia(liga.hasta) + ' · ' + modoNombre));
 
@@ -370,17 +482,14 @@ function modalLiga(id, repintar) {
   }
 
   const acciones = document.createElement('div');
-  acciones.style.display = 'flex';
-  acciones.style.flexWrap = 'wrap';
-  acciones.style.gap = '8px';
-  acciones.style.marginTop = '10px';
+  acciones.className = 'pp-acciones';
 
   const errAcciones = crearNota('');
 
-  const bInv = crearBoton('📤 Compartir invitación');
+  const bInv = crearBoton('Compartir invitación');
   bInv.addEventListener('click', () => compartirInvitacion(liga));
 
-  const bRes = crearBoton('📤 Enviar mi resultado');
+  const bRes = crearBoton('Enviar mi resultado');
   bRes.addEventListener('click', () => {
     try {
       const codigo = codigoResultadoLiga(liga.id);
@@ -392,10 +501,10 @@ function modalLiga(id, repintar) {
     }
   });
 
-  const bAdd = crearBoton('📥 Añadir resultado de un amigo');
+  const bAdd = crearBoton('Añadir resultado de un amigo');
   bAdd.addEventListener('click', () => { cerrarModal(); modalImportar(repintar); });
 
-  const bDel = crearBoton('🗑 Borrar competición', { color: 'danger' });
+  const bDel = crearBoton('Borrar competición', { color: 'danger' });
   bDel.addEventListener('click', () => modalConfirmarBorrado(liga, repintar));
 
   acciones.append(bInv, bRes, bAdd, bDel);
@@ -412,13 +521,11 @@ function modalLiga(id, repintar) {
    que ya evita dialogos nativos como alert()). */
 function modalConfirmarBorrado(liga, repintar) {
   const cuerpo = document.createElement('div');
-  cuerpo.appendChild(crearTitulo('🗑 Borrar competición'));
+  cuerpo.appendChild(crearTitulo('Borrar competición'));
   cuerpo.appendChild(crearNota('¿Borrar «' + liga.nombre + '» de tu móvil? (a tus amigos no les afecta)'));
 
   const acciones = document.createElement('div');
-  acciones.style.display = 'flex';
-  acciones.style.gap = '8px';
-  acciones.style.marginTop = '10px';
+  acciones.className = 'pp-acciones';
 
   const bSi = crearBoton('Borrar', { fill: 'solid', color: 'danger' });
   bSi.addEventListener('click', () => { borrarLiga(liga.id); cerrarModal(); repintar(); });
@@ -451,7 +558,7 @@ async function compartir(texto) {
 
 function mostrarCodigoParaCopiar(texto) {
   const cuerpo = document.createElement('div');
-  cuerpo.appendChild(crearTitulo('📤 Compartir'));
+  cuerpo.appendChild(crearTitulo('Compartir'));
   const area = document.createElement('ion-textarea');
   area.value = texto;
   area.setAttribute('readonly', 'true');

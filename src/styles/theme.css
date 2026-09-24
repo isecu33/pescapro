@@ -168,7 +168,32 @@ html, body {
 .pp-modal-gps-sep { margin-top: 14px; }
 
 /* Nav inferior fijo (no se usa ion-tabs/router, ver app-shell.js) */
-ion-tab-bar { position: fixed; bottom: 0; left: 0; right: 0; z-index: 1500; }
+ion-tab-bar {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 1500;
+  --border: 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+}
+
+ion-tab-button {
+  --color: rgba(240, 240, 240, 0.30);
+  --color-selected: var(--ion-color-primary);
+  --background: transparent;
+  --background-focused: transparent;
+  --background-selected: rgba(255, 114, 0, 0.09);
+  --ripple-color: rgba(255, 114, 0, 0.10);
+  --indicator-color: transparent;
+  --icon-font-size: 22px;
+  --label-font-size: 10px;
+  --padding-top: 9px;
+  --padding-bottom: 5px;
+  transition: opacity 0.18s var(--pp-ease);
+  letter-spacing: 0.02em;
+}
+ion-tab-button[selected] {
+  --color: var(--ion-color-primary);
+}
 
 /* Fix bug real (detectado con Playwright, no por los tests happy-dom):
    ion-app aplica `justify-content: space-between` de fabrica -- pensado
@@ -272,9 +297,47 @@ ion-tab-bar { position: fixed; bottom: 0; left: 0; right: 0; z-index: 1500; }
 .pp-mapa-fila { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; font-size: 13px; }
 .pp-mapa-fila ion-range { flex: 1; }
 .pp-mapa-toggle { --background: transparent; --padding-start: 0; --min-height: 0; }
-#pp-mapa-hora { font-weight: 700; min-width: 92px; }
-#pp-mapa-estado { font-size: 12px; color: var(--pp-texto2); }
-.pp-leyenda { display: flex; gap: 10px; font-size: 11px; color: var(--pp-texto2); flex-wrap: wrap; }
+#pp-mapa-hora {
+  font-weight: 600;
+  min-width: 80px;
+  font-size: 11.5px;
+  color: var(--ion-text-color);
+  font-variant-numeric: tabular-nums;
+  font-family: var(--pp-font-mono);
+}
+#pp-mapa-estado { font-size: 11.5px; color: var(--pp-texto2); }
+
+/* Botones toggle personalizados (reemplazo de ion-item/ion-checkbox) */
+.pp-mapa-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 11px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  color: var(--pp-texto2);
+  font-size: 12.5px;
+  font-family: var(--pp-font);
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background 0.15s var(--pp-ease), border-color 0.15s var(--pp-ease), color 0.15s var(--pp-ease);
+}
+.pp-mapa-toggle-btn.activo {
+  background: rgba(255, 114, 0, 0.12);
+  border-color: rgba(255, 114, 0, 0.32);
+  color: var(--ion-color-primary);
+}
+.pp-mapa-toggle-btn:active { transform: scale(0.96); }
+
+/* Leyenda de corrientes */
+.pp-leyenda { display: flex; flex-direction: column; gap: 5px; }
+.pp-leyenda-fila { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; }
+.pp-leyenda-item { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; color: var(--pp-texto2); }
+.pp-leyenda-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.pp-leyenda-nota { margin: 0; font-size: 10.5px; color: rgba(240, 240, 240, 0.22); }
 
 /* ── Selector de modalidad (chips) ── */
 .pp-modos {

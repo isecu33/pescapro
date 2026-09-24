@@ -2,6 +2,8 @@
    Devuelve elementos SVG del DOM (sin innerHTML de datos externos). */
 
 const TRAZOS = {
+  reloj:        '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l2.5 2.5"/>',
+  ancla:        '<circle cx="12" cy="5" r="2"/><path d="M12 7v4M5 11h14M5 11c0 5 3 8 7 9M19 11c0 5-3 8-7 9"/>',
   viento:       '<path d="M2 8h13a2.5 2.5 0 1 0-2.5-2.5"/><path d="M2 12h17a2.5 2.5 0 1 1-2.5 2.5"/><path d="M2 16h10"/>',
   ola:          '<path d="M2 9c2-2 4-2 6 0s4 2 6 0 4-2 6 0"/><path d="M2 15c2-2 4-2 6 0s4 2 6 0 4-2 6 0"/>',
   termometro:   '<path d="M14 13.5V4a2 2 0 1 0-4 0v9.5a4 4 0 1 0 4 0Z"/><circle cx="12" cy="16" r="1.2" fill="currentColor" stroke="none"/>',

@@ -39,14 +39,14 @@ describe('renderPrevision', () => {
     const vents = mejoresVentanas(st.ctx, st.modo);
     expect(vents.length).toBeGreaterThan(0);
 
-    const items = cont.querySelectorAll('ion-list ion-item');
+    const items = cont.querySelectorAll('.pp-vent-lista .pp-ventana');
     expect(items.length).toBe(vents.length);
 
-    const primerIdx = items[0].querySelector('.pp-vent-idx');
+    const primerIdx = items[0].querySelector('.pp-ventana-idx');
     expect(primerIdx.textContent).toBe(String(vents[0].max));
     expect(primerIdx.style.background).not.toBe('');
 
-    const primerMotivo = items[0].querySelector('.pp-vent-info span');
+    const primerMotivo = items[0].querySelector('.pp-ventana-motivo');
     expect(primerMotivo.textContent).toBe(motivoVentana(vents[0]));
   });
 
@@ -59,8 +59,8 @@ describe('renderPrevision', () => {
 
     const vents = mejoresVentanas(st.ctx, st.modo);
     expect(vents.length).toBe(0);
-    expect(cont.querySelector('ion-list')).toBeNull();
-    expect(cont.querySelector('.pp-nota').textContent).toMatch(/No hay ventanas buenas/);
+    expect(cont.querySelector('.pp-vent-lista')).toBeNull();
+    expect(cont.querySelector('.pp-vent-vacio p').textContent).toMatch(/Sin ventanas buenas/);
   });
 
   it('el grafico tiene una barra por cada hora relevante de la serie, con contraste alto/bajo', () => {
@@ -87,7 +87,7 @@ describe('renderPrevision', () => {
 
     const modal = document.getElementById('pp-modal');
     expect(modal).not.toBeNull();
-    expect(modal.querySelector('ion-content ion-list ion-item')).not.toBeNull();
+    expect(modal.querySelector('ion-content .pp-factores-wrap .pp-factor')).not.toBeNull();
   });
 
   it('el modal de detalle de hora muestra el banner de seguridad si la hora es roja', () => {

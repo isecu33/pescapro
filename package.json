@@ -3,6 +3,12 @@
   "version": "1.0.0",
   "description": "Condiciones de pesca: marea, viento, clima, corrientes, índice de pesca y actividad por especie. Datos gratuitos de Open-Meteo, sin IA.",
   "private": true,
+  "license": "MIT",
+  "author": "Iker Seoane Currás",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/isecu33/pescapro"
+  },
   "scripts": {
     "test": "node test/test_mareas.js && node test/test_indice.js && node test/test_especies.js && node test/test_records.js",
     "serve": "node scripts/serve.js",

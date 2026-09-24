@@ -21,7 +21,7 @@ describe('pp-mapa: funciones puras extraidas de www/js/mapa.js', () => {
 
   it('calcularFlecha() devuelve p1/p2 centrados en (lat,lon) y 2 puntas de flecha', () => {
     const { p1, p2, puntas, color } = calcularFlecha(43.29, -2.17, 0.4, 90);
-    expect(color).toBe('#f59f00');
+    expect(color).toBe('#ff7200');
     const centroLat = (p1[0] + p2[0]) / 2, centroLon = (p1[1] + p2[1]) / 2;
     expect(centroLat).toBeCloseTo(43.29, 3);
     expect(centroLon).toBeCloseTo(-2.17, 3);

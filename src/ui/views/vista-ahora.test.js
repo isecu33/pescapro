@@ -33,7 +33,7 @@ describe('renderAhora: reemplaza renderAhora()/selectorModo()/desgloseFactores()
     expect(cont.querySelector('ion-segment')).toBeNull();
   });
 
-  it('el gauge recibe el valor exacto calculado por indiceHora()', () => {
+  it('el panel de puntuación muestra el valor exacto calculado por indiceHora()', () => {
     const st = crearSt({ datos: { viento: 10, ola: 0.5, sst: 16 } });
     const cont = document.createElement('div');
     renderAhora(cont, st);
@@ -41,9 +41,9 @@ describe('renderAhora: reemplaza renderAhora()/selectorModo()/desgloseFactores()
     const h = horaMasCercana(st.datos.horas, new Date());
     const esperado = indiceHora(h, st.modo, st.ctx).valor;
 
-    const gauge = cont.querySelector('pp-gauge');
-    expect(gauge).not.toBeNull();
-    expect(gauge.value).toBe(esperado);
+    const scoreNum = cont.querySelector('.pp-score-num');
+    expect(scoreNum).not.toBeNull();
+    expect(scoreNum.textContent).toBe(String(esperado));
   });
 
   it('el banner de seguridad esta oculto cuando el nivel es "ok"', () => {
@@ -53,40 +53,40 @@ describe('renderAhora: reemplaza renderAhora()/selectorModo()/desgloseFactores()
 
     const cont = document.createElement('div');
     renderAhora(cont, st);
-    const banner = cont.querySelector('ion-card.pp-banner');
-    expect(banner).not.toBeNull();
+    // bannerSeguridad() es siempre el primer hijo; sin motivos no lleva clase.
+    const banner = cont.firstElementChild;
+    expect(banner.className).toBe('');
     expect(banner.style.display).toBe('none');
   });
 
-  it('el banner de seguridad se muestra en rojo cuando hay viento peligroso', () => {
+  it('el banner de seguridad se muestra con los motivos cuando hay viento peligroso', () => {
     const st = crearSt({ datos: { viento: 55, ola: 1.0, sst: 16 } });
     const h = horaMasCercana(st.datos.horas, new Date());
     expect(indiceHora(h, st.modo, st.ctx).seguridad.nivel).toBe('rojo');
 
     const cont = document.createElement('div');
     renderAhora(cont, st);
-    const banner = cont.querySelector('ion-card.pp-banner');
-    expect(banner.style.display).toBe('block');
-    expect(banner.getAttribute('color')).toBe('danger');
-    expect(banner.textContent).toContain('⛔');
+    const banner = cont.querySelector('.pp-banner');
+    expect(banner).not.toBeNull();
+    expect(banner.classList.contains('pp-banner-rojo')).toBe(true);
+    expect(banner.style.display).not.toBe('none');
+    expect(banner.textContent).toContain('Viento muy fuerte');
   });
 
-  it('el segment tiene un boton por modalidad y marca la activa', () => {
+  it('el selector de modalidad tiene un boton por modalidad y marca la activa', () => {
     const st = crearSt({ st: { modo: 'eging' } });
     const cont = document.createElement('div');
     renderAhora(cont, st);
 
-    const segment = cont.querySelector('ion-segment');
-    expect(segment).not.toBeNull();
-    expect(segment.value).toBe('eging');
-
-    const botones = segment.querySelectorAll('ion-segment-button');
+    const botones = cont.querySelectorAll('.pp-modos .pp-chip');
     expect(botones).toHaveLength(3);
-    const valores = Array.from(botones).map(b => b.value);
-    expect(valores).toEqual(['spinning', 'eging', 'surfcasting']);
+
+    const activos = Array.from(botones).filter(b => b.classList.contains('activo'));
+    expect(activos).toHaveLength(1);
+    expect(activos[0].textContent).toContain('Eging');
   });
 
-  it('cambiar el segment emite pp-cambiar-modo (bubbles) sin llamar a orquestacion', () => {
+  it('clicar una modalidad emite pp-cambiar-modo (bubbles) sin llamar a orquestacion', () => {
     const st = crearSt();
     const cont = document.createElement('div');
     document.body.appendChild(cont);
@@ -95,26 +95,25 @@ describe('renderAhora: reemplaza renderAhora()/selectorModo()/desgloseFactores()
     const eventos = [];
     cont.addEventListener('pp-cambiar-modo', (ev) => eventos.push(ev.detail));
 
-    const segment = cont.querySelector('ion-segment');
-    segment.dispatchEvent(new CustomEvent('ionChange', {
-      detail: { value: 'surfcasting' }, bubbles: true, composed: true
-    }));
+    const botones = cont.querySelectorAll('.pp-modos .pp-chip');
+    const btnSurf = Array.from(botones).find(b => b.textContent.includes('Surfcasting'));
+    btnSurf.click();
 
     expect(eventos).toHaveLength(1);
     expect(eventos[0]).toEqual({ modo: 'surfcasting' });
     cont.remove();
   });
 
-  it('renderiza tarjetas de marea, sol/luna y especies activas ahora', () => {
+  it('renderiza tarjetas de indice, marea, sol/luna, condiciones y especies activas ahora', () => {
     const st = crearSt();
     const cont = document.createElement('div');
     renderAhora(cont, st);
 
     const titulos = Array.from(cont.querySelectorAll('ion-card-title')).map(t => t.textContent);
+    expect(titulos).toContain('Índice de pesca');
     expect(titulos).toContain('Marea');
-    expect(titulos).toContain('Sol, luna y solunar');
+    expect(titulos).toContain('Sol y Luna');
     expect(titulos).toContain('Especies activas ahora');
-    expect(titulos).toContain('Qué suma y qué resta');
     expect(titulos).toContain('Condiciones ahora');
 
     expect(cont.querySelector('pp-curva-marea')).not.toBeNull();

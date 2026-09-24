@@ -57,25 +57,22 @@ describe('<pp-app-shell>: reemplaza header/nav estaticos de www/index.html', () 
     el.remove();
   });
 
-  it('.spot y .actualizado actualizan el selector de cabecera', () => {
+  it('.spot actualiza el nombre del selector de cabecera', () => {
     const el = document.createElement('pp-app-shell');
     document.body.appendChild(el);
     el.spot = { nombre: 'Zarautz' };
-    el.actualizado = 'hace 3 min';
     expect(el.querySelector('.pp-spot-selector span').textContent).toBe('Zarautz');
-    expect(el.querySelector('.pp-spot-selector small').textContent).toBe('hace 3 min');
     el.remove();
   });
 
-  it('.seguridad muestra/oculta el banner segun el nivel', () => {
+  it('.actualizado y .seguridad son no-ops en el shell (movidos a cada vista)', () => {
+    // .actualizado (timestamp) se eliminó del header; .seguridad ahora se
+    // renderiza dentro de cada vista (ver vista-ahora.js), no en el shell.
+    // Los setters se mantienen por compatibilidad de API y no deben lanzar.
     const el = document.createElement('pp-app-shell');
     document.body.appendChild(el);
-    el.seguridad = { nivel: 'rojo', motivos: ['Viento muy fuerte'] };
-    const banner = el.querySelector('.pp-banner');
-    expect(banner.style.display).toBe('block');
-    expect(banner.textContent).toContain('Viento muy fuerte');
-    el.seguridad = { nivel: 'ok', motivos: [] };
-    expect(banner.style.display).toBe('none');
+    expect(() => { el.actualizado = 'hace 3 min'; }).not.toThrow();
+    expect(() => { el.seguridad = { nivel: 'rojo', motivos: ['Viento muy fuerte'] }; }).not.toThrow();
     el.remove();
   });
 

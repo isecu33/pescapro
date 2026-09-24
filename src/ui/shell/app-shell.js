@@ -1,6 +1,6 @@
 /* <pp-app-shell> -- shell de la app: ion-app + ion-header/ion-toolbar
-   (logo, selector de spot, favorito/refrescar) + banner de seguridad +
-   contenedor de contenido + ion-tab-bar (una vista por pestaña).
+   (logo, selector de spot, favorito/refrescar) + contenedor de contenido +
+   ion-tab-bar (una vista por pestaña).
 
    Sustituye el header/nav estaticos de www/index.html. No se usa
    ion-tabs/router de Ionic (decision del plan de migracion): la vista
@@ -13,8 +13,8 @@
    - .contenido            -> elemento <main> donde montar la vista activa
    - .vistaActiva (get/set) -> id de la vista visible; el set dispara pp-cambiar-vista
    - .spot = {nombre}       -> texto del selector de spot
-   - .actualizado = string  -> "hace 5 min" etc., junto al spot
-   - .seguridad = {nivel, motivos} | null -> banner de seguridad
+   - .actualizado = string  -> no-op; el timestamp se retiró del header
+   - .seguridad = {nivel, motivos} | null -> no-op; el banner ahora vive en cada vista (ver vista-ahora.js)
    - .refrescando = bool    -> anima el icono de refrescar
    - .esFavorito = bool     -> togglea el icono de estrella (filled vs outline)
    Eventos emitidos: pp-cambiar-vista, pp-cambiar-spot, pp-favorito, pp-refrescar */

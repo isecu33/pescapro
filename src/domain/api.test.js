@@ -54,7 +54,7 @@ describe('api: conversion 1:1 desde www/js/api.js', () => {
   });
 
   it('buscarLugar codifica el nombre de busqueda en la URL (encodeURIComponent)', async () => {
-    const fetchMock = vi.fn(async () => ({ ok: true, json: async () => ({ results: [] }) }));
+    const fetchMock = vi.fn(async () => ({ ok: true, json: async () => ([]) }));
     vi.stubGlobal('fetch', fetchMock);
     await buscarLugar('San Sebastián');
     const url = fetchMock.mock.calls[0][0];

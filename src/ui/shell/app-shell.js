@@ -77,7 +77,7 @@ export class PpAppShell extends HTMLElement {
     logo.slot = 'start';
     logo.className = 'pp-logo';
     const logoImg = document.createElement('img');
-    logoImg.src = './img/logo-marante.png';
+    logoImg.src = './iconos/png/logo-marante.png';
     logoImg.alt = 'Marante';
     logo.appendChild(logoImg);
     toolbar.appendChild(logo);
@@ -131,7 +131,7 @@ export class PpAppShell extends HTMLElement {
     btnMenu.appendChild(icoMenu);
     btnMenu.addEventListener('click', () => {
       const m = this.querySelector('ion-menu');
-      if (m) m.toggle();
+      if (m && typeof m.toggle === 'function') m.toggle();
     });
 
     acciones.append(btnFav, btnRef, btnMenu);
@@ -250,7 +250,7 @@ export class PpAppShell extends HTMLElement {
     itemCache.addEventListener('click', () => {
       if (window.confirm('¿Borrar los datos en caché?\nLa app los descargará de nuevo al conectar.')) {
         try { localStorage.removeItem('pp_datos'); } catch (_) {}
-        menu.close();
+        if (typeof menu.close === 'function') menu.close();
         this._emit('pp-refrescar');
       }
     });
@@ -275,6 +275,15 @@ export class PpAppShell extends HTMLElement {
     listInfo.appendChild(itemAbout);
 
     mContent.append(this._menuPerfilEl, this._statsEl, secNav, secNotif, secAjustes, secInfo);
+
+    // ── Desarrollador (solo en npm run dev, nunca en el build real) ────
+    if (import.meta.env.DEV) {
+      const secDev = this._menuSeccion('Desarrollador');
+      const listDev = secDev.querySelector('ion-list');
+      listDev.appendChild(this._menuItem('bug-outline', 'Modo desarrollador', () => this._emit('pp-abrir-dev')));
+      mContent.append(secDev);
+    }
+
     menu.append(mHeader, mContent);
 
     // ionWillOpen (no ionDidOpen): el contenido ya esta al dia cuando

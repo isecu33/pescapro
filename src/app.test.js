@@ -5,7 +5,10 @@ vi.mock('./ui/views/vista-ahora.js', () => ({ renderAhora: vi.fn() }));
 vi.mock('./ui/views/vista-prevision.js', () => ({ renderPrevision: vi.fn() }));
 vi.mock('./ui/views/vista-especies.js', () => ({ renderEspecies: vi.fn() }));
 vi.mock('./ui/views/vista-cuaderno.js', () => ({ renderCuaderno: vi.fn() }));
-vi.mock('./ui/views/vista-trofeos.js', () => ({ renderTrofeos: vi.fn() }));
+vi.mock('./ui/views/vista-trofeos.js', () => ({
+  renderTrofeos: vi.fn(),
+  crearIcoLogro: vi.fn(() => document.createElement('span'))
+}));
 vi.mock('./ui/views/vista-mapa.js', () => ({
   crearVistaMapa: vi.fn(() => ({
     elemento: document.createElement('div'),
@@ -144,6 +147,19 @@ describe('app.js: orquestacion (reemplaza www/js/app.js)', () => {
 
     shell.emit('pp-cambiar-vista', { vista: 'especies' });
     expect(app.estado.vista).toBe('especies');
+  });
+
+  it('pp-abrir-dev emitido por el shell abre el panel de modo desarrollador', async () => {
+    const shell = crearShellFalso();
+    const app = crearApp(shell);
+    await vi.waitFor(() => expect(app.estado.datos).not.toBeNull());
+
+    shell.emit('pp-abrir-dev');
+    // modalDev() usa import() dinamico (para que produccion no empaquete
+    // vista-dev.js), asi que el modal aparece de forma asincrona.
+    await vi.waitFor(() => expect(document.getElementById('pp-modal')).not.toBeNull());
+    const modal = document.getElementById('pp-modal');
+    expect(modal.querySelector('.pp-dev-panel')).not.toBeNull();
   });
 
   it('un fallo de red sin datos previos ni cache deja un error visible en la vista activa', async () => {

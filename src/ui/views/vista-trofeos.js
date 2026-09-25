@@ -155,7 +155,7 @@ function marcarLogrosVistos(ids) {
   } catch (e) { /* silencioso: si falla, volverá a mostrar en la próxima visita */ }
 }
 
-function crearIcoLogro(l) {
+export function crearIcoLogro(l) {
   if (l.img) {
     const img = document.createElement('img');
     img.className = 'pp-logro-ico pp-logro-ico-png';

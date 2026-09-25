@@ -1,5 +1,6 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { evaluar } from './logros.js';
+import { setLogroOverride, resetOverrides } from '../dev.js';
 import { SunCalc } from '../vendor/suncalc.js';
 
 const LAT = 43.3;
@@ -51,5 +52,53 @@ describe('logros: conversion 1:1 desde www/js/records.js (PP.logros)', () => {
   it('logro viajero (5 spots) conseguido', () => expect(porId.viajero.conseguido).toBe(true));
   it('logro dia-perfecto-plata (3 en mismo dia) conseguido', () => expect(porId['dia-perfecto-plata'].conseguido).toBe(true));
   it('logro dia-perfecto-oro (5 en mismo dia) pendiente (mejor dia = 4)', () => expect(porId['dia-perfecto-oro'].conseguido).toBe(false));
+  it('logro faro NO conseguido (ninguna captura con lat/lon)', () => expect(porId.faro.conseguido).toBe(false));
   it('hay al menos 16 logros definidos', () => expect(logros.length).toBeGreaterThanOrEqual(16));
+});
+
+describe('logros: "faro" (captura cerca de un faro de la costa gallega)', () => {
+  // Cabo Vilán (Camariñas, A Coruña): 43.16041, -9.21093
+  const capCercaFaro = { especie: 'lubina', fecha: new Date().toISOString(), spot: { nombre: 'Camariñas', lat: 43.161, lon: -9.211 } };
+  const capLejosFaro = { especie: 'lubina', fecha: new Date().toISOString(), spot: { nombre: 'Zarautz', lat: 43.29, lon: -2.17 } };
+  const capSinSpot = { especie: 'lubina', fecha: new Date().toISOString(), spot: null };
+
+  it('conseguido con una captura a <1km de un faro conocido', () => {
+    expect(evaluar([capCercaFaro]).find(l => l.id === 'faro').conseguido).toBe(true);
+  });
+  it('NO conseguido si el spot está lejos de cualquier faro', () => {
+    expect(evaluar([capLejosFaro]).find(l => l.id === 'faro').conseguido).toBe(false);
+  });
+  it('NO conseguido si la captura no tiene spot/coordenadas', () => {
+    expect(evaluar([capSinSpot]).find(l => l.id === 'faro').conseguido).toBe(false);
+  });
+});
+
+describe('logros: override de modo desarrollador (domain/dev.js)', () => {
+  beforeEach(() => {
+    const store = new Map();
+    vi.stubGlobal('localStorage', {
+      getItem: (k) => (store.has(k) ? store.get(k) : null),
+      setItem: (k, v) => store.set(k, v),
+      removeItem: (k) => store.delete(k)
+    });
+  });
+
+  it('forzar un logro a conseguido lo refleja aunque la regla real diga que no', () => {
+    setLogroOverride('trofeo-lubina', true);
+    const logros = evaluar([]); // sin capturas, la regla real diria "no conseguido"
+    expect(logros.find(l => l.id === 'trofeo-lubina').conseguido).toBe(true);
+  });
+
+  it('forzar un logro a no conseguido lo refleja aunque la regla real diga que si', () => {
+    setLogroOverride('captura-bronce', false);
+    const logros = evaluar([{ especie: 'lubina', fecha: new Date().toISOString(), spot: { nombre: 'Zarautz' } }]);
+    expect(logros.find(l => l.id === 'captura-bronce').conseguido).toBe(false);
+  });
+
+  it('resetOverrides() vuelve a la regla real', () => {
+    setLogroOverride('captura-bronce', false);
+    resetOverrides();
+    const logros = evaluar([{ especie: 'lubina', fecha: new Date().toISOString(), spot: { nombre: 'Zarautz' } }]);
+    expect(logros.find(l => l.id === 'captura-bronce').conseguido).toBe(true);
+  });
 });

@@ -5,6 +5,10 @@ import { defineConfig } from 'vite';
 // Con rutas absolutas los assets generados no resuelven dentro del APK.
 export default defineConfig({
   base: './',
+  // El código referencia assets como './img/...' (strings en runtime, no
+  // imports estáticos), así que Vite no los rastrea como parte del grafo de
+  // módulos. publicDir los copia tal cual a dist/ en el build.
+  publicDir: 'img',
   build: {
     outDir: 'dist',
   },

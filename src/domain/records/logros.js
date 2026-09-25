@@ -71,7 +71,7 @@ export const LISTA = [
   { id: 'madrugador', img: './logros/madrugador.png', icono: '🌅',
     nombre: 'Madrugador', desc: 'Captura en los ±30 min del amanecer',
     check: (st, caps) => caps.some(c => esAmanecer(c)) },
-  { id: 'nocturno', img: './img/nocturno.png', icono: '🌙',
+  { id: 'nocturno', img: './logros/nocturno.png', icono: '🌙',
     nombre: 'Ave nocturna', desc: 'Captura entre las 3:00 y las 7:00',
     check: (st, caps) => caps.some(c => { const h = horaDe(c); return h >= 3 && h < 7; }) },
   { id: 'faro', img: './logros/faro.png', icono: '🚨',

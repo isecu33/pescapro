@@ -47,6 +47,7 @@ export function abrirModal(cuerpoEl, opts = {}) {
 }
 
 export function cerrarModal() {
+  document.removeEventListener('keydown', escCierraModal);
   const m = document.getElementById('pp-modal');
   if (!m) return;
   if (typeof m.dismiss === 'function') m.dismiss();
@@ -79,4 +80,9 @@ export function abrirModalCentrado(cuerpoEl) {
   setTimeout(() => {
     fondo.addEventListener('click', e => { if (e.target === fondo) cerrarModal(); });
   }, 0);
+  document.addEventListener('keydown', escCierraModal);
+}
+
+function escCierraModal(e) {
+  if (e.key === 'Escape') cerrarModal();
 }

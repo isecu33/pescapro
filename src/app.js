@@ -344,15 +344,45 @@ export function crearApp(shell) {
     const gpsIco = svg('ubicacion');
     if (gpsIco) { gpsIco.style.cssText = 'width:16px;height:16px;vertical-align:middle;margin-right:5px'; gps.appendChild(gpsIco); }
     gps.appendChild(document.createTextNode(' Usar mi ubicación (GPS)'));
+    let geoEnCurso = false;
     gps.addEventListener('click', () => {
+      if (geoEnCurso) return;
       if (typeof navigator === 'undefined' || !navigator.geolocation) {
         gps.textContent = 'GPS no disponible';
         return;
       }
+      geoEnCurso = true;
       gps.replaceChildren(document.createTextNode('Localizando…'));
+
+      // Algunos WebView (Android) no invocan ni exito ni error si el
+      // permiso de ubicacion queda en un estado raro -- sin este timeout
+      // propio, el boton se queda en "Localizando..." para siempre y
+      // parece que el modal esta colgado, aunque cerrar/backdrop siguen
+      // funcionando. `timeout` de PositionOptions no cubre ese caso: solo
+      // aplica cuando el navegador SI responde.
+      let resuelto = false;
+      const timeoutManual = setTimeout(() => {
+        if (resuelto) return;
+        resuelto = true;
+        geoEnCurso = false;
+        gps.textContent = 'Sin respuesta del GPS, prueba de nuevo';
+      }, 13000);
+
       navigator.geolocation.getCurrentPosition(
-        (pos) => cambiarSpot({ nombre: 'Mi ubicación', lat: pos.coords.latitude, lon: pos.coords.longitude }),
-        () => { gps.textContent = 'Sin permiso o sin señal GPS'; },
+        (pos) => {
+          if (resuelto) return;
+          resuelto = true;
+          clearTimeout(timeoutManual);
+          geoEnCurso = false;
+          cambiarSpot({ nombre: 'Mi ubicación', lat: pos.coords.latitude, lon: pos.coords.longitude });
+        },
+        () => {
+          if (resuelto) return;
+          resuelto = true;
+          clearTimeout(timeoutManual);
+          geoEnCurso = false;
+          gps.textContent = 'Sin permiso o sin señal GPS';
+        },
         { enableHighAccuracy: true, timeout: 12000 }
       );
     });

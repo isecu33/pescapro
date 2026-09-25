@@ -57,25 +57,22 @@ describe('<pp-app-shell>: reemplaza header/nav estaticos de www/index.html', () 
     el.remove();
   });
 
-  it('.spot y .actualizado actualizan el selector de cabecera', () => {
+  it('.spot actualiza el nombre del selector de cabecera', () => {
     const el = document.createElement('pp-app-shell');
     document.body.appendChild(el);
     el.spot = { nombre: 'Zarautz' };
-    el.actualizado = 'hace 3 min';
     expect(el.querySelector('.pp-spot-selector span').textContent).toBe('Zarautz');
-    expect(el.querySelector('.pp-spot-selector small').textContent).toBe('hace 3 min');
     el.remove();
   });
 
-  it('.seguridad muestra/oculta el banner segun el nivel', () => {
+  it('.actualizado y .seguridad son no-ops en el shell (movidos a cada vista)', () => {
+    // .actualizado (timestamp) se eliminó del header; .seguridad ahora se
+    // renderiza dentro de cada vista (ver vista-ahora.js), no en el shell.
+    // Los setters se mantienen por compatibilidad de API y no deben lanzar.
     const el = document.createElement('pp-app-shell');
     document.body.appendChild(el);
-    el.seguridad = { nivel: 'rojo', motivos: ['Viento muy fuerte'] };
-    const banner = el.querySelector('.pp-banner');
-    expect(banner.style.display).toBe('block');
-    expect(banner.textContent).toContain('Viento muy fuerte');
-    el.seguridad = { nivel: 'ok', motivos: [] };
-    expect(banner.style.display).toBe('none');
+    expect(() => { el.actualizado = 'hace 3 min'; }).not.toThrow();
+    expect(() => { el.seguridad = { nivel: 'rojo', motivos: ['Viento muy fuerte'] }; }).not.toThrow();
     el.remove();
   });
 
@@ -92,6 +89,75 @@ describe('<pp-app-shell>: reemplaza header/nav estaticos de www/index.html', () 
     expect(spySpot).toHaveBeenCalledTimes(1);
     expect(spyFav).toHaveBeenCalledTimes(1);
     expect(spyRef).toHaveBeenCalledTimes(1);
+    el.remove();
+  });
+
+  it('el menu incluye "Modo desarrollador" (import.meta.env.DEV=true en tests) y emite pp-abrir-dev', () => {
+    const el = document.createElement('pp-app-shell');
+    document.body.appendChild(el);
+    const spyDev = vi.fn();
+    el.addEventListener('pp-abrir-dev', spyDev);
+
+    const items = Array.from(el.querySelectorAll('ion-item'));
+    const itemDev = items.find(i => i.textContent.includes('Modo desarrollador'));
+    expect(itemDev).toBeTruthy();
+    itemDev.click();
+
+    expect(spyDev).toHaveBeenCalledTimes(1);
+    el.remove();
+  });
+});
+
+describe('<pp-app-shell>: menu lateral (hamburguesa) con perfil', () => {
+  function fakeLocalStorage() {
+    const m = new Map();
+    return {
+      getItem: (k) => (m.has(k) ? m.get(k) : null),
+      setItem: (k, v) => { m.set(k, String(v)); },
+      removeItem: (k) => { m.delete(k); }
+    };
+  }
+
+  it('la cabecera del menu muestra la tarjeta de perfil y abre la vista Perfil', () => {
+    vi.stubGlobal('localStorage', fakeLocalStorage());
+    localStorage.setItem('pp_perfil', JSON.stringify({ nombre: 'Iker', usuario: 'iker', clan: { id: 'c_abcd', nombre: 'Costa', etiqueta: 'CST' } }));
+    const el = document.createElement('pp-app-shell');
+    document.body.appendChild(el);
+    const tarjeta = el.querySelector('ion-menu .pp-perfil-tarjeta');
+    expect(tarjeta).not.toBeNull();
+    expect(tarjeta.querySelector('.pp-perfil-nombre').textContent).toContain('Iker');
+    expect(tarjeta.querySelector('.pp-perfil-usuario').textContent).toBe('@iker');
+    expect(tarjeta.querySelector('.pp-perfil-clan-tag').textContent).toBe('[CST]');
+
+    const spy = vi.fn();
+    el.addEventListener('pp-cambiar-vista', spy);
+    tarjeta.click();
+    expect(el.vistaActiva).toBe('perfil');
+    expect(spy.mock.calls[0][0].detail.vista).toBe('perfil');
+    // 'perfil' no tiene pestana: ninguna queda seleccionada
+    expect(el.querySelectorAll('ion-tab-button[selected]')).toHaveLength(0);
+    expect(el.querySelector('.pp-menu-item[data-vista="perfil"]').classList.contains('activo')).toBe(true);
+    el.remove();
+  });
+
+  it('los accesos directos del menu navegan a su vista', () => {
+    vi.stubGlobal('localStorage', fakeLocalStorage());
+    const el = document.createElement('pp-app-shell');
+    document.body.appendChild(el);
+    el.querySelector('.pp-menu-item[data-vista="cuaderno"]').click();
+    expect(el.vistaActiva).toBe('cuaderno');
+    expect(el.querySelector('ion-tab-button[tab="cuaderno"]').getAttribute('selected')).toBe('true');
+    el.remove();
+  });
+
+  it('pp-perfil-cambiado repinta la tarjeta del menu', () => {
+    vi.stubGlobal('localStorage', fakeLocalStorage());
+    const el = document.createElement('pp-app-shell');
+    document.body.appendChild(el);
+    expect(el.querySelector('ion-menu .pp-perfil-nombre').textContent).toBe('Pescador local');
+    localStorage.setItem('pp_perfil', JSON.stringify({ nombre: 'Ane' }));
+    el.contenido.dispatchEvent(new CustomEvent('pp-perfil-cambiado', { bubbles: true }));
+    expect(el.querySelector('ion-menu .pp-perfil-nombre').textContent).toBe('Ane');
     el.remove();
   });
 });

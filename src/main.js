@@ -7,7 +7,10 @@ import { addIcons } from 'ionicons';
 import {
   speedometerOutline, trendingUpOutline, mapOutline, fishOutline, bookOutline, trophyOutline,
   refreshOutline, starOutline, starSharp, closeOutline, addOutline, addCircleOutline,
-  cameraOutline, locationOutline, trashOutline
+  cameraOutline, locationOutline, trashOutline,
+  menuOutline, personCircleOutline, notificationsOutline, settingsOutline, informationCircleOutline,
+  chevronForwardOutline, moonOutline, sunnyOutline, cloudDownloadOutline,
+  waterOutline, navigateOutline, cloudUploadOutline
 } from 'ionicons/icons';
 
 import '@ionic/core/css/core.css';
@@ -19,6 +22,8 @@ import './styles/theme.css';
 
 import './ui/shell/app-shell.js';
 import { crearApp } from './app.js';
+import { iniciarAuth, usuario } from './domain/auth.js';
+import { mostrarLogin } from './ui/views/vista-login.js';
 
 addIcons({
   'speedometer-outline': speedometerOutline,
@@ -35,14 +40,39 @@ addIcons({
   'add-circle-outline': addCircleOutline,
   'camera-outline': cameraOutline,
   'location-outline': locationOutline,
-  'trash-outline': trashOutline
+  'trash-outline': trashOutline,
+  'menu-outline': menuOutline,
+  'person-circle-outline': personCircleOutline,
+  'notifications-outline': notificationsOutline,
+  'settings-outline': settingsOutline,
+  'information-circle-outline': informationCircleOutline,
+  'chevron-forward-outline': chevronForwardOutline,
+  'moon-outline': moonOutline,
+  'sunny-outline': sunnyOutline,
+  'cloud-download-outline': cloudDownloadOutline,
+  'water-outline': waterOutline,
+  'navigate-outline': navigateOutline,
+  'cloud-upload-outline': cloudUploadOutline
 });
 
 defineCustomElements(window);
 
-document.addEventListener('DOMContentLoaded', () => {
+function arrancarApp() {
   const raiz = document.getElementById('app');
   const shell = document.createElement('pp-app-shell');
   raiz.appendChild(shell);
-  crearApp(shell); // se engancha a su propio DOMContentLoaded (once) para arrancar
+  crearApp(shell);
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+  await iniciarAuth();
+
+  if (usuario()) {
+    arrancarApp();
+  } else {
+    mostrarLogin(
+      (_u) => arrancarApp(),      // onExito: usuario autenticado
+      () => arrancarApp()          // onOmitir: continuar sin cuenta
+    );
+  }
 });

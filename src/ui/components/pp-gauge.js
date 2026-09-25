@@ -15,10 +15,10 @@ TEMPLATE.innerHTML = `
   <style>
     :host { display: inline-block; width: 128px; }
     svg { width: 100%; height: auto; display: block; filter: drop-shadow(0 0 10px rgba(0,0,0,.6)); }
-    .fondo { stroke: var(--borde, #1e3347); }
+    .fondo { stroke: var(--borde, #242424); }
     .fondo2 { stroke: rgba(255,255,255,.04); }
     .num { font-size: 36px; font-weight: 800; letter-spacing: -.03em; font-family: 'SF Mono', 'Roboto Mono', monospace; }
-    .lbl { font-size: 10px; fill: var(--texto2, #7a96aa); font-family: system-ui, sans-serif; }
+    .lbl { font-size: 10px; fill: var(--texto2, #888888); font-family: system-ui, sans-serif; }
   </style>
   <svg viewBox="0 0 140 140">
     <circle class="fondo" cx="70" cy="70" r="${R}" fill="none" stroke-width="13"/>

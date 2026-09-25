@@ -2,10 +2,15 @@
    las condiciones del momento y calcula TUS estadísticas (por fase de marea,
    luna, franja horaria, especie...). Con el tiempo revela tus propios patrones
    — la mejor "predicción" es tu propio historial. Sin IA: recuento puro.
-   Las fotos se guardan aparte en IndexedDB (ver fotos.js) referenciadas por fotoId. */
+   Las fotos se guardan aparte en IndexedDB (ver fotos.js) referenciadas por
+   fotoIds (hasta MAX_FOTOS); fotoId se mantiene como alias del primer
+   elemento por compatibilidad con capturas antiguas y con el codigo que
+   solo necesita una miniatura (historial, perfil, records/logros). */
 import { borrar as borrarFoto } from './fotos.js';
 
 const KEY = 'pp_cuaderno';
+
+export const MAX_FOTOS = 5;
 
 export function leer() {
   try { return JSON.parse(localStorage.getItem(KEY) || '[]'); }
@@ -28,6 +33,8 @@ function guardar(lista) {
 /* Crea una captura. condiciones = snapshot {viento, ola, sst, presion, faseMarea, luna, indice, momento} */
 export function anadir(c) {
   const lista = leer();
+  const fotoIds = (Array.isArray(c.fotoIds) ? c.fotoIds : (c.fotoId ? [c.fotoId] : []))
+    .filter(Boolean).slice(0, MAX_FOTOS);
   lista.unshift({
     id: Date.now() + '_' + Math.random().toString(36).slice(2, 7),
     fecha: c.fecha || new Date().toISOString(),
@@ -38,7 +45,8 @@ export function anadir(c) {
     senuelo: c.senuelo || null,
     spot: c.spot || null,
     notas: c.notas || null,
-    fotoId: c.fotoId || null,
+    fotoId: fotoIds[0] || null,
+    fotoIds,
     condiciones: c.condiciones || null
   });
   guardar(lista);
@@ -48,7 +56,11 @@ export function anadir(c) {
 export function borrar(id) {
   const lista = leer();
   const item = lista.find(x => x.id === id);
-  if (item && item.fotoId) borrarFoto(item.fotoId);
+  if (item) {
+    const ids = Array.isArray(item.fotoIds) && item.fotoIds.length
+      ? item.fotoIds : (item.fotoId ? [item.fotoId] : []);
+    ids.forEach(fid => borrarFoto(fid));
+  }
   const nueva = lista.filter(x => x.id !== id);
   guardar(nueva);
   return nueva;

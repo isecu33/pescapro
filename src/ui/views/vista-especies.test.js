@@ -45,7 +45,17 @@ describe('renderEspecies: grid de tarjetas + modal de ficha por especie', () => 
     expect(tarjetas.length).toBe(rank.length);
     tarjetas.forEach((card, i) => {
       const r = rank[i];
-      expect(card.querySelector('.pp-esp-card-ico').textContent).toBe(r.especie.icono);
+      // espImgEl(): <img> con la silueta SVG si la especie tiene `imagen`,
+      // <span> con el emoji si no (ver domain/especies.js).
+      const ico = card.querySelector('.pp-esp-card-ico');
+      expect(ico).toBeTruthy();
+      if (r.especie.imagen) {
+        expect(ico.tagName.toLowerCase()).toBe('img');
+        expect(ico.getAttribute('src')).toBe(r.especie.imagen);
+      } else {
+        expect(ico.tagName.toLowerCase()).toBe('span');
+        expect(ico.textContent).toBe(r.especie.icono);
+      }
       expect(card.querySelector('.pp-esp-card-nombre').textContent).toBe(r.especie.nombre);
       expect(card.querySelector('.pp-esp-card-val').textContent).toBe(String(r.act.valor));
       expect(card.querySelector('.pp-esp-card-motivo').textContent).toBe(r.act.motivo);

@@ -123,6 +123,40 @@ export function serie(ctx, modo) {
     .map(h => ({ hora: h, ...indiceHora(h, modo, ctx) }));
 }
 
+/* Días con datos en la previsión actual (para el selector de calendario):
+   una entrada por dia calendario, a medianoche local, en el orden en que
+   aparecen en la serie (ya filtrada a horas futuras, ver serie()). */
+export function diasDisponibles(ctx, modo) {
+  const vistos = new Set();
+  const dias = [];
+  serie(ctx, modo).forEach(x => {
+    const f = x.hora.fecha;
+    const clave = f.getFullYear() + '-' + f.getMonth() + '-' + f.getDate();
+    if (vistos.has(clave)) return;
+    vistos.add(clave);
+    dias.push(new Date(f.getFullYear(), f.getMonth(), f.getDate()));
+  });
+  return dias;
+}
+
+/* Resumen por dia de la ventana de previsión (para la tira de dias): pico de
+   índice, código WMO representativo (la hora más cercana al mediodía, para
+   no coger una hora de madrugada) y si hay algún aviso de seguridad rojo. */
+export function resumenDias(ctx, modo) {
+  const s = serie(ctx, modo);
+  return diasDisponibles(ctx, modo).map(dia => {
+    const horas = s.filter(x => util.esMismoDia(x.hora.fecha, dia));
+    const max = horas.reduce((m, x) => Math.max(m, x.valor), 0);
+    const aviso = horas.some(x => x.seguridad.nivel === 'rojo');
+    let mejorDist = Infinity, codigo = null;
+    horas.forEach(x => {
+      const dist = Math.abs(x.hora.fecha.getHours() - 13);
+      if (dist < mejorDist) { mejorDist = dist; codigo = x.hora.codigo; }
+    });
+    return { fecha: dia, max, aviso, codigo };
+  });
+}
+
 /* Mejores ventanas de pesca: agrupa horas consecutivas con índice >= umbral */
 export function mejoresVentanas(ctx, modo, opts) {
   const o = Object.assign({ umbral: 55, maxVentanas: 6, horas: 72 }, opts || {});

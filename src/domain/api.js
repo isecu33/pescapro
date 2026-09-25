@@ -97,14 +97,35 @@ export function fetchCorrientesGrid(lat, lon) {
   });
 }
 
-/* Buscador de lugares */
-export function buscarLugar(nombre) {
-  const url = CONFIG.API.geo + '?' + qs({ name: nombre, count: 6, language: 'es', format: 'json' });
-  return getJSON(url).then(j => (j.results || []).map(r => ({
-    nombre: r.name,
-    detalle: [r.admin2, r.admin1, r.country].filter(Boolean).join(', '),
-    lat: r.latitude, lon: r.longitude
-  })));
+/* Buscador de lugares via Nominatim (OpenStreetMap).
+   Mucho mejor cobertura costera que Open-Meteo geocoding: incluye puertos,
+   playas, calas y pueblos pequeños. Acepta bias de ubicación via viewbox
+   (±3° alrededor del spot actual) para priorizar resultados cercanos.
+   Política: 1 req/s máx, uso no comercial — válido para app personal. */
+export function buscarLugar(nombre, spot) {
+  const params = {
+    q: nombre,
+    format: 'jsonv2',
+    limit: 8,
+    addressdetails: 1,
+    'accept-language': 'es'
+  };
+  if (spot && spot.lat != null && spot.lon != null) {
+    const d = 3;
+    params.viewbox = [spot.lon - d, spot.lat + d, spot.lon + d, spot.lat - d].join(',');
+    params.bounded = 0;
+  }
+  const url = 'https://nominatim.openstreetmap.org/search?' + qs(params);
+  return getJSON(url).then(rs => rs.slice(0, 8).map(r => {
+    const addr = r.address || {};
+    const partes = [addr.village || addr.town || addr.city, addr.county || addr.state, addr.country].filter(Boolean);
+    return {
+      nombre: r.name || r.display_name.split(',')[0],
+      detalle: partes.slice(1).join(', '),
+      lat: parseFloat(r.lat),
+      lon: parseFloat(r.lon)
+    };
+  }));
 }
 
 /* Fusiona clima + marino en una serie horaria única indexada por Date */

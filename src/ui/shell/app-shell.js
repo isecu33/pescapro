@@ -1,6 +1,6 @@
 /* <pp-app-shell> -- shell de la app: ion-app + ion-header/ion-toolbar
-   (logo, selector de spot, favorito/refrescar) + banner de seguridad +
-   contenedor de contenido + ion-tab-bar (una vista por pestaña).
+   (logo, selector de spot, favorito/refrescar) + contenedor de contenido +
+   ion-tab-bar (una vista por pestaña).
 
    Sustituye el header/nav estaticos de www/index.html. No se usa
    ion-tabs/router de Ionic (decision del plan de migracion): la vista
@@ -13,10 +13,24 @@
    - .contenido            -> elemento <main> donde montar la vista activa
    - .vistaActiva (get/set) -> id de la vista visible; el set dispara pp-cambiar-vista
    - .spot = {nombre}       -> texto del selector de spot
-   - .actualizado = string  -> "hace 5 min" etc., junto al spot
-   - .seguridad = {nivel, motivos} | null -> banner de seguridad
+   - .actualizado = string  -> no-op; el timestamp se retiró del header
+   - .seguridad = {nivel, motivos} | null -> no-op; el banner ahora vive en cada vista (ver vista-ahora.js)
    - .refrescando = bool    -> anima el icono de refrescar
-   Eventos emitidos: pp-cambiar-vista, pp-cambiar-spot, pp-favorito, pp-refrescar */
+   - .esFavorito = bool     -> togglea el icono de estrella (filled vs outline)
+   - .refrescarMenu()       -> repinta la cabecera de perfil del menu lateral
+   Eventos emitidos: pp-cambiar-vista, pp-cambiar-spot, pp-favorito, pp-refrescar,
+   pp-menu-modo. Escucha pp-perfil-cambiado (lo emite vista-perfil.js).
+
+   Menu lateral (hamburguesa): cabecera con la tarjeta publica del perfil
+   (banner, avatar, @usuario, clan, insignias) que abre la vista Perfil,
+   accesos directos, notificaciones, ajustes y acerca de. */
+import { svg } from '../../domain/iconos.js';
+import { estadisticas } from '../../domain/cuaderno.js';
+import { MODOS } from '../../domain/config.js';
+import { leer as leerCuaderno } from '../../domain/cuaderno.js';
+import { evaluar as evaluarLogros } from '../../domain/records/logros.js';
+import { leer as leerPerfil, publico as perfilPublico } from '../../domain/perfil.js';
+import { crearTarjetaPerfil, cargarImagenesPropias } from '../util/perfil-tarjeta.js';
 
 const VISTAS = [
   { id: 'ahora', nombre: 'Ahora', icono: 'speedometer-outline' },
@@ -26,6 +40,8 @@ const VISTAS = [
   { id: 'cuaderno', nombre: 'Cuaderno', icono: 'book-outline' },
   { id: 'trofeos', nombre: 'Trofeos', icono: 'trophy-outline' }
 ];
+// Vistas sin pestana en el tab-bar: se abren desde el menu lateral.
+const VISTAS_MENU = ['perfil'];
 
 export class PpAppShell extends HTMLElement {
   constructor() {
@@ -44,6 +60,7 @@ export class PpAppShell extends HTMLElement {
     if (!this._construido) {
       this._construido = true;
       this._build();
+      this.addEventListener('pp-perfil-cambiado', () => this.refrescarMenu());
     }
     this._actualizarTabSeleccionado();
   }
@@ -59,15 +76,29 @@ export class PpAppShell extends HTMLElement {
     const logo = document.createElement('div');
     logo.slot = 'start';
     logo.className = 'pp-logo';
-    logo.textContent = '🐟';
+    const logoImg = document.createElement('img');
+    logoImg.src = './iconos/png/logo-marante.png';
+    logoImg.alt = 'Marante';
+    logo.appendChild(logoImg);
     toolbar.appendChild(logo);
 
     const selector = document.createElement('div');
     selector.className = 'pp-spot-selector';
+
+    const pinIco = svg('pin');
+    if (pinIco) {
+      pinIco.style.cssText = 'width:16px;height:16px;flex:none;color:var(--pp-accion-color,rgba(255,255,255,0.54))';
+      selector.appendChild(pinIco);
+    }
+
+    const spotTextos = document.createElement('div');
+    spotTextos.className = 'pp-spot-textos';
     this._spotNombreEl = document.createElement('span');
+    this._spotNombreEl.className = 'pp-spot-nombre';
     this._spotNombreEl.textContent = '—';
-    this._actualizadoEl = document.createElement('small');
-    selector.append(this._spotNombreEl, this._actualizadoEl);
+    spotTextos.append(this._spotNombreEl);
+    selector.appendChild(spotTextos);
+
     selector.addEventListener('click', () => this._emit('pp-cambiar-spot'));
     toolbar.appendChild(selector);
 
@@ -75,30 +106,41 @@ export class PpAppShell extends HTMLElement {
     acciones.slot = 'end';
     const btnFav = document.createElement('ion-button');
     btnFav.setAttribute('fill', 'clear');
-    const icoFav = document.createElement('ion-icon');
-    icoFav.setAttribute('name', 'star-outline');
-    icoFav.slot = 'icon-only';
-    btnFav.appendChild(icoFav);
+    btnFav.className = 'pp-accion-btn';
+    this._icoFavEl = document.createElement('ion-icon');
+    this._icoFavEl.setAttribute('name', 'star-outline');
+    this._icoFavEl.slot = 'icon-only';
+    btnFav.appendChild(this._icoFavEl);
     btnFav.addEventListener('click', () => this._emit('pp-favorito'));
 
     const btnRef = document.createElement('ion-button');
     btnRef.setAttribute('fill', 'clear');
+    btnRef.className = 'pp-accion-btn';
     this._icoRefEl = document.createElement('ion-icon');
     this._icoRefEl.setAttribute('name', 'refresh-outline');
     this._icoRefEl.slot = 'icon-only';
     btnRef.appendChild(this._icoRefEl);
     btnRef.addEventListener('click', () => this._emit('pp-refrescar'));
 
-    acciones.append(btnFav, btnRef);
+    const btnMenu = document.createElement('ion-button');
+    btnMenu.setAttribute('fill', 'clear');
+    btnMenu.className = 'pp-accion-btn';
+    const icoMenu = document.createElement('ion-icon');
+    icoMenu.setAttribute('name', 'menu-outline');
+    icoMenu.slot = 'icon-only';
+    btnMenu.appendChild(icoMenu);
+    btnMenu.addEventListener('click', () => {
+      const m = this.querySelector('ion-menu');
+      if (m && typeof m.toggle === 'function') m.toggle();
+    });
+
+    acciones.append(btnFav, btnRef, btnMenu);
     toolbar.appendChild(acciones);
     header.appendChild(toolbar);
 
-    this._bannerEl = document.createElement('div');
-    this._bannerEl.className = 'pp-banner';
-    this._bannerEl.style.display = 'none';
-
     this._contenido = document.createElement('main');
     this._contenido.className = 'pp-contenido';
+    this._contenido.id = 'pp-contenido';
 
     const tabBar = document.createElement('ion-tab-bar');
     VISTAS.forEach(v => {
@@ -114,18 +156,258 @@ export class PpAppShell extends HTMLElement {
       this._botones[v.id] = btn;
     });
 
-    app.append(header, this._bannerEl, this._contenido, tabBar);
+    const menuLateral = this._buildMenu();
+    app.append(menuLateral, header, this._contenido, tabBar);
     this.appendChild(app);
     this._actualizarTabSeleccionado();
+  }
+
+  _buildMenu() {
+    const menu = document.createElement('ion-menu');
+    menu.setAttribute('side', 'end');
+    menu.setAttribute('menu-id', 'pp-menu-lateral');
+    menu.setAttribute('content-id', 'pp-contenido');
+
+    const mHeader = document.createElement('ion-header');
+    const mToolbar = document.createElement('ion-toolbar');
+    const mTitle = document.createElement('ion-title');
+    mTitle.textContent = 'Marante';
+    mToolbar.appendChild(mTitle);
+    mHeader.appendChild(mToolbar);
+
+    const mContent = document.createElement('ion-content');
+    mContent.className = 'pp-menu-content';
+
+    // ── Perfil (tarjeta publica compacta) ─────────────
+    this._menuPerfilEl = document.createElement('div');
+    this._menuPerfilEl.className = 'pp-menu-perfil';
+    this._statsEl = document.createElement('div');
+    this._statsEl.className = 'pp-menu-stats';
+
+    // ── Accesos directos ──────────────────────────────
+    const secNav = this._menuSeccion('Tu espacio');
+    const listNav = secNav.querySelector('ion-list');
+    listNav.append(
+      this._menuItem('person-circle-outline', 'Mi perfil', () => { this.vistaActiva = 'perfil'; }, 'perfil'),
+      this._menuItem('book-outline', 'Cuaderno de capturas', () => { this.vistaActiva = 'cuaderno'; }, 'cuaderno'),
+      this._menuItem('trophy-outline', 'Logros y competiciones', () => { this.vistaActiva = 'trofeos'; }, 'trofeos'),
+      this._menuItem('fish-outline', 'Guía de especies', () => { this.vistaActiva = 'especies'; }, 'especies')
+    );
+
+    // ── Notificaciones ────────────────────────────────
+    const secNotif = this._menuSeccion('Notificaciones');
+    const listNotif = secNotif.querySelector('ion-list');
+    const itemNotif = document.createElement('ion-item');
+    itemNotif.className = 'pp-menu-item';
+    const icoNotif = document.createElement('ion-icon');
+    icoNotif.setAttribute('name', 'notifications-outline');
+    icoNotif.slot = 'start';
+    const lblNotif = document.createElement('ion-label');
+    lblNotif.textContent = 'Alertas de condiciones';
+    const toggleNotif = document.createElement('ion-toggle');
+    toggleNotif.slot = 'end';
+    try { toggleNotif.checked = localStorage.getItem('pp_notif') === '1'; } catch (_) {}
+    toggleNotif.addEventListener('ionChange', (e) => {
+      try { localStorage.setItem('pp_notif', e.detail.checked ? '1' : '0'); } catch (_) {}
+    });
+    itemNotif.append(icoNotif, lblNotif, toggleNotif);
+    listNotif.appendChild(itemNotif);
+
+    // ── Ajustes ───────────────────────────────────────
+    const secAjustes = this._menuSeccion('Ajustes');
+    const listAjustes = secAjustes.querySelector('ion-list');
+
+    // Modalidad por defecto
+    const lblModo = document.createElement('div');
+    lblModo.className = 'pp-menu-seccion-subtitulo';
+    lblModo.textContent = 'Modalidad';
+    this._modoChipsEl = document.createElement('div');
+    this._modoChipsEl.className = 'pp-menu-modo-chips';
+    Object.values(MODOS).forEach(m => {
+      const chip = document.createElement('button');
+      chip.className = 'pp-chip pp-menu-modo-chip';
+      chip.dataset.modo = m.id;
+      chip.textContent = m.nombre;
+      chip.addEventListener('click', () => {
+        this._emit('pp-menu-modo', { modo: m.id });
+        this._actualizarModoChips(m.id);
+      });
+      this._modoChipsEl.appendChild(chip);
+    });
+    listAjustes.append(lblModo, this._modoChipsEl);
+
+    // Borrar caché
+    const itemCache = document.createElement('ion-item');
+    itemCache.setAttribute('button', 'true');
+    itemCache.setAttribute('detail', 'false');
+    itemCache.className = 'pp-menu-item pp-menu-item-danger';
+    const icoCache = document.createElement('ion-icon');
+    icoCache.setAttribute('name', 'cloud-download-outline');
+    icoCache.slot = 'start';
+    const lblCache = document.createElement('ion-label');
+    lblCache.textContent = 'Borrar caché de datos';
+    itemCache.append(icoCache, lblCache);
+    itemCache.addEventListener('click', () => {
+      if (window.confirm('¿Borrar los datos en caché?\nLa app los descargará de nuevo al conectar.')) {
+        try { localStorage.removeItem('pp_datos'); } catch (_) {}
+        if (typeof menu.close === 'function') menu.close();
+        this._emit('pp-refrescar');
+      }
+    });
+    listAjustes.appendChild(itemCache);
+
+    // ── Acerca de ─────────────────────────────────────
+    const secInfo = this._menuSeccion('Acerca de');
+    const listInfo = secInfo.querySelector('ion-list');
+    const itemAbout = document.createElement('ion-item');
+    itemAbout.className = 'pp-menu-item';
+    const icoAbout = document.createElement('ion-icon');
+    icoAbout.setAttribute('name', 'information-circle-outline');
+    icoAbout.slot = 'start';
+    const lblAbout = document.createElement('ion-label');
+    const aboutTitulo = document.createElement('b');
+    aboutTitulo.textContent = 'Marante · v0.1';
+    const aboutSub = document.createElement('small');
+    aboutSub.className = 'pp-menu-about-sub';
+    aboutSub.textContent = 'Datos: Open-Meteo · Nominatim · SunCalc · Sin servidor · 100% local';
+    lblAbout.append(aboutTitulo, document.createElement('br'), aboutSub);
+    itemAbout.append(icoAbout, lblAbout);
+    listInfo.appendChild(itemAbout);
+
+    mContent.append(this._menuPerfilEl, this._statsEl, secNav, secNotif, secAjustes, secInfo);
+
+    // ── Desarrollador (solo en npm run dev, nunca en el build real) ────
+    if (import.meta.env.DEV) {
+      const secDev = this._menuSeccion('Desarrollador');
+      const listDev = secDev.querySelector('ion-list');
+      listDev.appendChild(this._menuItem('bug-outline', 'Modo desarrollador', () => this._emit('pp-abrir-dev')));
+      mContent.append(secDev);
+    }
+
+    menu.append(mHeader, mContent);
+
+    // ionWillOpen (no ionDidOpen): el contenido ya esta al dia cuando
+    // empieza la animacion, sin "parpadeo" de datos viejos.
+    menu.addEventListener('ionWillOpen', () => {
+      this.refrescarMenu();
+      try {
+        const prefs = JSON.parse(localStorage.getItem('pp_prefs') || '{}');
+        if (prefs.modo) this._actualizarModoChips(prefs.modo);
+      } catch (_) {}
+    });
+
+    this.refrescarMenu();
+    return menu;
+  }
+
+  refrescarMenu() {
+    this._refreshPerfil();
+    this._refreshStats();
+    this._actualizarItemActivo();
+  }
+
+  _refreshPerfil() {
+    if (!this._menuPerfilEl) return;
+    const perfil = leerPerfil();
+    let logros = [];
+    try { logros = evaluarLogros(leerCuaderno()); } catch (_) { /* sin cuaderno legible */ }
+    this._logros = logros;
+    const tarjeta = crearTarjetaPerfil(perfilPublico(perfil), {
+      logros,
+      compacta: true,
+      onClick: () => {
+        const m = this.querySelector('ion-menu');
+        if (m && typeof m.close === 'function') m.close();
+        this.vistaActiva = 'perfil';
+      }
+    });
+    cargarImagenesPropias(perfil, tarjeta);
+    const pista = document.createElement('div');
+    pista.className = 'pp-menu-perfil-sub';
+    pista.textContent = perfil.nombre ? 'Ver mi perfil' : 'Crea tu perfil de pescador';
+    tarjeta.querySelector('.pp-perfil-cuerpo').appendChild(pista);
+    this._menuPerfilEl.replaceChildren(tarjeta);
+  }
+
+  _refreshStats() {
+    if (!this._statsEl) return;
+    const st = estadisticas();
+    const nEspecies = Object.keys(st.porEspecie).length;
+    const nLogros = (this._logros || []).filter(l => l.conseguido).length;
+    this._statsEl.replaceChildren();
+    const statChip = (n, label) => {
+      const s = document.createElement('span');
+      s.className = 'pp-menu-stat-chip';
+      const b = document.createElement('b');
+      b.textContent = n;
+      s.append(b, document.createTextNode(' ' + label));
+      return s;
+    };
+    this._statsEl.append(
+      statChip(st.total, st.total === 1 ? 'captura' : 'capturas'),
+      statChip(nEspecies, nEspecies === 1 ? 'especie' : 'especies'),
+      statChip(nLogros, nLogros === 1 ? 'logro' : 'logros'),
+    );
+  }
+
+  _actualizarItemActivo() {
+    this.querySelectorAll('.pp-menu-item[data-vista]').forEach(it => {
+      it.classList.toggle('activo', it.dataset.vista === this._vistaActiva);
+    });
+  }
+
+  _actualizarModoChips(modo) {
+    if (!this._modoChipsEl) return;
+    this._modoChipsEl.querySelectorAll('.pp-menu-modo-chip').forEach(c => {
+      c.classList.toggle('pp-chip-acento', c.dataset.modo === modo);
+    });
+  }
+
+  _menuSeccion(titulo) {
+    const wrap = document.createElement('div');
+    wrap.className = 'pp-menu-seccion';
+    const label = document.createElement('div');
+    label.className = 'pp-menu-seccion-titulo';
+    label.textContent = titulo.toUpperCase();
+    const list = document.createElement('ion-list');
+    list.setAttribute('lines', 'none');
+    wrap.append(label, list);
+    return wrap;
+  }
+
+  _menuItem(icono, texto, onClick, vista) {
+    const item = document.createElement('ion-item');
+    if (vista) item.dataset.vista = vista;
+    item.setAttribute('button', 'true');
+    item.setAttribute('detail', 'false');
+    item.className = 'pp-menu-item';
+    const ico = document.createElement('ion-icon');
+    ico.setAttribute('name', icono);
+    ico.slot = 'start';
+    const lbl = document.createElement('ion-label');
+    lbl.textContent = texto;
+    const chevron = document.createElement('ion-icon');
+    chevron.setAttribute('name', 'chevron-forward-outline');
+    chevron.slot = 'end';
+    chevron.className = 'pp-menu-chevron';
+    item.append(ico, lbl, chevron);
+    item.addEventListener('click', () => {
+      const m = this.querySelector('ion-menu');
+      if (m && typeof m.close === 'function') m.close();
+      onClick();
+    });
+    return item;
   }
 
   get contenido() { return this._contenido; }
 
   get vistaActiva() { return this._vistaActiva; }
   set vistaActiva(id) {
-    if (!VISTAS.some(v => v.id === id) || id === this._vistaActiva) return;
+    const valida = VISTAS.some(v => v.id === id) || VISTAS_MENU.includes(id);
+    if (!valida || id === this._vistaActiva) return;
     this._vistaActiva = id;
     this._actualizarTabSeleccionado();
+    this._actualizarItemActivo();
     this._emit('pp-cambiar-vista', { vista: id });
   }
 
@@ -140,9 +422,11 @@ export class PpAppShell extends HTMLElement {
     this._spotNombreEl.textContent = (info && info.nombre) ? info.nombre : '—';
   }
 
-  set actualizado(texto) {
-    this._actualizadoEl.textContent = texto || '';
+  set esFavorito(val) {
+    if (this._icoFavEl) this._icoFavEl.setAttribute('name', val ? 'star' : 'star-outline');
   }
+
+  set actualizado(_texto) { /* eliminado: timestamp no aporta info útil */ }
 
   set refrescando(activo) {
     this._icoRefEl.classList.toggle('girando', !!activo);
@@ -152,15 +436,8 @@ export class PpAppShell extends HTMLElement {
      Los motivos vienen de PP.indice.seguridad() (texto fijo del propio
      dominio, no input de usuario), pero se usa textContent igualmente
      por consistencia con el resto de componentes. */
-  set seguridad(info) {
-    if (!info || info.nivel === 'ok') {
-      this._bannerEl.style.display = 'none';
-      this._bannerEl.textContent = '';
-      return;
-    }
-    this._bannerEl.style.display = 'block';
-    this._bannerEl.className = 'pp-banner pp-banner-' + info.nivel;
-    this._bannerEl.textContent = (info.nivel === 'rojo' ? '⛔ ' : '⚠️ ') + info.motivos.join(' · ');
+  set seguridad(_info) {
+    // El banner de seguridad se renderiza dentro de cada vista, no en el shell
   }
 
   _emit(nombre, detail) {

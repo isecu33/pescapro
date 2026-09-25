@@ -40,6 +40,6 @@ describe('config: conversion 1:1 desde www/js/config.js', () => {
   it('util.colorIndice y util.etiquetaIndice son consistentes por umbral', () => {
     expect(util.etiquetaIndice(75)).toBe('Excelente');
     expect(util.etiquetaIndice(10)).toBe('Malo');
-    expect(util.colorIndice(75)).toBe('#2fb344');
+    expect(util.colorIndice(75)).toBe('#ff9500');
   });
 });

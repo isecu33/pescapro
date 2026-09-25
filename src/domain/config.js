@@ -41,7 +41,7 @@ export const CONFIG = {
    Cada factor se puntúa 0..1 en indice.js y el índice final es 0..100. */
 export const MODOS = {
   spinning: {
-    id: 'spinning', nombre: 'Spinning', icono: '🎣',
+    id: 'spinning', nombre: 'Spinning', icono: './iconos/svg/spinning-icono.svg',
     desc: 'Costa con señuelos',
     pesos: { viento: 0.15, oleaje: 0.20, marea: 0.15, solunar: 0.10, momento: 0.15, presion: 0.10, cielo: 0.05, corriente: 0.05, sst: 0.05 },
     // trapecio [min, opt1, opt2, max]
@@ -51,7 +51,7 @@ export const MODOS = {
     noche: 0.55 // factor del momento nocturno (0..1); crepúsculos siempre 1
   },
   eging: {
-    id: 'eging', nombre: 'Eging', icono: '🦑',
+    id: 'eging', nombre: 'Eging', icono: './iconos/svg/egging-icono.svg',
     desc: 'Calamar y sepia',
     pesos: { viento: 0.14, oleaje: 0.24, marea: 0.10, solunar: 0.08, momento: 0.18, presion: 0.06, cielo: 0.05, corriente: 0.07, sst: 0.08 },
     vientoOK: [0, 0, 12, 22],
@@ -60,7 +60,7 @@ export const MODOS = {
     noche: 1.0 // el eging es sobre todo nocturno/crepuscular
   },
   surfcasting: {
-    id: 'surfcasting', nombre: 'Surfcasting', icono: '🏖️',
+    id: 'surfcasting', nombre: 'Surfcasting', icono: './iconos/svg/surfcasting-icono.svg',
     desc: 'Fondo desde playa',
     pesos: { viento: 0.10, oleaje: 0.15, marea: 0.25, solunar: 0.10, momento: 0.13, presion: 0.10, cielo: 0.04, corriente: 0.03, sst: 0.10 },
     vientoOK: [0, 5, 24, 40],
@@ -81,9 +81,9 @@ export const SEGURIDAD = {
 
 /* Clasificación de la amplitud de marea (Cantábrico, rango medio ~2.8 m) */
 export const MAREA_CLASES = [
-  { max: 2.2, clase: 'muertas', etiqueta: 'Mareas muertas', color: '#8aa0b4' },
-  { max: 3.4, clase: 'medias', etiqueta: 'Mareas medias', color: '#4dabf7' },
-  { max: 99,  clase: 'vivas',  etiqueta: 'Mareas vivas',  color: '#f59f00' }
+  { max: 2.2, clase: 'muertas', etiqueta: 'Mareas muertas', color: '#888888' },
+  { max: 3.4, clase: 'medias', etiqueta: 'Mareas medias', color: '#cc6600' },
+  { max: 99,  clase: 'vivas',  etiqueta: 'Mareas vivas',  color: '#ff7200' }
 ];
 
 /* Códigos meteo de Open-Meteo (WMO) → texto e icono */
@@ -124,10 +124,10 @@ export const util = {
   fmtFecha(d) { return d.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' }); },
   esMismoDia(a, b) { return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate(); },
   colorIndice(v) {
-    if (v >= 70) return '#2fb344';
-    if (v >= 50) return '#8bc34a';
-    if (v >= 35) return '#f59f00';
-    if (v >= 20) return '#f76707';
+    if (v >= 70) return '#ff9500';
+    if (v >= 50) return '#ff7200';
+    if (v >= 35) return '#e05500';
+    if (v >= 20) return '#c44000';
     return '#e03131';
   },
   etiquetaIndice(v) {

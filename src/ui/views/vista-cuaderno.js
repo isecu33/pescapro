@@ -15,9 +15,9 @@
    datos de una captura en ningun otro punto (galeria, visor de foto,
    formulario). Regla de esta vista: CERO innerHTML con datos dinamicos. */
 import '../components/pp-captura-card.js';
-import { leer, anadir, borrar as borrarCaptura, estadisticas, exportar, importar } from '../../domain/cuaderno.js';
+import { leer, anadir, borrar as borrarCaptura, estadisticas, exportar, importar, favoritos, MAX_FOTOS } from '../../domain/cuaderno.js';
 import { obtener as obtenerFoto, comprimir as comprimirFoto, guardar as guardarFoto } from '../../domain/fotos.js';
-import { ESPECIES, especiePorId } from '../../domain/especies.js';
+import { ESPECIES, especiePorId, espImgEl } from '../../domain/especies.js';
 import { MODOS } from '../../domain/config.js';
 import { horaMasCercana, indiceHora } from '../../domain/indice.js';
 import { luna as lunaEn, momentoDelDia } from '../../domain/solunar.js';
@@ -87,13 +87,9 @@ function crearTarjetaStats(stats) {
   card.appendChild(statsBarras('Por luna', stats.porLuna));
   card.appendChild(statsBarras('Por especie', stats.porEspecie, null, (k) => {
     const e = especiePorId(k);
-    return e ? e.icono + ' ' + e.nombre : k;
+    return e ? e.nombre : k;
   }));
 
-  const nota = document.createElement('p');
-  nota.className = 'pp-nota';
-  nota.textContent = 'Tu historial es tu mejor predictor: repite lo que te funciona.';
-  card.appendChild(nota);
   return card;
 }
 
@@ -165,7 +161,8 @@ function crearHistorial(lista, contenedor, st) {
   card.addEventListener('pp-borrar', (ev) => {
     const c = ev.detail && ev.detail.captura;
     if (!c) return;
-    const aviso = '¿Borrar esta captura?' + (c.fotoId ? ' (también su foto)' : '');
+    const numFotos = Array.isArray(c.fotoIds) ? c.fotoIds.length : (c.fotoId ? 1 : 0);
+    const aviso = '¿Borrar esta captura?' + (numFotos > 1 ? ' (también sus fotos)' : numFotos === 1 ? ' (también su foto)' : '');
     if (window.confirm(aviso)) {
       borrarCaptura(c.id);
       renderCuaderno(contenedor, st);
@@ -193,16 +190,31 @@ function abrirModalFoto(c) {
   const especie = especiePorId(c.especie);
   const cuerpo = document.createElement('div');
 
-  const img = document.createElement('img');
-  img.className = 'pp-foto-grande';
-  img.alt = especie ? especie.nombre : c.especie;
-  if (c.fotoId) obtenerFoto(c.fotoId).then(d => { if (d) img.src = d; });
-  cuerpo.appendChild(img);
+  const ids = Array.isArray(c.fotoIds) && c.fotoIds.length ? c.fotoIds : (c.fotoId ? [c.fotoId] : []);
+  if (ids.length > 1) {
+    const tira = document.createElement('div');
+    tira.className = 'pp-foto-grande-tira';
+    ids.forEach(fotoId => {
+      const img = document.createElement('img');
+      img.className = 'pp-foto-grande';
+      img.alt = especie ? especie.nombre : c.especie;
+      obtenerFoto(fotoId).then(d => { if (d) img.src = d; });
+      tira.appendChild(img);
+    });
+    cuerpo.appendChild(tira);
+  } else {
+    const img = document.createElement('img');
+    img.className = 'pp-foto-grande';
+    img.alt = especie ? especie.nombre : c.especie;
+    if (ids[0]) obtenerFoto(ids[0]).then(d => { if (d) img.src = d; });
+    cuerpo.appendChild(img);
+  }
 
   const campo = document.createElement('div');
   campo.className = 'pp-campo';
+  if (especie) campo.appendChild(espImgEl(especie, 'pp-esp-cab-ico'));
   const b = document.createElement('b');
-  b.textContent = especie ? especie.icono + ' ' + especie.nombre : c.especie;
+  b.textContent = especie ? especie.nombre : c.especie;
   campo.appendChild(b);
   if (c.talla) campo.appendChild(document.createTextNode(' · ' + c.talla + ' cm'));
   if (c.peso) campo.appendChild(document.createTextNode(' · ' + c.peso + ' kg'));
@@ -210,22 +222,41 @@ function abrirModalFoto(c) {
 
   const sub = document.createElement('div');
   sub.className = 'pp-captura-sub';
-  let subTexto = new Date(c.fecha).toLocaleString('es-ES',
+  const fechaTxt = new Date(c.fecha).toLocaleString('es-ES',
     { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' });
-  if (c.spot && c.spot.nombre) subTexto += ' · 📍 ' + c.spot.nombre;
-  sub.textContent = subTexto;
+  sub.appendChild(document.createTextNode(fechaTxt));
+  if (c.spot && c.spot.nombre) {
+    sub.appendChild(document.createTextNode(' · '));
+    const locIco = document.createElement('ion-icon');
+    locIco.setAttribute('name', 'location-outline');
+    sub.appendChild(locIco);
+    sub.appendChild(document.createTextNode(' ' + c.spot.nombre));
+  }
   cuerpo.appendChild(sub);
 
   const cond = c.condiciones || {};
-  if (cond.faseMarea || cond.luna) {
+  if (cond.faseMarea || cond.luna || cond.viento != null || cond.ola != null || cond.indice != null) {
     const condDiv = document.createElement('div');
     condDiv.className = 'pp-captura-cond';
-    let t = '🌊 Marea ' + (cond.faseMarea || '—');
-    if (cond.luna) t += ' · ' + cond.luna;
-    if (cond.viento != null) t += ' · 💨 ' + Math.round(cond.viento) + ' km/h';
-    if (cond.ola != null) t += ' · 🌊 ' + Number(cond.ola).toFixed(1) + ' m';
-    if (cond.indice != null) t += ' · índice ' + cond.indice;
-    condDiv.textContent = t;
+    let sep = false;
+    const add = (nodes) => {
+      if (sep) condDiv.appendChild(document.createTextNode(' · '));
+      nodes.forEach(n => condDiv.appendChild(n));
+      sep = true;
+    };
+    if (cond.faseMarea) {
+      const ico = document.createElement('ion-icon');
+      ico.setAttribute('name', 'water-outline');
+      add([ico, document.createTextNode(' Marea ' + cond.faseMarea)]);
+    }
+    if (cond.luna) add([document.createTextNode(cond.luna)]);
+    if (cond.viento != null) {
+      const ico = document.createElement('ion-icon');
+      ico.setAttribute('name', 'navigate-outline');
+      add([ico, document.createTextNode(' ' + Math.round(cond.viento) + ' km/h')]);
+    }
+    if (cond.ola != null) add([document.createTextNode(Number(cond.ola).toFixed(1) + ' m')]);
+    if (cond.indice != null) add([document.createTextNode('índice ' + cond.indice)]);
     cuerpo.appendChild(condDiv);
   }
 
@@ -252,8 +283,16 @@ function crearExportImport(contenedor, st) {
   const card = document.createElement('div');
   card.className = 'pp-card';
 
-  const be = document.createElement('ion-chip');
-  be.textContent = '⬇ Exportar (copiar JSON)';
+  const fila = document.createElement('div');
+  fila.className = 'pp-export-fila';
+
+  const be = document.createElement('ion-button');
+  be.setAttribute('fill', 'outline');
+  be.setAttribute('size', 'small');
+  const icoExp = document.createElement('ion-icon');
+  icoExp.setAttribute('name', 'cloud-download-outline');
+  icoExp.slot = 'start';
+  be.append(icoExp, document.createTextNode('Exportar'));
   be.addEventListener('click', async () => {
     const json = exportar();
     try {
@@ -264,8 +303,13 @@ function crearExportImport(contenedor, st) {
     }
   });
 
-  const bi = document.createElement('ion-chip');
-  bi.textContent = '⬆ Importar';
+  const bi = document.createElement('ion-button');
+  bi.setAttribute('fill', 'outline');
+  bi.setAttribute('size', 'small');
+  const icoImp = document.createElement('ion-icon');
+  icoImp.setAttribute('name', 'cloud-upload-outline');
+  icoImp.slot = 'start';
+  bi.append(icoImp, document.createTextNode('Importar'));
   bi.addEventListener('click', () => {
     const txt = window.prompt('Pega el JSON del cuaderno:');
     if (!txt) return;
@@ -277,7 +321,8 @@ function crearExportImport(contenedor, st) {
     }
   });
 
-  card.append(be, bi);
+  fila.append(be, bi);
+  card.appendChild(fila);
   const nota = document.createElement('p');
   nota.className = 'pp-nota';
   nota.textContent = 'La exportación lleva los datos de las capturas; las fotos permanecen en este dispositivo.';
@@ -287,12 +332,128 @@ function crearExportImport(contenedor, st) {
 
 /* ---- Formulario de nueva captura ---- */
 
-function actualizarBotonFoto(btn, icono, texto) {
-  btn.textContent = '';
-  const ico = document.createElement('ion-icon');
-  ico.setAttribute('name', icono);
-  ico.slot = 'start';
-  btn.append(ico, document.createTextNode(texto));
+/* Selector de hasta `max` fotos: grid de miniaturas + celda "Añadir" (con
+   spinner mientras comprime) + texto de ayuda con el contador. Acepta
+   selección múltiple del selector nativo; si el usuario elige más de las
+   que caben, el resto se ignora sin más aviso que dejar el hueco lleno. */
+function crearSelectorFotos(max) {
+  const wrap = document.createElement('div');
+
+  const grid = document.createElement('div');
+  grid.className = 'pp-fotos-captura';
+  wrap.appendChild(grid);
+
+  const ayuda = document.createElement('p');
+  ayuda.className = 'pp-foto-ayuda';
+  wrap.appendChild(ayuda);
+
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*';
+  input.multiple = true;
+  input.style.display = 'none';
+  wrap.appendChild(input);
+
+  const fotos = [];
+  let procesando = false;
+  let error = null;
+
+  function pintarAyuda() {
+    if (error) { ayuda.textContent = error; return; }
+    ayuda.textContent = fotos.length
+      ? fotos.length + ' de ' + max + ' fotos'
+      : 'Añade hasta ' + max + ' fotos de la captura';
+  }
+
+  function render() {
+    grid.textContent = '';
+    fotos.forEach((dataUrl, i) => {
+      const item = document.createElement('div');
+      item.className = 'pp-foto-item';
+      const img = document.createElement('img');
+      img.src = dataUrl;
+      img.alt = '';
+      item.appendChild(img);
+
+      const quitar = document.createElement('button');
+      quitar.type = 'button';
+      quitar.className = 'pp-foto-quitar';
+      quitar.setAttribute('aria-label', 'Quitar foto');
+      const icoQ = document.createElement('ion-icon');
+      icoQ.setAttribute('name', 'close-outline');
+      quitar.appendChild(icoQ);
+      quitar.addEventListener('click', () => { fotos.splice(i, 1); error = null; render(); });
+      item.appendChild(quitar);
+
+      grid.appendChild(item);
+    });
+
+    if (fotos.length < max) {
+      const add = document.createElement('button');
+      add.type = 'button';
+      add.className = 'pp-foto-add';
+      add.setAttribute('aria-label', 'Añadir foto');
+      if (procesando) {
+        add.setAttribute('aria-disabled', 'true');
+        add.appendChild(document.createElement('ion-spinner'));
+      } else {
+        const icoA = document.createElement('ion-icon');
+        icoA.setAttribute('name', 'camera-outline');
+        const txt = document.createElement('span');
+        txt.textContent = 'Añadir';
+        add.append(icoA, txt);
+        add.addEventListener('click', () => input.click());
+      }
+      grid.appendChild(add);
+    }
+
+    pintarAyuda();
+  }
+
+  input.addEventListener('change', async () => {
+    const archivos = Array.from(input.files || []);
+    input.value = ''; // permite volver a elegir el mismo fichero mas tarde
+    if (!archivos.length) return;
+    const hueco = archivos.slice(0, max - fotos.length);
+    error = null;
+    procesando = true;
+    render();
+    for (const f of hueco) {
+      try { fotos.push(await comprimirFoto(f)); }
+      catch (e) { error = 'No se pudo leer una de las fotos — prueba otra.'; }
+    }
+    procesando = false;
+    render();
+  });
+
+  render();
+  return { el: wrap, getFotos: () => fotos.slice() };
+}
+
+function pad2(n) { return String(n).padStart(2, '0'); }
+function fmtFechaISO(d) { return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()); }
+function fmtHoraHHMM(d) { return pad2(d.getHours()) + ':' + pad2(d.getMinutes()); }
+
+/* Combina los campos separados de fecha y hora en un Date; si alguno esta
+   vacio o el resultado no es valido, cae a "ahora" -- así el registro
+   nunca se bloquea por un dato de fecha mal escrito a mano. */
+function leerFechaHora(fechaInput, horaInput) {
+  const f = fechaInput.value || fmtFechaISO(new Date());
+  const h = horaInput.value || fmtHoraHHMM(new Date());
+  const d = new Date(f + 'T' + h + ':00');
+  return isNaN(d.getTime()) ? new Date() : d;
+}
+
+/* Spot activo + favoritos, sin duplicados por coordenadas (mismo criterio
+   que favoritos.anadir() en domain/cuaderno.js). */
+function candidatosSpot(spotActivo) {
+  const vistos = new Set();
+  return [spotActivo, ...favoritos.leer()].filter(s => {
+    const k = s.lat.toFixed(4) + ',' + s.lon.toFixed(4);
+    if (vistos.has(k)) return false;
+    vistos.add(k);
+    return true;
+  });
 }
 
 function abrirModalCaptura(contenedor, st) {
@@ -310,7 +471,7 @@ function abrirModalCaptura(contenedor, st) {
   ESPECIES.forEach(e => {
     const o = document.createElement('ion-select-option');
     o.value = e.id;
-    o.textContent = e.icono + ' ' + e.nombre;
+    o.textContent = e.nombre;
     selEsp.appendChild(o);
   });
   const oOtra = document.createElement('ion-select-option');
@@ -336,10 +497,41 @@ function abrirModalCaptura(contenedor, st) {
   Object.values(MODOS).forEach(m => {
     const o = document.createElement('ion-select-option');
     o.value = m.id;
-    o.textContent = m.icono + ' ' + m.nombre;
+    o.textContent = m.nombre;
     selModo.appendChild(o);
   });
   selModo.value = st.modo;
+
+  // Spot: el activo en la app + favoritos guardados -- permite registrar
+  // una captura de un sitio distinto al que se esta consultando ahora.
+  const candidatos = candidatosSpot(st.spot);
+  const selSpot = document.createElement('ion-select');
+  selSpot.setAttribute('label', 'Spot');
+  selSpot.setAttribute('interface', 'action-sheet');
+  candidatos.forEach((s, i) => {
+    const o = document.createElement('ion-select-option');
+    o.value = String(i);
+    o.textContent = s.nombre;
+    selSpot.appendChild(o);
+  });
+  selSpot.value = '0';
+
+  // Fecha y hora de la captura, editables -- por defecto ahora, pero no
+  // hace falta registrar la captura en el momento: se puede rellenar el
+  // cuaderno mas tarde con la fecha/hora real de la marea.
+  const ahoraIni = new Date();
+  const filaFecha = document.createElement('div');
+  filaFecha.className = 'pp-form-fila';
+  const fecha = document.createElement('ion-input');
+  fecha.type = 'date';
+  fecha.setAttribute('label', 'Fecha');
+  fecha.setAttribute('max', fmtFechaISO(ahoraIni));
+  fecha.value = fmtFechaISO(ahoraIni);
+  const hora = document.createElement('ion-input');
+  hora.type = 'time';
+  hora.setAttribute('label', 'Hora');
+  hora.value = fmtHoraHHMM(ahoraIni);
+  filaFecha.append(fecha, hora);
 
   const senuelo = document.createElement('ion-input');
   senuelo.setAttribute('label', 'Señuelo / cebo');
@@ -349,61 +541,42 @@ function abrirModalCaptura(contenedor, st) {
   notas.setAttribute('label', 'Notas (opcional)');
   notas.setAttribute('placeholder', 'Notas (opcional)');
 
-  // Foto: cámara o galería (el selector del sistema ofrece ambas)
-  const foto = document.createElement('input');
-  foto.type = 'file';
-  foto.accept = 'image/*';
-  foto.style.display = 'none';
-  const btnFoto = document.createElement('ion-button');
-  btnFoto.setAttribute('fill', 'outline');
-  btnFoto.type = 'button';
-  actualizarBotonFoto(btnFoto, 'camera-outline', 'Añadir foto');
-  const preview = document.createElement('img');
-  preview.className = 'pp-foto-preview';
-  preview.style.display = 'none';
-  preview.alt = '';
-  let fotoData = null;
-  btnFoto.addEventListener('click', () => foto.click());
-  foto.addEventListener('change', async () => {
-    const f = foto.files && foto.files[0];
-    if (!f) return;
-    actualizarBotonFoto(btnFoto, 'camera-outline', 'Procesando…');
-    try {
-      fotoData = await comprimirFoto(f);
-      preview.src = fotoData;
-      preview.style.display = 'block';
-      actualizarBotonFoto(btnFoto, 'camera-outline', 'Cambiar foto');
-    } catch (e2) {
-      fotoData = null;
-      actualizarBotonFoto(btnFoto, 'camera-outline', 'No se pudo leer la foto — prueba otra');
-    }
-  });
+  // Fotos: cámara o galería (el selector del sistema ofrece ambas), hasta MAX_FOTOS
+  const selectorFotos = crearSelectorFotos(MAX_FOTOS);
 
-  [selEsp, talla, peso, selModo, senuelo, notas, foto, btnFoto, preview].forEach(x => form.appendChild(x));
+  [selEsp, talla, peso, selModo, selSpot, filaFecha, senuelo, notas, selectorFotos.el]
+    .forEach(x => form.appendChild(x));
 
   const guardar = document.createElement('ion-button');
   guardar.setAttribute('expand', 'block');
-  guardar.textContent = 'Guardar con condiciones actuales';
+  guardar.textContent = 'Guardar captura';
   guardar.addEventListener('click', async () => {
     guardar.disabled = true;
+    const spotSel = candidatos[Number(selSpot.value)] || st.spot;
+    const fechaSel = leerFechaHora(fecha, hora);
+    // Las condiciones (marea/viento/oleaje...) vienen del pronostico ya
+    // cargado para st.spot -- si el usuario elige un spot distinto no hay
+    // datos fiables para ese sitio, asi que la captura se guarda igual
+    // pero sin snapshot de condiciones (mejor nada que un dato erroneo).
+    const mismoSpot = Math.abs(spotSel.lat - st.spot.lat) < 1e-4 && Math.abs(spotSel.lon - st.spot.lon) < 1e-4;
     let condiciones = null;
-    if (st.ctx) {
-      const h = horaMasCercana(st.datos.horas, new Date());
+    if (st.ctx && mismoSpot) {
+      const h = horaMasCercana(st.datos.horas, fechaSel);
       const idx = indiceHora(h, selModo.value, st.ctx);
-      const em = st.ctx.mareas.ahora;
-      const lunaInfo = lunaEn(new Date(), st.spot.lat, st.spot.lon);
+      const estado = st.ctx.mareas.estadoEn(fechaSel);
+      const lunaInfo = lunaEn(fechaSel, st.spot.lat, st.spot.lon);
       condiciones = {
         viento: h.viento, ola: h.ola, sst: h.sst, presion: h.presion,
-        faseMarea: em ? em.fase : null, luna: lunaInfo.nombre,
-        momento: momentoDelDia(new Date(), st.spot.lat, st.spot.lon),
+        faseMarea: estado ? estado.fase : null, luna: lunaInfo.nombre,
+        momento: momentoDelDia(fechaSel, st.spot.lat, st.spot.lon),
         indice: idx.valor
       };
     }
-    let fotoId = null;
-    if (fotoData) {
-      fotoId = 'f_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
-      try { await guardarFoto(fotoId, fotoData); }
-      catch (e3) { fotoId = null; }
+    const fotoIds = [];
+    for (const dataUrl of selectorFotos.getFotos()) {
+      const fotoId = 'f_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
+      try { await guardarFoto(fotoId, dataUrl); fotoIds.push(fotoId); }
+      catch (e3) { /* esa foto no se guarda; el resto sigue su curso */ }
     }
     anadir({
       especie: selEsp.value,
@@ -412,8 +585,9 @@ function abrirModalCaptura(contenedor, st) {
       modalidad: selModo.value,
       senuelo: senuelo.value || null,
       notas: notas.value || null,
-      spot: { nombre: st.spot.nombre, lat: st.spot.lat, lon: st.spot.lon },
-      fotoId,
+      fecha: fechaSel.toISOString(),
+      spot: { nombre: spotSel.nombre, lat: spotSel.lat, lon: spotSel.lon },
+      fotoIds,
       condiciones
     });
     cerrarModal();
@@ -421,5 +595,9 @@ function abrirModalCaptura(contenedor, st) {
   });
   form.appendChild(guardar);
   cuerpo.appendChild(form);
-  abrirModal(cuerpo);
+  // breakpoints [0,1]: sheet a pantalla completa en vez del 90% por defecto
+  // -- con fotos el contenido crece y el sheet parcial atrapaba el scroll,
+  // dejando el boton "Guardar captura" inalcanzable (mismo patron que el
+  // editor de perfil en vista-perfil.js).
+  abrirModal(cuerpo, { breakpoints: [0, 1], initialBreakpoint: 1 });
 }

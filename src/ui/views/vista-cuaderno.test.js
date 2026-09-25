@@ -137,6 +137,44 @@ describe('renderCuaderno: vista Cuaderno (registro, galeria, stats, historial, e
     expect(cont2.querySelectorAll('.pp-galeria-celda')).toHaveLength(2);
   });
 
+  it('formulario de nueva captura: permite elegir spot (activo + favoritos) y fecha/hora, y se guardan en la captura', async () => {
+    cuaderno.favoritos.anadir({ nombre: 'Getaria', lat: 43.30, lon: -2.20 });
+    const cont = document.createElement('div');
+    document.body.appendChild(cont);
+    renderCuaderno(cont, stBase());
+
+    cont.querySelector('ion-button').click(); // "Registrar captura"
+    const modal = document.getElementById('pp-modal');
+    expect(modal).not.toBeNull();
+
+    const selSpot = Array.from(modal.querySelectorAll('ion-select')).find(s => s.getAttribute('label') === 'Spot');
+    expect(selSpot).toBeTruthy();
+    const opciones = selSpot.querySelectorAll('ion-select-option');
+    expect(opciones).toHaveLength(2); // spot activo (Zarautz) + favorito (Getaria)
+    expect(opciones[0].textContent).toBe('Zarautz');
+    expect(opciones[1].textContent).toBe('Getaria');
+    selSpot.value = '1'; // elige el favorito
+
+    const inputs = modal.querySelectorAll('ion-input');
+    const fechaInput = Array.from(inputs).find(i => i.getAttribute('label') === 'Fecha');
+    const horaInput = Array.from(inputs).find(i => i.getAttribute('label') === 'Hora');
+    expect(fechaInput).toBeTruthy();
+    expect(horaInput).toBeTruthy();
+    fechaInput.value = '2026-01-10';
+    horaInput.value = '07:30';
+
+    const guardarBtn = Array.from(modal.querySelectorAll('ion-button')).find(b => b.textContent === 'Guardar captura');
+    guardarBtn.click();
+    await Promise.resolve();
+
+    const lista = cuaderno.leer();
+    expect(lista).toHaveLength(1);
+    expect(lista[0].fecha).toBe(new Date('2026-01-10T07:30:00').toISOString());
+    expect(lista[0].spot.nombre).toBe('Getaria');
+    // spot distinto al activo -> sin datos de pronostico fiables para el
+    expect(lista[0].condiciones).toBeNull();
+  });
+
   it('exportar: copia el JSON al portapapeles cuando clipboard.writeText esta disponible', async () => {
     const writeText = vi.fn().mockResolvedValue(undefined);
     Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true });
@@ -146,7 +184,7 @@ describe('renderCuaderno: vista Cuaderno (registro, galeria, stats, historial, e
     document.body.appendChild(cont);
     renderCuaderno(cont, stBase());
 
-    const chips = cont.querySelectorAll('ion-chip');
+    const chips = cont.querySelectorAll('ion-button');
     const exportarChip = Array.from(chips).find(c => c.textContent.includes('Exportar'));
     exportarChip.click();
     await Promise.resolve();
@@ -164,7 +202,7 @@ describe('renderCuaderno: vista Cuaderno (registro, galeria, stats, historial, e
     document.body.appendChild(cont);
     renderCuaderno(cont, stBase());
 
-    const chips = cont.querySelectorAll('ion-chip');
+    const chips = cont.querySelectorAll('ion-button');
     const importarChip = Array.from(chips).find(c => c.textContent.includes('Importar'));
     importarChip.click();
 
@@ -180,7 +218,7 @@ describe('renderCuaderno: vista Cuaderno (registro, galeria, stats, historial, e
     document.body.appendChild(cont);
     renderCuaderno(cont, stBase());
 
-    const chips = cont.querySelectorAll('ion-chip');
+    const chips = cont.querySelectorAll('ion-button');
     const importarChip = Array.from(chips).find(c => c.textContent.includes('Importar'));
     importarChip.click();
 

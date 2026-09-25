@@ -6,17 +6,19 @@ import { CONFIG } from './domain/config.js';
 import { cargarTodo, desdeCache, buscarLugar } from './domain/api.js';
 import { preparar, indiceHora, horaMasCercana } from './domain/indice.js';
 import { favoritos } from './domain/cuaderno.js';
-import { abrirModal, cerrarModal } from './ui/util/modal.js';
+import { abrirModal, cerrarModal, abrirModalCentrado } from './ui/util/modal.js';
+import { svg } from './domain/iconos.js';
 import { renderAhora } from './ui/views/vista-ahora.js';
 import { renderPrevision } from './ui/views/vista-prevision.js';
 import { crearVistaMapa } from './ui/views/vista-mapa.js';
 import { renderEspecies } from './ui/views/vista-especies.js';
 import { renderCuaderno } from './ui/views/vista-cuaderno.js';
 import { renderTrofeos } from './ui/views/vista-trofeos.js';
+import { renderPerfil } from './ui/views/vista-perfil.js';
 
 const PREFS_KEY = 'pp_prefs';
 const PICO_KEY = 'pp_pico';
-const VISTAS = ['ahora', 'prevision', 'mapa', 'especies', 'cuaderno', 'trofeos'];
+const VISTAS = ['ahora', 'prevision', 'mapa', 'especies', 'cuaderno', 'trofeos', 'perfil'];
 
 /* Crea la app conectada a un <pp-app-shell> ya montado en el DOM.
    Devuelve un pequeno API publico (cambiarModo/cambiarSpot/irA/refrescar/
@@ -170,6 +172,7 @@ export function crearApp(shell) {
     else if (st.vista === 'especies') renderEspecies(cont, st);
     else if (st.vista === 'cuaderno') renderCuaderno(cont, st);
     else if (st.vista === 'trofeos') renderTrofeos(cont, st);
+    else if (st.vista === 'perfil') renderPerfil(cont, st);
     // 'mapa' no se reconstruye por render: es un componente persistente
     // (ver iniciarMapa/vistaMapaCtrl), solo se actualiza via sus metodos.
   }
@@ -229,19 +232,76 @@ export function crearApp(shell) {
     refrescar();
   }
 
+  function modalGuardarFavorito() {
+    if (!st.spot) return;
+
+    const cuerpo = document.createElement('div');
+    cuerpo.className = 'pp-modal-buscar-content';
+
+    const titulo = document.createElement('h3');
+    const icoEl = svg('estrellaLlena');
+    if (icoEl) { icoEl.style.cssText = 'width:18px;height:18px;color:var(--acento)'; titulo.appendChild(icoEl); }
+    titulo.appendChild(document.createTextNode(' Guardar favorito'));
+    cuerpo.appendChild(titulo);
+
+    const lbl = document.createElement('div');
+    lbl.className = 'pp-campo';
+    lbl.textContent = 'Nombre del spot';
+    cuerpo.appendChild(lbl);
+
+    const input = document.createElement('input');
+    input.className = 'pp-input';
+    input.value = st.spot.nombre || '';
+    input.placeholder = 'Nombre del spot…';
+    input.style.marginTop = '6px';
+    cuerpo.appendChild(input);
+
+    const acciones = document.createElement('div');
+    acciones.style.cssText = 'display:flex;gap:8px;margin-top:16px;justify-content:flex-end';
+
+    const btnCancelar = document.createElement('button');
+    btnCancelar.className = 'pp-chip';
+    btnCancelar.textContent = 'Cancelar';
+    btnCancelar.addEventListener('click', cerrarModal);
+
+    const btnGuardar = document.createElement('button');
+    btnGuardar.className = 'pp-chip pp-chip-acento';
+    btnGuardar.textContent = 'Guardar';
+    btnGuardar.addEventListener('click', () => {
+      const nombre = input.value.trim() || st.spot.nombre;
+      favoritos.anadir({ ...st.spot, nombre });
+      cerrarModal();
+    });
+
+    acciones.append(btnCancelar, btnGuardar);
+    cuerpo.appendChild(acciones);
+
+    abrirModalCentrado(cuerpo);
+    setTimeout(() => { input.focus(); input.select(); }, 80);
+  }
+
   function modalBuscar() {
     const cuerpo = document.createElement('div');
+    cuerpo.className = 'pp-modal-buscar-content';
+
     const titulo = document.createElement('h3');
-    titulo.textContent = '📍 Cambiar spot';
-    const input = document.createElement('ion-input');
+    const pinIco = svg('pin');
+    if (pinIco) { pinIco.style.cssText = 'width:18px;height:18px;vertical-align:middle;margin-right:6px'; titulo.appendChild(pinIco); }
+    titulo.appendChild(document.createTextNode(' Cambiar spot'));
+    cuerpo.appendChild(titulo);
+
+    const input = document.createElement('input');
+    input.className = 'pp-input';
     input.placeholder = 'Busca un puerto, playa o pueblo…';
+    cuerpo.appendChild(input);
+
     const res = document.createElement('div');
-    cuerpo.append(titulo, input, res);
+    cuerpo.appendChild(res);
 
     let timerBusqueda = null;
-    input.addEventListener('ionInput', (e) => {
+    input.addEventListener('input', () => {
       clearTimeout(timerBusqueda);
-      const valor = (e.detail.value || '').trim();
+      const valor = input.value.trim();
       timerBusqueda = setTimeout(async () => {
         res.replaceChildren();
         if (valor.length < 2) return;
@@ -250,7 +310,7 @@ export function crearApp(shell) {
         cargando.textContent = 'Buscando…';
         res.appendChild(cargando);
         try {
-          const lugares = await buscarLugar(valor);
+          const lugares = await buscarLugar(valor, st.spot);
           res.replaceChildren();
           if (!lugares.length) {
             const p = document.createElement('p');
@@ -269,39 +329,76 @@ export function crearApp(shell) {
             fila.addEventListener('click', () => cambiarSpot(l));
             res.appendChild(fila);
           });
-        } catch (e) {
+        } catch (err) {
           res.replaceChildren();
           const p = document.createElement('p');
           p.className = 'pp-nota';
-          p.textContent = 'Error buscando: ' + e.message;
+          p.textContent = 'Error buscando: ' + err.message;
           res.appendChild(p);
         }
       }, 350);
     });
 
-    const gps = document.createElement('ion-button');
-    gps.setAttribute('fill', 'outline');
-    gps.textContent = '🛰️ Usar mi ubicación (GPS)';
+    const gpsSep = document.createElement('div');
+    gpsSep.className = 'pp-modal-gps-sep';
+    const gps = document.createElement('button');
+    gps.className = 'pp-chip';
+    const gpsIco = svg('ubicacion');
+    if (gpsIco) { gpsIco.style.cssText = 'width:16px;height:16px;vertical-align:middle;margin-right:5px'; gps.appendChild(gpsIco); }
+    gps.appendChild(document.createTextNode(' Usar mi ubicación (GPS)'));
+    let geoEnCurso = false;
     gps.addEventListener('click', () => {
+      if (geoEnCurso) return;
       if (typeof navigator === 'undefined' || !navigator.geolocation) {
-        gps.textContent = '🛰️ GPS no disponible';
+        gps.textContent = 'GPS no disponible';
         return;
       }
-      gps.textContent = '🛰️ Localizando…';
+      geoEnCurso = true;
+      gps.replaceChildren(document.createTextNode('Localizando…'));
+
+      // Algunos WebView (Android) no invocan ni exito ni error si el
+      // permiso de ubicacion queda en un estado raro -- sin este timeout
+      // propio, el boton se queda en "Localizando..." para siempre y
+      // parece que el modal esta colgado, aunque cerrar/backdrop siguen
+      // funcionando. `timeout` de PositionOptions no cubre ese caso: solo
+      // aplica cuando el navegador SI responde.
+      let resuelto = false;
+      const timeoutManual = setTimeout(() => {
+        if (resuelto) return;
+        resuelto = true;
+        geoEnCurso = false;
+        gps.textContent = 'Sin respuesta del GPS, prueba de nuevo';
+      }, 13000);
+
       navigator.geolocation.getCurrentPosition(
-        (pos) => cambiarSpot({ nombre: 'Mi ubicación', lat: pos.coords.latitude, lon: pos.coords.longitude }),
-        () => { gps.textContent = '🛰️ Sin permiso o sin señal GPS'; },
+        (pos) => {
+          if (resuelto) return;
+          resuelto = true;
+          clearTimeout(timeoutManual);
+          geoEnCurso = false;
+          cambiarSpot({ nombre: 'Mi ubicación', lat: pos.coords.latitude, lon: pos.coords.longitude });
+        },
+        () => {
+          if (resuelto) return;
+          resuelto = true;
+          clearTimeout(timeoutManual);
+          geoEnCurso = false;
+          gps.textContent = 'Sin permiso o sin señal GPS';
+        },
         { enableHighAccuracy: true, timeout: 12000 }
       );
     });
-    cuerpo.appendChild(gps);
+    gpsSep.appendChild(gps);
+    cuerpo.appendChild(gpsSep);
 
     const favs = favoritos.leer();
     if (favs.length) {
       const t = document.createElement('div');
       t.className = 'pp-campo';
       const b = document.createElement('b');
-      b.textContent = '⭐ Favoritos';
+      const favIco = svg('estrellaLlena');
+      if (favIco) { favIco.style.cssText = 'width:14px;height:14px;vertical-align:middle;margin-right:5px;color:var(--acento)'; b.appendChild(favIco); }
+      b.appendChild(document.createTextNode(' Favoritos'));
       t.appendChild(b);
       cuerpo.appendChild(t);
       favs.forEach((f, i) => {
@@ -311,7 +408,9 @@ export function crearApp(shell) {
         nombre.textContent = f.nombre;
         const borrar = document.createElement('button');
         borrar.className = 'pp-borrar';
-        borrar.textContent = '✕';
+        const cerrarIco = svg('cerrar');
+        if (cerrarIco) { cerrarIco.style.cssText = 'width:14px;height:14px'; borrar.appendChild(cerrarIco); }
+        else borrar.textContent = '✕';
         borrar.addEventListener('click', (e) => {
           e.stopPropagation();
           favoritos.borrar(i);
@@ -323,7 +422,19 @@ export function crearApp(shell) {
         cuerpo.appendChild(fila);
       });
     }
-    abrirModal(cuerpo);
+    abrirModalCentrado(cuerpo);
+  }
+
+  /* ---------- Desarrollador ---------- */
+
+  // Import dinamico (no `import` estatico arriba): en el build de
+  // produccion import.meta.env.DEV es `false` en tiempo de compilacion,
+  // asi que esta rama es inalcanzable y Vite ni siquiera empaqueta
+  // vista-dev.js -- no basta con ocultar el item de menu, el codigo del
+  // panel (logros, overrides...) tampoco debe viajar en el APK real.
+  function modalDev() {
+    if (!import.meta.env.DEV) return;
+    import('./ui/views/vista-dev.js').then(({ panelDev }) => abrirModal(panelDev()));
   }
 
   /* ---------- Cabecera ---------- */
@@ -332,6 +443,9 @@ export function crearApp(shell) {
     shell.spot = st.spot;
     shell.actualizado = textoActualizado();
     shell.refrescando = st.cargando;
+    shell.esFavorito = st.spot
+      ? favoritos.leer().some(f => Math.abs(f.lat - st.spot.lat) < 1e-4 && Math.abs(f.lon - st.spot.lon) < 1e-4)
+      : false;
     if (st.ctx && st.datos) {
       const h = horaMasCercana(st.datos.horas, new Date());
       if (h) shell.seguridad = indiceHora(h, st.modo, st.ctx).seguridad;
@@ -353,9 +467,9 @@ export function crearApp(shell) {
     shell.addEventListener('pp-cambiar-vista', (e) => irA(e.detail.vista));
     shell.addEventListener('pp-cambiar-spot', modalBuscar);
     shell.addEventListener('pp-refrescar', refrescarManual);
-    shell.addEventListener('pp-favorito', () => {
-      favoritos.anadir(st.spot);
-    });
+    shell.addEventListener('pp-favorito', modalGuardarFavorito);
+    shell.addEventListener('pp-menu-modo', (e) => cambiarModo(e.detail.modo));
+    shell.addEventListener('pp-abrir-dev', modalDev);
     shell.contenido.addEventListener('pp-cambiar-modo', (e) => cambiarModo(e.detail.modo));
   }
 

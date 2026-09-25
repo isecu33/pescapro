@@ -40,6 +40,29 @@ describe('cuaderno: conversion 1:1 desde www/js/cuaderno.js (incluye favoritos)'
     expect(fotosMod.borrar).toHaveBeenCalledWith('foto123');
   });
 
+  it('anadir() acepta fotoIds y expone fotoId como alias del primero (limitado a MAX_FOTOS)', async () => {
+    const { anadir, leer, MAX_FOTOS } = await import('./cuaderno.js');
+    expect(MAX_FOTOS).toBe(5);
+    anadir({ especie: 'lubina', fotoIds: ['f1', 'f2', 'f3', 'f4', 'f5', 'f6', 'f7'] });
+    const c = leer()[0];
+    expect(c.fotoIds).toHaveLength(5);
+    expect(c.fotoIds).toEqual(['f1', 'f2', 'f3', 'f4', 'f5']);
+    expect(c.fotoId).toBe('f1');
+  });
+
+  it('borrar() con varias fotos las borra todas via fotos.borrar', async () => {
+    vi.doMock('./fotos.js', () => ({ borrar: vi.fn(async () => true), obtener: vi.fn(), guardar: vi.fn(), comprimir: vi.fn() }));
+    const fotosMod = await import('./fotos.js');
+    const { anadir, leer, borrar } = await import('./cuaderno.js');
+    anadir({ especie: 'lubina', fotoIds: ['f1', 'f2', 'f3'] });
+    const id = leer()[0].id;
+    borrar(id);
+    expect(fotosMod.borrar).toHaveBeenCalledWith('f1');
+    expect(fotosMod.borrar).toHaveBeenCalledWith('f2');
+    expect(fotosMod.borrar).toHaveBeenCalledWith('f3');
+    expect(fotosMod.borrar).toHaveBeenCalledTimes(3);
+  });
+
   it('estadisticas() agrega por especie, fase de marea, luna y franja', async () => {
     const { anadir, estadisticas } = await import('./cuaderno.js');
     anadir({ especie: 'lubina', condiciones: { faseMarea: 'subiendo', luna: 'llena', momento: 'noche' } });

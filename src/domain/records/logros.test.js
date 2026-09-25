@@ -51,5 +51,23 @@ describe('logros: conversion 1:1 desde www/js/records.js (PP.logros)', () => {
   it('logro viajero (5 spots) conseguido', () => expect(porId.viajero.conseguido).toBe(true));
   it('logro dia-perfecto-plata (3 en mismo dia) conseguido', () => expect(porId['dia-perfecto-plata'].conseguido).toBe(true));
   it('logro dia-perfecto-oro (5 en mismo dia) pendiente (mejor dia = 4)', () => expect(porId['dia-perfecto-oro'].conseguido).toBe(false));
+  it('logro faro NO conseguido (ninguna captura con lat/lon)', () => expect(porId.faro.conseguido).toBe(false));
   it('hay al menos 16 logros definidos', () => expect(logros.length).toBeGreaterThanOrEqual(16));
+});
+
+describe('logros: "faro" (captura cerca de un faro de la costa gallega)', () => {
+  // Cabo Vilán (Camariñas, A Coruña): 43.16041, -9.21093
+  const capCercaFaro = { especie: 'lubina', fecha: new Date().toISOString(), spot: { nombre: 'Camariñas', lat: 43.161, lon: -9.211 } };
+  const capLejosFaro = { especie: 'lubina', fecha: new Date().toISOString(), spot: { nombre: 'Zarautz', lat: 43.29, lon: -2.17 } };
+  const capSinSpot = { especie: 'lubina', fecha: new Date().toISOString(), spot: null };
+
+  it('conseguido con una captura a <1km de un faro conocido', () => {
+    expect(evaluar([capCercaFaro]).find(l => l.id === 'faro').conseguido).toBe(true);
+  });
+  it('NO conseguido si el spot está lejos de cualquier faro', () => {
+    expect(evaluar([capLejosFaro]).find(l => l.id === 'faro').conseguido).toBe(false);
+  });
+  it('NO conseguido si la captura no tiene spot/coordenadas', () => {
+    expect(evaluar([capSinSpot]).find(l => l.id === 'faro').conseguido).toBe(false);
+  });
 });

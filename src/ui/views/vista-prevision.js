@@ -8,7 +8,7 @@
    El modal de detalle de hora usa abrirModal() (src/ui/util/modal.js,
    sobre <ion-modal>) en vez del modal()/cerrarModal() a mano del original. */
 import { util, MODOS } from '../../domain/config.js';
-import { serie, mejoresVentanas, diasDisponibles, especiesEn } from '../../domain/indice.js';
+import { serie, mejoresVentanas, diasDisponibles, resumenDias, especiesEn } from '../../domain/indice.js';
 import { abrirModal, cerrarModal } from '../util/modal.js';
 import { svg, WMO_ICO } from '../util/icons.js';
 import { espImgEl } from '../../domain/especies.js';
@@ -47,7 +47,79 @@ export function renderPrevision(contenedor, st) {
     return;
   }
   contenedor.appendChild(cardVentanas(st));
+  contenedor.appendChild(cardResumenSemana(contenedor, st));
   contenedor.appendChild(cardGrafico(contenedor, st));
+}
+
+/* Tira de dias: resumen visual de toda la ventana de previsión (pico de
+   índice + icono meteo + aviso) y forma principal de saltar a un día
+   concreto -- toca un día para filtrar el gráfico de abajo a esas 24h,
+   vuelve a tocarlo para quitar el filtro. Ocupaba un hueco vacío grande
+   entre las "mejores ventanas" y el gráfico horario, y es más rápido que
+   abrir el selector de calendario para el caso normal (los 5-6 días de la
+   previsión caben enteros en la tira). El calendario completo (abrirSelectorDia)
+   queda disponible como última ficha de la tira para quien prefiera esa vista. */
+function cardResumenSemana(contenedor, st) {
+  const card = document.createElement('div');
+  card.className = 'pp-card';
+
+  card.appendChild(tituloConIcono('calendario', 'Próximos días'));
+
+  const scroll = document.createElement('div');
+  scroll.className = 'pp-semana-scroll';
+  const fila = document.createElement('div');
+  fila.className = 'pp-semana';
+
+  const hoy = new Date();
+  resumenDias(st.ctx, st.modo).forEach(r => {
+    const tile = document.createElement('button');
+    tile.type = 'button';
+    tile.className = 'pp-dia-tile';
+    if (st.diaPrevisionSel && util.esMismoDia(r.fecha, st.diaPrevisionSel)) tile.classList.add('activo');
+
+    const nombre = document.createElement('span');
+    nombre.className = 'pp-dia-tile-nombre';
+    nombre.textContent = util.esMismoDia(r.fecha, hoy) ? 'Hoy' : util.fmtDia(r.fecha);
+    tile.appendChild(nombre);
+
+    const wmo = WMO_ICO[r.codigo] || { cat: 'nube-sol' };
+    const ico = document.createElement('span');
+    ico.className = 'pp-dia-tile-ico';
+    ico.appendChild(svg(wmo.cat, 18));
+    tile.appendChild(ico);
+
+    const idx = document.createElement('span');
+    idx.className = 'pp-dia-tile-idx';
+    idx.style.background = util.colorIndice(r.max);
+    idx.textContent = String(r.max);
+    tile.appendChild(idx);
+
+    if (r.aviso) {
+      const aviso = document.createElement('i');
+      aviso.className = 'pp-dia-tile-aviso';
+      aviso.title = 'Aviso de seguridad ese día';
+      tile.appendChild(aviso);
+    }
+
+    tile.addEventListener('click', () => {
+      const yaActivo = st.diaPrevisionSel && util.esMismoDia(r.fecha, st.diaPrevisionSel);
+      st.diaPrevisionSel = yaActivo ? null : r.fecha;
+      renderPrevision(contenedor, st);
+    });
+    fila.appendChild(tile);
+  });
+
+  const tileCalendario = document.createElement('button');
+  tileCalendario.type = 'button';
+  tileCalendario.className = 'pp-dia-tile pp-dia-tile-calendario';
+  tileCalendario.appendChild(svg('calendario', 18));
+  tileCalendario.appendChild(document.createTextNode('Ver todos'));
+  tileCalendario.addEventListener('click', () => abrirSelectorDia(contenedor, st));
+  fila.appendChild(tileCalendario);
+
+  scroll.appendChild(fila);
+  card.appendChild(scroll);
+  return card;
 }
 
 function cardVentanas(st) {
@@ -131,14 +203,6 @@ function cardGrafico(contenedor, st) {
   const cabecera = document.createElement('div');
   cabecera.className = 'pp-graf-cabecera';
   cabecera.appendChild(tituloConIcono('nube-sol', 'Índice hora a hora'));
-
-  const btnDia = document.createElement('button');
-  btnDia.type = 'button';
-  btnDia.className = 'pp-graf-btn-dia';
-  btnDia.appendChild(svg('calendario', 14));
-  btnDia.appendChild(document.createTextNode(st.diaPrevisionSel ? util.fmtDia(st.diaPrevisionSel) : 'Elegir día'));
-  btnDia.addEventListener('click', () => abrirSelectorDia(contenedor, st));
-  cabecera.appendChild(btnDia);
   card.appendChild(cabecera);
 
   if (st.diaPrevisionSel) {

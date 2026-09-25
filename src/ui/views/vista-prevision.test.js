@@ -112,15 +112,48 @@ describe('renderPrevision', () => {
     const cont = document.createElement('div');
     renderPrevision(cont, st);
     renderPrevision(cont, st);
-    expect(cont.querySelectorAll('.pp-card').length).toBe(2);
+    expect(cont.querySelectorAll('.pp-card').length).toBe(3);
   });
 
-  it('el boton "Elegir dia" abre un selector con ion-datetime acotado a los dias con datos', () => {
+  it('la tira de dias muestra un dia por cada entrada de resumenDias(), mas la ficha de calendario', () => {
     const st = stConCtx();
     const cont = document.createElement('div');
     renderPrevision(cont, st);
 
-    cont.querySelector('.pp-graf-btn-dia').click();
+    const dias = diasDisponibles(st.ctx, st.modo);
+    const tiles = cont.querySelectorAll('.pp-semana .pp-dia-tile');
+    expect(tiles.length).toBe(dias.length + 1); // + ficha "Ver todos"
+    expect(tiles[0].querySelector('.pp-dia-tile-nombre').textContent).toBe('Hoy');
+    expect(tiles[tiles.length - 1].classList.contains('pp-dia-tile-calendario')).toBe(true);
+  });
+
+  it('tocar un dia de la tira filtra el grafico a esas 24h, y volver a tocarlo quita el filtro', () => {
+    const st = stConCtx();
+    const cont = document.createElement('div');
+    renderPrevision(cont, st);
+
+    const dias = diasDisponibles(st.ctx, st.modo);
+    const objetivo = dias[1];
+    const tileObjetivo = cont.querySelectorAll('.pp-semana .pp-dia-tile')[1];
+    tileObjetivo.click();
+
+    expect(st.diaPrevisionSel.getTime()).toBe(objetivo.getTime());
+    const horasEsperadas = serie(st.ctx, st.modo).filter(x => util.esMismoDia(x.hora.fecha, objetivo)).length;
+    expect(cont.querySelectorAll('.pp-graf-barra').length).toBe(horasEsperadas);
+    expect(cont.querySelectorAll('.pp-semana .pp-dia-tile.activo').length).toBe(1);
+
+    // tocar el mismo dia otra vez quita el filtro
+    cont.querySelectorAll('.pp-semana .pp-dia-tile')[1].click();
+    expect(st.diaPrevisionSel).toBeNull();
+    expect(cont.querySelectorAll('.pp-graf-barra').length).toBe(serie(st.ctx, st.modo).slice(0, 96).length);
+  });
+
+  it('la ficha de calendario abre el selector con ion-datetime acotado a los dias con datos', () => {
+    const st = stConCtx();
+    const cont = document.createElement('div');
+    renderPrevision(cont, st);
+
+    cont.querySelector('.pp-dia-tile-calendario').click();
 
     const dt = document.querySelector('#pp-modal ion-datetime');
     expect(dt).not.toBeNull();
@@ -130,7 +163,7 @@ describe('renderPrevision', () => {
     expect(dt.getAttribute('max')).toBe(iso(dias[dias.length - 1]));
   });
 
-  it('elegir un dia en el selector filtra el grafico a esas 24h y lo indica en la tarjeta', () => {
+  it('elegir un dia en el selector de calendario filtra el grafico a esas 24h y lo indica en la tarjeta', () => {
     const st = stConCtx();
     const cont = document.createElement('div');
     renderPrevision(cont, st);
@@ -139,7 +172,7 @@ describe('renderPrevision', () => {
     const objetivo = dias[1];
     const iso = objetivo.getFullYear() + '-' + String(objetivo.getMonth() + 1).padStart(2, '0') + '-' + String(objetivo.getDate()).padStart(2, '0');
 
-    cont.querySelector('.pp-graf-btn-dia').click();
+    cont.querySelector('.pp-dia-tile-calendario').click();
     const dt = document.querySelector('#pp-modal ion-datetime');
     dt.dispatchEvent(new CustomEvent('ionChange', { detail: { value: iso } }));
 

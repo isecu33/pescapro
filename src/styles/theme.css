@@ -266,18 +266,39 @@ ion-tab-button[selected] {
 .pp-vent-vacio p { font-size: 15px; font-weight: 600; margin: 0 0 4px; }
 .pp-vent-vacio span { font-size: 12.5px; color: var(--pp-texto2); }
 
+/* Vista Prevision: tira de dias (resumen visual de la ventana de previsión
+   + forma principal de elegir un día, ver cardResumenSemana en el JS) */
+.pp-semana-scroll { overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none; margin: 2px -2px 0; }
+.pp-semana-scroll::-webkit-scrollbar { display: none; }
+.pp-semana { display: flex; gap: 8px; padding: 2px; }
+.pp-dia-tile {
+  position: relative; flex: 0 0 64px; display: flex; flex-direction: column;
+  align-items: center; gap: 6px; padding: 10px 6px 9px;
+  background: var(--pp-panel2); border: 1px solid rgba(255,255,255,0.05);
+  border-radius: var(--pp-radius-sm); cursor: pointer;
+}
+.pp-dia-tile:active { opacity: .8; }
+.pp-dia-tile.activo { border-color: var(--ion-color-primary); background: rgba(255,114,0,0.12); }
+.pp-dia-tile-nombre { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--pp-texto2); }
+.pp-dia-tile-ico { display: flex; color: var(--pp-texto2); }
+.pp-dia-tile-idx {
+  min-width: 30px; padding: 3px 5px; border-radius: 7px; color: #000;
+  font-weight: 900; font-size: 13px; text-align: center;
+}
+.pp-dia-tile-aviso {
+  position: absolute; top: 6px; right: 6px; width: 7px; height: 7px;
+  border-radius: 50%; background: #e03131;
+}
+.pp-dia-tile-calendario {
+  color: var(--pp-texto2); border-style: dashed; justify-content: center;
+  font-size: 11px; font-weight: 700;
+}
+.pp-dia-tile-calendario svg { color: var(--pp-texto2); }
+
 /* Vista Prevision: grafico horario (barras a medida, sin equivalente Ionic) */
 .pp-graf-cabecera { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; gap: 8px; }
 .pp-graf-cabecera .pp-card-titulo { margin: 0; }
 .pp-graf-nota-tap { display: block; font-size: 11.5px; color: var(--pp-texto2); margin-bottom: 2px; }
-.pp-graf-btn-dia {
-  display: flex; align-items: center; gap: 5px; flex-shrink: 0;
-  background: var(--pp-panel2); color: var(--ion-text-color);
-  border: 1px solid rgba(255,255,255,0.08); border-radius: 999px;
-  padding: 5px 11px; font-size: 11.5px; font-weight: 600; cursor: pointer;
-}
-.pp-graf-btn-dia:active { background: rgba(255,114,0,0.14); }
-.pp-graf-btn-dia svg { color: var(--ion-color-primary); }
 .pp-graf-dia-aviso {
   display: flex; align-items: center; justify-content: space-between; gap: 8px;
   font-size: 12px; color: var(--pp-texto2); margin-bottom: 2px;

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { preparar, factores, indiceHora, serie, mejoresVentanas, diasDisponibles, actividadEspecie, especiesEn, mejoresHorasEspecie } from './indice.js';
+import { preparar, factores, indiceHora, serie, mejoresVentanas, diasDisponibles, resumenDias, actividadEspecie, especiesEn, mejoresHorasEspecie } from './indice.js';
 import { MODOS, SEGURIDAD } from './config.js';
 import { ESPECIES, especiePorId } from './especies.js';
 import { generarDatos } from './__fixtures__.js';
@@ -81,6 +81,20 @@ describe('indice: conversion 1:1 desde www/js/indice.js', () => {
     });
     // Orden estrictamente ascendente, sin dias repetidos
     for (let i = 1; i < dias.length; i++) expect(dias[i].getTime()).toBeGreaterThan(dias[i - 1].getTime());
+  });
+
+  it('resumenDias() da un pico de indice y codigo WMO por cada dia disponible, y detecta avisos rojos', () => {
+    const datosT = generarDatos({ viento: 10, ola: 1.0, sst: 15, tormentaEn: 20 });
+    const ctxT = preparar(datosT);
+    const resumen = resumenDias(ctxT, 'spinning');
+    const dias = diasDisponibles(ctxT, 'spinning');
+    expect(resumen.length).toBe(dias.length);
+    resumen.forEach(r => {
+      expect(r.max).toBeGreaterThanOrEqual(0);
+      expect(r.max).toBeLessThanOrEqual(100);
+    });
+    // tormentaEn:20 cae en el primer dia de la serie (index horario 20 ~ hoy)
+    expect(resumen[0].aviso).toBe(true);
   });
 
   it('las horas de temporal no aparecen como buenas ventanas', () => {

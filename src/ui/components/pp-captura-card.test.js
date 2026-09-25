@@ -92,4 +92,20 @@ describe('<pp-captura-card>: resuelve el CRITICAL de XSS de renderCuaderno/modal
     expect(el.shadowRoot.querySelector('.thumb')).toBeNull();
     el.remove();
   });
+
+  it('muestra un badge "+N" cuando la captura tiene varias fotos', () => {
+    const el = document.createElement('pp-captura-card');
+    document.body.appendChild(el);
+    el.captura = capturaBase({ fotoId: 'foto1', fotoIds: ['foto1', 'foto2', 'foto3'] });
+    expect(el.shadowRoot.querySelector('.thumb .badge').textContent).toBe('+2');
+    el.remove();
+  });
+
+  it('no muestra badge con una sola foto', () => {
+    const el = document.createElement('pp-captura-card');
+    document.body.appendChild(el);
+    el.captura = capturaBase({ fotoId: 'foto1', fotoIds: ['foto1'] });
+    expect(el.shadowRoot.querySelector('.thumb .badge')).toBeNull();
+    el.remove();
+  });
 });

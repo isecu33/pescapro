@@ -31,16 +31,25 @@ export class PpCapturaCard extends HTMLElement {
     style.textContent = `
       :host { display: block; border-bottom: 1px solid var(--borde, #242424); padding: 9px 0; }
       .flex { display: flex; gap: 10px; align-items: flex-start; }
-      .thumb { flex: 0 0 56px; width: 56px; height: 56px; border-radius: 10px; overflow: hidden;
-        background: var(--panel2, #1a1a1a); cursor: pointer; }
+      .thumb { position: relative; flex: 0 0 56px; width: 56px; height: 56px; border-radius: 10px;
+        overflow: hidden; background: var(--panel2, #1a1a1a); cursor: pointer; }
       .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+      .thumb .badge { position: absolute; bottom: 2px; right: 2px; background: rgba(0,0,0,.65);
+        color: #fff; font-size: 9px; font-weight: 700; line-height: 1.3; padding: 1px 4px; border-radius: 6px; }
       .cuerpo { flex: 1; min-width: 0; }
       .cab { display: flex; align-items: center; gap: 6px; }
       .sub, .cond { font-size: 12px; color: var(--texto2, #888888); margin-top: 2px; }
       .notas { font-size: 12.5px; margin-top: 3px; font-style: italic; }
       .borrar { margin-left: auto; background: none; border: none; color: var(--texto2, #888888);
         cursor: pointer; font-size: 18px; display: flex; align-items: center; padding: 0 2px; }
-      ion-icon { font-size: 14px; vertical-align: -2px; display: inline-block; }
+      ion-icon { font-size: 14px; vertical-align: -2px; display: inline-block; margin-right: 4px; }
+      /* Estilos globales de theme.css (tamaño, alineación, filtro a blanco de
+         los SVG) no cruzan el limite del Shadow DOM -- se duplican aqui a
+         proposito. Sin esto el icono de especie sale sin tamaño fijo (se
+         desajusta) y sin el filtro que lo pone en blanco sobre fondo oscuro. */
+      img.pp-esp-cab-ico { width: 20px; height: 16px; object-fit: contain; vertical-align: middle; margin-right: 4px; }
+      img.pp-esp-cab-ico[src$=".svg"] { filter: brightness(0) invert(1); }
+      span.pp-esp-cab-ico { font-size: 14px; vertical-align: middle; margin-right: 4px; }
     `;
     shadow.appendChild(style);
     this._root = document.createElement('div');
@@ -66,6 +75,13 @@ export class PpCapturaCard extends HTMLElement {
       img.alt = '';
       obtenerFoto(c.fotoId).then(d => { if (d) img.src = d; });
       thumb.appendChild(img);
+      const numFotos = Array.isArray(c.fotoIds) ? c.fotoIds.length : 1;
+      if (numFotos > 1) {
+        const badge = document.createElement('span');
+        badge.className = 'badge';
+        badge.textContent = '+' + (numFotos - 1);
+        thumb.appendChild(badge);
+      }
       thumb.addEventListener('click', () => this._emit('pp-abrir-foto'));
       flex.appendChild(thumb);
     }
@@ -78,7 +94,7 @@ export class PpCapturaCard extends HTMLElement {
     cab.className = 'cab';
     const b = document.createElement('b');
     if (especie) b.appendChild(espImgEl(especie, 'pp-esp-cab-ico'));
-    b.append(' ' + (especie ? especie.nombre : c.especie));
+    b.append(especie ? especie.nombre : c.especie);
     cab.appendChild(b);
     if (c.talla) cab.appendChild(document.createTextNode(' · ' + c.talla + ' cm'));
     if (c.peso) cab.appendChild(document.createTextNode(' · ' + c.peso + ' kg'));
@@ -113,13 +129,13 @@ export class PpCapturaCard extends HTMLElement {
       if (cond.faseMarea) {
         const ico = document.createElement('ion-icon');
         ico.setAttribute('name', 'water-outline');
-        add([ico, document.createTextNode(' ' + cond.faseMarea)]);
+        add([ico, document.createTextNode(cond.faseMarea)]);
       }
       if (cond.luna) add([document.createTextNode(cond.luna)]);
       if (cond.viento != null) {
         const ico = document.createElement('ion-icon');
         ico.setAttribute('name', 'navigate-outline');
-        add([ico, document.createTextNode(' ' + Math.round(cond.viento) + ' km/h')]);
+        add([ico, document.createTextNode(Math.round(cond.viento) + ' km/h')]);
       }
       if (cond.indice != null) add([document.createTextNode('índice ' + cond.indice)]);
       cuerpo.appendChild(condDiv);

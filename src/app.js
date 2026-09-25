@@ -14,10 +14,11 @@ import { crearVistaMapa } from './ui/views/vista-mapa.js';
 import { renderEspecies } from './ui/views/vista-especies.js';
 import { renderCuaderno } from './ui/views/vista-cuaderno.js';
 import { renderTrofeos } from './ui/views/vista-trofeos.js';
+import { renderPerfil } from './ui/views/vista-perfil.js';
 
 const PREFS_KEY = 'pp_prefs';
 const PICO_KEY = 'pp_pico';
-const VISTAS = ['ahora', 'prevision', 'mapa', 'especies', 'cuaderno', 'trofeos'];
+const VISTAS = ['ahora', 'prevision', 'mapa', 'especies', 'cuaderno', 'trofeos', 'perfil'];
 
 /* Crea la app conectada a un <pp-app-shell> ya montado en el DOM.
    Devuelve un pequeno API publico (cambiarModo/cambiarSpot/irA/refrescar/
@@ -171,6 +172,7 @@ export function crearApp(shell) {
     else if (st.vista === 'especies') renderEspecies(cont, st);
     else if (st.vista === 'cuaderno') renderCuaderno(cont, st);
     else if (st.vista === 'trofeos') renderTrofeos(cont, st);
+    else if (st.vista === 'perfil') renderPerfil(cont, st);
     // 'mapa' no se reconstruye por render: es un componente persistente
     // (ver iniciarMapa/vistaMapaCtrl), solo se actualiza via sus metodos.
   }

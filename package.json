@@ -17,6 +17,7 @@
     "preview": "vite preview",
     "test:vitest": "vitest run",
     "test:vitest:watch": "vitest",
+    "test:auditoria": "vitest run -c auditoria/vitest.config.mjs",
     "android:add": "npx cap add android",
     "android:sync": "npx cap sync android",
     "cap:sync": "npm run build && npx cap sync android",

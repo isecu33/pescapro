@@ -92,3 +92,57 @@ describe('<pp-app-shell>: reemplaza header/nav estaticos de www/index.html', () 
     el.remove();
   });
 });
+
+describe('<pp-app-shell>: menu lateral (hamburguesa) con perfil', () => {
+  function fakeLocalStorage() {
+    const m = new Map();
+    return {
+      getItem: (k) => (m.has(k) ? m.get(k) : null),
+      setItem: (k, v) => { m.set(k, String(v)); },
+      removeItem: (k) => { m.delete(k); }
+    };
+  }
+
+  it('la cabecera del menu muestra la tarjeta de perfil y abre la vista Perfil', () => {
+    vi.stubGlobal('localStorage', fakeLocalStorage());
+    localStorage.setItem('pp_perfil', JSON.stringify({ nombre: 'Iker', usuario: 'iker', clan: { id: 'c_abcd', nombre: 'Costa', etiqueta: 'CST' } }));
+    const el = document.createElement('pp-app-shell');
+    document.body.appendChild(el);
+    const tarjeta = el.querySelector('ion-menu .pp-perfil-tarjeta');
+    expect(tarjeta).not.toBeNull();
+    expect(tarjeta.querySelector('.pp-perfil-nombre').textContent).toContain('Iker');
+    expect(tarjeta.querySelector('.pp-perfil-usuario').textContent).toBe('@iker');
+    expect(tarjeta.querySelector('.pp-perfil-clan-tag').textContent).toBe('[CST]');
+
+    const spy = vi.fn();
+    el.addEventListener('pp-cambiar-vista', spy);
+    tarjeta.click();
+    expect(el.vistaActiva).toBe('perfil');
+    expect(spy.mock.calls[0][0].detail.vista).toBe('perfil');
+    // 'perfil' no tiene pestana: ninguna queda seleccionada
+    expect(el.querySelectorAll('ion-tab-button[selected]')).toHaveLength(0);
+    expect(el.querySelector('.pp-menu-item[data-vista="perfil"]').classList.contains('activo')).toBe(true);
+    el.remove();
+  });
+
+  it('los accesos directos del menu navegan a su vista', () => {
+    vi.stubGlobal('localStorage', fakeLocalStorage());
+    const el = document.createElement('pp-app-shell');
+    document.body.appendChild(el);
+    el.querySelector('.pp-menu-item[data-vista="cuaderno"]').click();
+    expect(el.vistaActiva).toBe('cuaderno');
+    expect(el.querySelector('ion-tab-button[tab="cuaderno"]').getAttribute('selected')).toBe('true');
+    el.remove();
+  });
+
+  it('pp-perfil-cambiado repinta la tarjeta del menu', () => {
+    vi.stubGlobal('localStorage', fakeLocalStorage());
+    const el = document.createElement('pp-app-shell');
+    document.body.appendChild(el);
+    expect(el.querySelector('ion-menu .pp-perfil-nombre').textContent).toBe('Pescador local');
+    localStorage.setItem('pp_perfil', JSON.stringify({ nombre: 'Ane' }));
+    el.contenido.dispatchEvent(new CustomEvent('pp-perfil-cambiado', { bubbles: true }));
+    expect(el.querySelector('ion-menu .pp-perfil-nombre').textContent).toBe('Ane');
+    el.remove();
+  });
+});

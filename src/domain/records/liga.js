@@ -27,8 +27,12 @@ export const MODOS_LIGA = {
 export function perfil() {
   try { return JSON.parse(localStorage.getItem(KEYP) || 'null'); } catch (e) { return null; }
 }
+/* `pp_perfil` lo comparte domain/perfil.js (bio, clan, banner...): se
+   fusiona en vez de sobrescribir para no borrar el resto del perfil. */
 export function setNombre(n) {
-  localStorage.setItem(KEYP, JSON.stringify({ nombre: String(n).trim().slice(0, 24) }));
+  const previo = perfil();
+  const base = previo && typeof previo === 'object' ? previo : {};
+  localStorage.setItem(KEYP, JSON.stringify(Object.assign({}, base, { nombre: String(n).trim().slice(0, 24) })));
   return perfil();
 }
 

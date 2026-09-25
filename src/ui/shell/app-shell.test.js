@@ -91,4 +91,19 @@ describe('<pp-app-shell>: reemplaza header/nav estaticos de www/index.html', () 
     expect(spyRef).toHaveBeenCalledTimes(1);
     el.remove();
   });
+
+  it('el menu incluye "Modo desarrollador" (import.meta.env.DEV=true en tests) y emite pp-abrir-dev', () => {
+    const el = document.createElement('pp-app-shell');
+    document.body.appendChild(el);
+    const spyDev = vi.fn();
+    el.addEventListener('pp-abrir-dev', spyDev);
+
+    const items = Array.from(el.querySelectorAll('ion-item'));
+    const itemDev = items.find(i => i.textContent.includes('Modo desarrollador'));
+    expect(itemDev).toBeTruthy();
+    itemDev.click();
+
+    expect(spyDev).toHaveBeenCalledTimes(1);
+    el.remove();
+  });
 });

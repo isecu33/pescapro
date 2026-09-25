@@ -4,6 +4,7 @@
    propio modulo como parte de la migracion a ES modules. */
 import { calcular } from './records.js';
 import { SunCalc } from '../vendor/suncalc.js';
+import { logroOverride } from '../dev.js';
 
 const CEFALOPODOS = ['calamar', 'sepia', 'pulpo'];
 const LAT_DEFAULT = 43.3;
@@ -142,9 +143,12 @@ function cercaDeFaro(c) {
 /* Devuelve la lista de logros con estado {conseguido, progreso:[actual,meta]|null} */
 export function evaluar(capturas) {
   const st = calcular(capturas);
-  return LISTA.map(l => ({
-    id: l.id, img: l.img || null, icono: l.icono, nombre: l.nombre, desc: l.desc,
-    conseguido: !!l.check(st, capturas),
-    progreso: l.prog ? l.prog(st) : null
-  }));
+  return LISTA.map(l => {
+    const forzado = logroOverride(l.id);
+    return {
+      id: l.id, img: l.img || null, icono: l.icono, nombre: l.nombre, desc: l.desc,
+      conseguido: forzado != null ? forzado : !!l.check(st, capturas),
+      progreso: l.prog ? l.prog(st) : null
+    };
+  });
 }

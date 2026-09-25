@@ -25,6 +25,7 @@ import { indiceHora, horaMasCercana, mejoresVentanas, especiesEn } from '../../d
 import { sol, luna, curvaSolunar } from '../../domain/solunar.js';
 import { espImgEl } from '../../domain/especies.js';
 import { abrirModalEspecie } from './vista-especies.js';
+import { seguridadOverride } from '../../domain/dev.js';
 import '../components/pp-gauge.js';
 import '../components/pp-curva-marea.js';
 import '../components/pp-curva-solunar.js';
@@ -49,7 +50,12 @@ export function renderAhora(contenedor, st, delta = null) {
   const h = horaMasCercana(st.datos.horas, ahora);
   const idx = indiceHora(h, st.modo, st.ctx);
 
-  contenedor.appendChild(bannerSeguridad(idx.seguridad));
+  const nivelForzado = seguridadOverride();
+  const seguridadMostrada = nivelForzado
+    ? { nivel: nivelForzado, motivos: (idx.seguridad && idx.seguridad.motivos && idx.seguridad.motivos.length) ? idx.seguridad.motivos : ['Forzado desde modo desarrollador'] }
+    : idx.seguridad;
+
+  contenedor.appendChild(bannerSeguridad(seguridadMostrada));
   contenedor.appendChild(resumenDia(st, idx, delta));
   contenedor.appendChild(selectorModo(st));
   contenedor.appendChild(cardIndiceFull(idx, st));

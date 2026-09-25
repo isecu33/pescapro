@@ -393,6 +393,18 @@ export function crearApp(shell) {
     abrirModalCentrado(cuerpo);
   }
 
+  /* ---------- Desarrollador ---------- */
+
+  // Import dinamico (no `import` estatico arriba): en el build de
+  // produccion import.meta.env.DEV es `false` en tiempo de compilacion,
+  // asi que esta rama es inalcanzable y Vite ni siquiera empaqueta
+  // vista-dev.js -- no basta con ocultar el item de menu, el codigo del
+  // panel (logros, overrides...) tampoco debe viajar en el APK real.
+  function modalDev() {
+    if (!import.meta.env.DEV) return;
+    import('./ui/views/vista-dev.js').then(({ panelDev }) => abrirModal(panelDev()));
+  }
+
   /* ---------- Cabecera ---------- */
 
   function actualizarCabecera() {
@@ -425,6 +437,7 @@ export function crearApp(shell) {
     shell.addEventListener('pp-refrescar', refrescarManual);
     shell.addEventListener('pp-favorito', modalGuardarFavorito);
     shell.addEventListener('pp-menu-modo', (e) => cambiarModo(e.detail.modo));
+    shell.addEventListener('pp-abrir-dev', modalDev);
     shell.contenido.addEventListener('pp-cambiar-modo', (e) => cambiarModo(e.detail.modo));
   }
 

@@ -118,7 +118,7 @@ export class PpAppShell extends HTMLElement {
     btnMenu.appendChild(icoMenu);
     btnMenu.addEventListener('click', () => {
       const m = this.querySelector('ion-menu');
-      if (m) m.toggle();
+      if (m && typeof m.toggle === 'function') m.toggle();
     });
 
     acciones.append(btnFav, btnRef, btnMenu);
@@ -236,7 +236,7 @@ export class PpAppShell extends HTMLElement {
     itemCache.addEventListener('click', () => {
       if (window.confirm('¿Borrar los datos en caché?\nLa app los descargará de nuevo al conectar.')) {
         try { localStorage.removeItem('pp_datos'); } catch (_) {}
-        menu.close();
+        if (typeof menu.close === 'function') menu.close();
         this._emit('pp-refrescar');
       }
     });
@@ -261,6 +261,15 @@ export class PpAppShell extends HTMLElement {
     listInfo.appendChild(itemAbout);
 
     mContent.append(perfil, secNotif, secAjustes, secInfo);
+
+    // ── Desarrollador (solo en npm run dev, nunca en el build real) ────
+    if (import.meta.env.DEV) {
+      const secDev = this._menuSeccion('Desarrollador');
+      const listDev = secDev.querySelector('ion-list');
+      listDev.appendChild(this._menuItem('bug-outline', 'Modo desarrollador', () => this._emit('pp-abrir-dev')));
+      mContent.append(secDev);
+    }
+
     menu.append(mHeader, mContent);
 
     menu.addEventListener('ionDidOpen', () => {
@@ -329,7 +338,7 @@ export class PpAppShell extends HTMLElement {
     item.append(ico, lbl, chevron);
     item.addEventListener('click', () => {
       const m = this.querySelector('ion-menu');
-      if (m) m.close();
+      if (m && typeof m.close === 'function') m.close();
       onClick();
     });
     return item;

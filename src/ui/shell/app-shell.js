@@ -17,10 +17,20 @@
    - .seguridad = {nivel, motivos} | null -> no-op; el banner ahora vive en cada vista (ver vista-ahora.js)
    - .refrescando = bool    -> anima el icono de refrescar
    - .esFavorito = bool     -> togglea el icono de estrella (filled vs outline)
-   Eventos emitidos: pp-cambiar-vista, pp-cambiar-spot, pp-favorito, pp-refrescar */
+   - .refrescarMenu()       -> repinta la cabecera de perfil del menu lateral
+   Eventos emitidos: pp-cambiar-vista, pp-cambiar-spot, pp-favorito, pp-refrescar,
+   pp-menu-modo. Escucha pp-perfil-cambiado (lo emite vista-perfil.js).
+
+   Menu lateral (hamburguesa): cabecera con la tarjeta publica del perfil
+   (banner, avatar, @usuario, clan, insignias) que abre la vista Perfil,
+   accesos directos, notificaciones, ajustes y acerca de. */
 import { svg } from '../../domain/iconos.js';
 import { estadisticas } from '../../domain/cuaderno.js';
 import { MODOS } from '../../domain/config.js';
+import { leer as leerCuaderno } from '../../domain/cuaderno.js';
+import { evaluar as evaluarLogros } from '../../domain/records/logros.js';
+import { leer as leerPerfil, publico as perfilPublico } from '../../domain/perfil.js';
+import { crearTarjetaPerfil, cargarImagenesPropias } from '../util/perfil-tarjeta.js';
 
 const VISTAS = [
   { id: 'ahora', nombre: 'Ahora', icono: 'speedometer-outline' },
@@ -30,6 +40,8 @@ const VISTAS = [
   { id: 'cuaderno', nombre: 'Cuaderno', icono: 'book-outline' },
   { id: 'trofeos', nombre: 'Trofeos', icono: 'trophy-outline' }
 ];
+// Vistas sin pestana en el tab-bar: se abren desde el menu lateral.
+const VISTAS_MENU = ['perfil'];
 
 export class PpAppShell extends HTMLElement {
   constructor() {
@@ -48,6 +60,7 @@ export class PpAppShell extends HTMLElement {
     if (!this._construido) {
       this._construido = true;
       this._build();
+      this.addEventListener('pp-perfil-cambiado', () => this.refrescarMenu());
     }
     this._actualizarTabSeleccionado();
   }
@@ -165,20 +178,21 @@ export class PpAppShell extends HTMLElement {
     const mContent = document.createElement('ion-content');
     mContent.className = 'pp-menu-content';
 
-    // ── Perfil ────────────────────────────────────────
-    const perfil = document.createElement('div');
-    perfil.className = 'pp-menu-perfil';
-    const avatarWrap = document.createElement('div');
-    avatarWrap.className = 'pp-menu-avatar';
-    const avatarIco = document.createElement('ion-icon');
-    avatarIco.setAttribute('name', 'person-circle-outline');
-    avatarWrap.appendChild(avatarIco);
-    const perfilNombre = document.createElement('div');
-    perfilNombre.className = 'pp-menu-perfil-nombre';
-    perfilNombre.textContent = 'Pescador local';
+    // ── Perfil (tarjeta publica compacta) ─────────────
+    this._menuPerfilEl = document.createElement('div');
+    this._menuPerfilEl.className = 'pp-menu-perfil';
     this._statsEl = document.createElement('div');
     this._statsEl.className = 'pp-menu-stats';
-    perfil.append(avatarWrap, perfilNombre, this._statsEl);
+
+    // ── Accesos directos ──────────────────────────────
+    const secNav = this._menuSeccion('Tu espacio');
+    const listNav = secNav.querySelector('ion-list');
+    listNav.append(
+      this._menuItem('person-circle-outline', 'Mi perfil', () => { this.vistaActiva = 'perfil'; }, 'perfil'),
+      this._menuItem('book-outline', 'Cuaderno de capturas', () => { this.vistaActiva = 'cuaderno'; }, 'cuaderno'),
+      this._menuItem('trophy-outline', 'Logros y competiciones', () => { this.vistaActiva = 'trofeos'; }, 'trofeos'),
+      this._menuItem('fish-outline', 'Guía de especies', () => { this.vistaActiva = 'especies'; }, 'especies')
+    );
 
     // ── Notificaciones ────────────────────────────────
     const secNotif = this._menuSeccion('Notificaciones');
@@ -260,7 +274,7 @@ export class PpAppShell extends HTMLElement {
     itemAbout.append(icoAbout, lblAbout);
     listInfo.appendChild(itemAbout);
 
-    mContent.append(perfil, secNotif, secAjustes, secInfo);
+    mContent.append(this._menuPerfilEl, this._statsEl, secNav, secNotif, secAjustes, secInfo);
 
     // ── Desarrollador (solo en npm run dev, nunca en el build real) ────
     if (import.meta.env.DEV) {
@@ -272,21 +286,54 @@ export class PpAppShell extends HTMLElement {
 
     menu.append(mHeader, mContent);
 
-    menu.addEventListener('ionDidOpen', () => {
-      this._refreshStats();
+    // ionWillOpen (no ionDidOpen): el contenido ya esta al dia cuando
+    // empieza la animacion, sin "parpadeo" de datos viejos.
+    menu.addEventListener('ionWillOpen', () => {
+      this.refrescarMenu();
       try {
         const prefs = JSON.parse(localStorage.getItem('pp_prefs') || '{}');
         if (prefs.modo) this._actualizarModoChips(prefs.modo);
       } catch (_) {}
     });
 
+    this.refrescarMenu();
     return menu;
+  }
+
+  refrescarMenu() {
+    this._refreshPerfil();
+    this._refreshStats();
+    this._actualizarItemActivo();
+  }
+
+  _refreshPerfil() {
+    if (!this._menuPerfilEl) return;
+    const perfil = leerPerfil();
+    let logros = [];
+    try { logros = evaluarLogros(leerCuaderno()); } catch (_) { /* sin cuaderno legible */ }
+    this._logros = logros;
+    const tarjeta = crearTarjetaPerfil(perfilPublico(perfil), {
+      logros,
+      compacta: true,
+      onClick: () => {
+        const m = this.querySelector('ion-menu');
+        if (m && typeof m.close === 'function') m.close();
+        this.vistaActiva = 'perfil';
+      }
+    });
+    cargarImagenesPropias(perfil, tarjeta);
+    const pista = document.createElement('div');
+    pista.className = 'pp-menu-perfil-sub';
+    pista.textContent = perfil.nombre ? 'Ver mi perfil' : 'Crea tu perfil de pescador';
+    tarjeta.querySelector('.pp-perfil-cuerpo').appendChild(pista);
+    this._menuPerfilEl.replaceChildren(tarjeta);
   }
 
   _refreshStats() {
     if (!this._statsEl) return;
     const st = estadisticas();
     const nEspecies = Object.keys(st.porEspecie).length;
+    const nLogros = (this._logros || []).filter(l => l.conseguido).length;
     this._statsEl.replaceChildren();
     const statChip = (n, label) => {
       const s = document.createElement('span');
@@ -299,7 +346,14 @@ export class PpAppShell extends HTMLElement {
     this._statsEl.append(
       statChip(st.total, st.total === 1 ? 'captura' : 'capturas'),
       statChip(nEspecies, nEspecies === 1 ? 'especie' : 'especies'),
+      statChip(nLogros, nLogros === 1 ? 'logro' : 'logros'),
     );
+  }
+
+  _actualizarItemActivo() {
+    this.querySelectorAll('.pp-menu-item[data-vista]').forEach(it => {
+      it.classList.toggle('activo', it.dataset.vista === this._vistaActiva);
+    });
   }
 
   _actualizarModoChips(modo) {
@@ -321,8 +375,9 @@ export class PpAppShell extends HTMLElement {
     return wrap;
   }
 
-  _menuItem(icono, texto, onClick) {
+  _menuItem(icono, texto, onClick, vista) {
     const item = document.createElement('ion-item');
+    if (vista) item.dataset.vista = vista;
     item.setAttribute('button', 'true');
     item.setAttribute('detail', 'false');
     item.className = 'pp-menu-item';
@@ -348,9 +403,11 @@ export class PpAppShell extends HTMLElement {
 
   get vistaActiva() { return this._vistaActiva; }
   set vistaActiva(id) {
-    if (!VISTAS.some(v => v.id === id) || id === this._vistaActiva) return;
+    const valida = VISTAS.some(v => v.id === id) || VISTAS_MENU.includes(id);
+    if (!valida || id === this._vistaActiva) return;
     this._vistaActiva = id;
     this._actualizarTabSeleccionado();
+    this._actualizarItemActivo();
     this._emit('pp-cambiar-vista', { vista: id });
   }
 

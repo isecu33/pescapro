@@ -1,5 +1,6 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { evaluar } from './logros.js';
+import { setLogroOverride, resetOverrides } from '../dev.js';
 import { SunCalc } from '../vendor/suncalc.js';
 
 const LAT = 43.3;
@@ -69,5 +70,35 @@ describe('logros: "faro" (captura cerca de un faro de la costa gallega)', () => 
   });
   it('NO conseguido si la captura no tiene spot/coordenadas', () => {
     expect(evaluar([capSinSpot]).find(l => l.id === 'faro').conseguido).toBe(false);
+  });
+});
+
+describe('logros: override de modo desarrollador (domain/dev.js)', () => {
+  beforeEach(() => {
+    const store = new Map();
+    vi.stubGlobal('localStorage', {
+      getItem: (k) => (store.has(k) ? store.get(k) : null),
+      setItem: (k, v) => store.set(k, v),
+      removeItem: (k) => store.delete(k)
+    });
+  });
+
+  it('forzar un logro a conseguido lo refleja aunque la regla real diga que no', () => {
+    setLogroOverride('trofeo-lubina', true);
+    const logros = evaluar([]); // sin capturas, la regla real diria "no conseguido"
+    expect(logros.find(l => l.id === 'trofeo-lubina').conseguido).toBe(true);
+  });
+
+  it('forzar un logro a no conseguido lo refleja aunque la regla real diga que si', () => {
+    setLogroOverride('captura-bronce', false);
+    const logros = evaluar([{ especie: 'lubina', fecha: new Date().toISOString(), spot: { nombre: 'Zarautz' } }]);
+    expect(logros.find(l => l.id === 'captura-bronce').conseguido).toBe(false);
+  });
+
+  it('resetOverrides() vuelve a la regla real', () => {
+    setLogroOverride('captura-bronce', false);
+    resetOverrides();
+    const logros = evaluar([{ especie: 'lubina', fecha: new Date().toISOString(), spot: { nombre: 'Zarautz' } }]);
+    expect(logros.find(l => l.id === 'captura-bronce').conseguido).toBe(true);
   });
 });

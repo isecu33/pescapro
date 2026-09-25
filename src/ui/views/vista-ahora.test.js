@@ -1,8 +1,9 @@
 // @vitest-environment happy-dom
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, afterEach } from 'vitest';
 import { renderAhora } from './vista-ahora.js';
 import { preparar, indiceHora, horaMasCercana } from '../../domain/indice.js';
 import { generarDatos } from '../../domain/__fixtures__.js';
+import { setSeguridadOverride } from '../../domain/dev.js';
 
 /* Datos sinteticos a mano (via el generador de fixtures de dominio, no el
    test/fixtures.js de la version vanilla) para cada escenario de la vista.
@@ -126,5 +127,31 @@ describe('renderAhora: reemplaza renderAhora()/selectorModo()/desgloseFactores()
     const totalTrasPrimerRender = cont.querySelectorAll('ion-card').length;
     renderAhora(cont, st);
     expect(cont.querySelectorAll('ion-card').length).toBe(totalTrasPrimerRender);
+  });
+
+  describe('override de seguridad (modo desarrollador)', () => {
+    afterEach(() => setSeguridadOverride(null));
+
+    it('fuerza el banner en rojo aunque las condiciones reales sean seguras', () => {
+      const st = crearSt({ datos: { viento: 10, ola: 0.5, sst: 16 } });
+      setSeguridadOverride('rojo');
+
+      const cont = document.createElement('div');
+      renderAhora(cont, st);
+      const banner = cont.querySelector('.pp-banner');
+      expect(banner).not.toBeNull();
+      expect(banner.classList.contains('pp-banner-rojo')).toBe(true);
+      expect(banner.textContent).toContain('Forzado desde modo desarrollador');
+    });
+
+    it('fuerza el banner oculto ("ok") aunque las condiciones reales sean peligrosas', () => {
+      const st = crearSt({ datos: { viento: 55, ola: 1.0, sst: 16 } });
+      setSeguridadOverride('ok');
+
+      const cont = document.createElement('div');
+      renderAhora(cont, st);
+      const banner = cont.firstElementChild;
+      expect(banner.style.display).toBe('none');
+    });
   });
 });

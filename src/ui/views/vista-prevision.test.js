@@ -2,7 +2,8 @@
 import { describe, it, expect, afterEach } from 'vitest';
 import { renderPrevision, motivoVentana } from './vista-prevision.js';
 import { cerrarModal } from '../util/modal.js';
-import { preparar, mejoresVentanas, serie } from '../../domain/indice.js';
+import { preparar, mejoresVentanas, diasDisponibles, serie } from '../../domain/indice.js';
+import { util } from '../../domain/config.js';
 import { generarDatos } from '../../domain/__fixtures__.js';
 
 /* Puerto de www/js/ui.js:265-343 (renderPrevision/motivoVentana/
@@ -112,5 +113,59 @@ describe('renderPrevision', () => {
     renderPrevision(cont, st);
     renderPrevision(cont, st);
     expect(cont.querySelectorAll('.pp-card').length).toBe(2);
+  });
+
+  it('el boton "Elegir dia" abre un selector con ion-datetime acotado a los dias con datos', () => {
+    const st = stConCtx();
+    const cont = document.createElement('div');
+    renderPrevision(cont, st);
+
+    cont.querySelector('.pp-graf-btn-dia').click();
+
+    const dt = document.querySelector('#pp-modal ion-datetime');
+    expect(dt).not.toBeNull();
+    const dias = diasDisponibles(st.ctx, st.modo);
+    const iso = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    expect(dt.getAttribute('min')).toBe(iso(dias[0]));
+    expect(dt.getAttribute('max')).toBe(iso(dias[dias.length - 1]));
+  });
+
+  it('elegir un dia en el selector filtra el grafico a esas 24h y lo indica en la tarjeta', () => {
+    const st = stConCtx();
+    const cont = document.createElement('div');
+    renderPrevision(cont, st);
+
+    const dias = diasDisponibles(st.ctx, st.modo);
+    const objetivo = dias[1];
+    const iso = objetivo.getFullYear() + '-' + String(objetivo.getMonth() + 1).padStart(2, '0') + '-' + String(objetivo.getDate()).padStart(2, '0');
+
+    cont.querySelector('.pp-graf-btn-dia').click();
+    const dt = document.querySelector('#pp-modal ion-datetime');
+    dt.dispatchEvent(new CustomEvent('ionChange', { detail: { value: iso } }));
+
+    // el modal se cierra y la vista se re-renderiza filtrada a ese dia
+    expect(document.getElementById('pp-modal')).toBeNull();
+    expect(st.diaPrevisionSel.getFullYear()).toBe(objetivo.getFullYear());
+    expect(st.diaPrevisionSel.getMonth()).toBe(objetivo.getMonth());
+    expect(st.diaPrevisionSel.getDate()).toBe(objetivo.getDate());
+
+    const barras = cont.querySelectorAll('.pp-graf-barra');
+    const horasEsperadas = serie(st.ctx, st.modo).filter(x => util.esMismoDia(x.hora.fecha, objetivo)).length;
+    expect(barras.length).toBe(horasEsperadas);
+    expect(barras.length).toBeLessThanOrEqual(24);
+    expect(cont.querySelector('.pp-graf-dia-aviso')).not.toBeNull();
+  });
+
+  it('"Ver proximos dias" limpia el filtro de dia y vuelve a la vista de 96h', () => {
+    const st = stConCtx();
+    st.diaPrevisionSel = diasDisponibles(st.ctx, st.modo)[1];
+    const cont = document.createElement('div');
+    renderPrevision(cont, st);
+
+    cont.querySelector('.pp-graf-dia-volver').click();
+
+    expect(st.diaPrevisionSel).toBeNull();
+    const s = serie(st.ctx, st.modo).slice(0, 96);
+    expect(cont.querySelectorAll('.pp-graf-barra').length).toBe(s.length);
   });
 });

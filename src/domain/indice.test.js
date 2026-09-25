@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { preparar, factores, indiceHora, serie, mejoresVentanas, actividadEspecie, especiesEn, mejoresHorasEspecie } from './indice.js';
+import { preparar, factores, indiceHora, serie, mejoresVentanas, diasDisponibles, actividadEspecie, especiesEn, mejoresHorasEspecie } from './indice.js';
 import { MODOS, SEGURIDAD } from './config.js';
 import { ESPECIES, especiePorId } from './especies.js';
 import { generarDatos } from './__fixtures__.js';
@@ -69,6 +69,18 @@ describe('indice: conversion 1:1 desde www/js/indice.js', () => {
     expect(Array.isArray(vents)).toBe(true);
     expect(vents.length).toBeLessThanOrEqual(6);
     for (let i = 1; i < vents.length; i++) expect(vents[i].inicio >= vents[i - 1].inicio).toBe(true);
+  });
+
+  it('diasDisponibles() devuelve un dia por cada fecha calendario de la serie, sin huecos ni duplicados', () => {
+    const dias = diasDisponibles(ctx, 'spinning');
+    expect(dias.length).toBeGreaterThan(0);
+    // Cada entrada es medianoche local (para poder usarla como min/max de un date-picker)
+    dias.forEach(d => {
+      expect(d.getHours()).toBe(0);
+      expect(d.getMinutes()).toBe(0);
+    });
+    // Orden estrictamente ascendente, sin dias repetidos
+    for (let i = 1; i < dias.length; i++) expect(dias[i].getTime()).toBeGreaterThan(dias[i - 1].getTime());
   });
 
   it('las horas de temporal no aparecen como buenas ventanas', () => {

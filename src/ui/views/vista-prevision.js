@@ -8,8 +8,8 @@
    El modal de detalle de hora usa abrirModal() (src/ui/util/modal.js,
    sobre <ion-modal>) en vez del modal()/cerrarModal() a mano del original. */
 import { util, MODOS } from '../../domain/config.js';
-import { serie, mejoresVentanas, especiesEn } from '../../domain/indice.js';
-import { abrirModal } from '../util/modal.js';
+import { serie, mejoresVentanas, diasDisponibles, especiesEn } from '../../domain/indice.js';
+import { abrirModal, cerrarModal } from '../util/modal.js';
 import { svg, WMO_ICO } from '../util/icons.js';
 import { espImgEl } from '../../domain/especies.js';
 
@@ -47,7 +47,7 @@ export function renderPrevision(contenedor, st) {
     return;
   }
   contenedor.appendChild(cardVentanas(st));
-  contenedor.appendChild(cardGrafico(st));
+  contenedor.appendChild(cardGrafico(contenedor, st));
 }
 
 function cardVentanas(st) {
@@ -124,23 +124,99 @@ export function motivoVentana(v) {
   return razones.length ? 'Suma: ' + razones.join(' + ') : 'Condiciones equilibradas';
 }
 
-function cardGrafico(st) {
+function cardGrafico(contenedor, st) {
   const card = document.createElement('div');
   card.className = 'pp-card';
 
   const cabecera = document.createElement('div');
   cabecera.className = 'pp-graf-cabecera';
   cabecera.appendChild(tituloConIcono('nube-sol', 'Índice hora a hora'));
-  const nota = document.createElement('span');
-  nota.className = 'pp-graf-nota-tap';
-  nota.textContent = 'Toca una barra';
-  cabecera.appendChild(nota);
+
+  const btnDia = document.createElement('button');
+  btnDia.type = 'button';
+  btnDia.className = 'pp-graf-btn-dia';
+  btnDia.appendChild(svg('calendario', 14));
+  btnDia.appendChild(document.createTextNode(st.diaPrevisionSel ? util.fmtDia(st.diaPrevisionSel) : 'Elegir día'));
+  btnDia.addEventListener('click', () => abrirSelectorDia(contenedor, st));
+  cabecera.appendChild(btnDia);
   card.appendChild(cabecera);
+
+  if (st.diaPrevisionSel) {
+    const aviso = document.createElement('div');
+    aviso.className = 'pp-graf-dia-aviso';
+    aviso.appendChild(document.createTextNode('Mostrando ' + util.fmtFecha(st.diaPrevisionSel)));
+    const btnVolver = document.createElement('button');
+    btnVolver.type = 'button';
+    btnVolver.className = 'pp-graf-dia-volver';
+    btnVolver.textContent = 'Ver próximos días';
+    btnVolver.addEventListener('click', () => {
+      st.diaPrevisionSel = null;
+      renderPrevision(contenedor, st);
+    });
+    aviso.appendChild(btnVolver);
+    card.appendChild(aviso);
+  } else {
+    const nota = document.createElement('span');
+    nota.className = 'pp-graf-nota-tap';
+    nota.textContent = 'Toca una barra';
+    card.appendChild(nota);
+  }
 
   card.appendChild(leyendaIndice());
   card.appendChild(graficoHoras(st));
 
   return card;
+}
+
+/* Selector de día: ion-datetime dentro del modal ya usado en el resto de la
+   vista, acotado al rango con datos reales (diasDisponibles). Al elegir un
+   día filtra el gráfico a esas 24h; "Ver próximos días" vuelve a la vista
+   por defecto (próximas 96h, todos los días). */
+function abrirSelectorDia(contenedor, st) {
+  const dias = diasDisponibles(st.ctx, st.modo);
+  if (!dias.length) return;
+
+  const cuerpo = document.createElement('div');
+  cuerpo.className = 'pp-modal-selector-dia';
+
+  const titulo = document.createElement('h3');
+  titulo.appendChild(svg('calendario', 17));
+  titulo.appendChild(document.createTextNode('Elegir día'));
+  cuerpo.appendChild(titulo);
+
+  const iso = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+
+  const datetime = document.createElement('ion-datetime');
+  datetime.setAttribute('presentation', 'date');
+  datetime.setAttribute('locale', 'es-ES');
+  datetime.setAttribute('first-day-of-week', '1');
+  datetime.setAttribute('min', iso(dias[0]));
+  datetime.setAttribute('max', iso(dias[dias.length - 1]));
+  datetime.value = iso(st.diaPrevisionSel || dias[0]);
+  datetime.addEventListener('ionChange', e => {
+    const v = e.detail && e.detail.value;
+    if (!v) return;
+    const [y, m, d] = v.split('-').map(Number);
+    st.diaPrevisionSel = new Date(y, m - 1, d);
+    cerrarModal();
+    renderPrevision(contenedor, st);
+  });
+  cuerpo.appendChild(datetime);
+
+  if (st.diaPrevisionSel) {
+    const btnVolver = document.createElement('button');
+    btnVolver.type = 'button';
+    btnVolver.className = 'pp-graf-dia-volver';
+    btnVolver.textContent = 'Ver próximos días';
+    btnVolver.addEventListener('click', () => {
+      st.diaPrevisionSel = null;
+      cerrarModal();
+      renderPrevision(contenedor, st);
+    });
+    cuerpo.appendChild(btnVolver);
+  }
+
+  abrirModal(cuerpo, { breakpoints: null });
 }
 
 /* Explica qué significa el color de cada barra: sin esto el gráfico es
@@ -176,13 +252,15 @@ export function graficoHoras(st) {
   const inner = document.createElement('div');
   inner.className = 'pp-grafico';
 
-  const s = serie(st.ctx, st.modo).slice(0, 96);
+  const s = st.diaPrevisionSel
+    ? serie(st.ctx, st.modo).filter(x => util.esMismoDia(x.hora.fecha, st.diaPrevisionSel))
+    : serie(st.ctx, st.modo).slice(0, 96);
   let diaActual = null;
   s.forEach(x => {
     const d = x.hora.fecha;
     const hora = d.getHours();
 
-    if (diaActual !== d.getDate()) {
+    if (!st.diaPrevisionSel && diaActual !== d.getDate()) {
       diaActual = d.getDate();
       const sep = document.createElement('div');
       sep.className = 'pp-graf-sep-dia';

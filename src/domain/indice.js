@@ -123,6 +123,22 @@ export function serie(ctx, modo) {
     .map(h => ({ hora: h, ...indiceHora(h, modo, ctx) }));
 }
 
+/* Días con datos en la previsión actual (para el selector de calendario):
+   una entrada por dia calendario, a medianoche local, en el orden en que
+   aparecen en la serie (ya filtrada a horas futuras, ver serie()). */
+export function diasDisponibles(ctx, modo) {
+  const vistos = new Set();
+  const dias = [];
+  serie(ctx, modo).forEach(x => {
+    const f = x.hora.fecha;
+    const clave = f.getFullYear() + '-' + f.getMonth() + '-' + f.getDate();
+    if (vistos.has(clave)) return;
+    vistos.add(clave);
+    dias.push(new Date(f.getFullYear(), f.getMonth(), f.getDate()));
+  });
+  return dias;
+}
+
 /* Mejores ventanas de pesca: agrupa horas consecutivas con índice >= umbral */
 export function mejoresVentanas(ctx, modo, opts) {
   const o = Object.assign({ umbral: 55, maxVentanas: 6, horas: 72 }, opts || {});

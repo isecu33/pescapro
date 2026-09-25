@@ -7,15 +7,35 @@
 
    El modal de detalle de hora usa abrirModal() (src/ui/util/modal.js,
    sobre <ion-modal>) en vez del modal()/cerrarModal() a mano del original. */
-import { util, WMO, MODOS } from '../../domain/config.js';
+import { util, MODOS } from '../../domain/config.js';
 import { serie, mejoresVentanas, especiesEn } from '../../domain/indice.js';
 import { abrirModal } from '../util/modal.js';
+import { svg, WMO_ICO } from '../util/icons.js';
+import { espImgEl } from '../../domain/especies.js';
+
+const ESCALA_INDICE = [
+  { min: 70, etiqueta: 'Excelente' },
+  { min: 50, etiqueta: 'Bueno' },
+  { min: 35, etiqueta: 'Regular' },
+  { min: 20, etiqueta: 'Flojo' },
+  { min: 0,  etiqueta: 'Malo' }
+];
 
 const NOMBRES_FACTOR = {
   viento: 'Viento', oleaje: 'Oleaje', marea: 'Marea', solunar: 'Solunar',
   momento: 'Momento del día', presion: 'Presión', cielo: 'Cielo',
   corriente: 'Corriente', sst: 'Tª agua'
 };
+
+/* Cabecera de tarjeta con icono + título, consistente entre las dos tarjetas
+   de la vista (evita el emoji suelto que llevaba el título original). */
+function tituloConIcono(cat, texto) {
+  const titulo = document.createElement('h3');
+  titulo.className = 'pp-card-titulo';
+  titulo.appendChild(svg(cat, 15));
+  titulo.appendChild(document.createTextNode(texto));
+  return titulo;
+}
 
 export function renderPrevision(contenedor, st) {
   contenedor.textContent = '';
@@ -34,9 +54,7 @@ function cardVentanas(st) {
   const card = document.createElement('div');
   card.className = 'pp-card';
 
-  const titulo = document.createElement('h3');
-  titulo.textContent = '🎯 Mejores ventanas (72 h)';
-  card.appendChild(titulo);
+  card.appendChild(tituloConIcono('diana', 'Mejores ventanas (72 h)'));
 
   const vents = mejoresVentanas(st.ctx, st.modo);
   if (!vents.length) {
@@ -44,7 +62,7 @@ function cardVentanas(st) {
     vacio.className = 'pp-vent-vacio';
     const icono = document.createElement('div');
     icono.className = 'pp-vent-vacio-ico';
-    icono.textContent = '🌧️';
+    icono.appendChild(svg('lluvia', 34));
     const msg = document.createElement('p');
     msg.textContent = 'Sin ventanas buenas en 72 h';
     const sub = document.createElement('span');
@@ -112,17 +130,41 @@ function cardGrafico(st) {
 
   const cabecera = document.createElement('div');
   cabecera.className = 'pp-graf-cabecera';
-  const titulo = document.createElement('h3');
-  titulo.textContent = 'Índice hora a hora';
+  cabecera.appendChild(tituloConIcono('nube-sol', 'Índice hora a hora'));
   const nota = document.createElement('span');
   nota.className = 'pp-graf-nota-tap';
   nota.textContent = 'Toca una barra';
-  cabecera.append(titulo, nota);
+  cabecera.appendChild(nota);
   card.appendChild(cabecera);
 
+  card.appendChild(leyendaIndice());
   card.appendChild(graficoHoras(st));
 
   return card;
+}
+
+/* Explica qué significa el color de cada barra: sin esto el gráfico es
+   ilegible para quien no conoce la escala 0-100 del índice. */
+function leyendaIndice() {
+  const fila = document.createElement('div');
+  fila.className = 'pp-graf-leyenda';
+  ESCALA_INDICE.forEach(nivel => {
+    const item = document.createElement('span');
+    item.className = 'pp-graf-leyenda-item';
+    const punto = document.createElement('i');
+    punto.style.background = util.colorIndice(nivel.min);
+    item.appendChild(punto);
+    item.appendChild(document.createTextNode(nivel.etiqueta));
+    fila.appendChild(item);
+  });
+  const aviso = document.createElement('span');
+  aviso.className = 'pp-graf-leyenda-item pp-graf-leyenda-aviso';
+  const puntoAviso = document.createElement('i');
+  puntoAviso.style.background = '#e03131';
+  aviso.appendChild(puntoAviso);
+  aviso.appendChild(document.createTextNode('Aviso de seguridad'));
+  fila.appendChild(aviso);
+  return fila;
 }
 
 /* Barras a medida: scroll horizontal + columna por hora, coloreada segun
@@ -214,27 +256,34 @@ function modalDetalleHora(x, st) {
   secFactores.appendChild(barrasFactores(x.factores, st.modo));
   cuerpo.appendChild(secFactores);
 
-  const wmo = WMO[d.codigo] || ['—', ''];
+  const wmo = WMO_ICO[d.codigo] || { texto: '—', cat: 'nube-sol' };
+  const secMeteoTitulo = document.createElement('p');
+  secMeteoTitulo.className = 'pp-modal-sec-titulo';
+  secMeteoTitulo.textContent = 'Condiciones';
   const secMeteo = document.createElement('div');
   secMeteo.className = 'pp-modal-sec pp-modal-meteo';
+  secMeteo.appendChild(secMeteoTitulo);
 
+  const filaMeteo = document.createElement('div');
+  filaMeteo.className = 'pp-modal-meteo-fila';
   const datosMeteo = [
-    { ico: wmo[1] || '🌤️', val: wmo[0] },
-    { ico: '💨', val: Math.round(d.viento || 0) + ' km/h' },
-    { ico: '🌊', val: (d.ola != null ? d.ola.toFixed(1) : '—') + ' m' },
-    { ico: '🌡️', val: (d.sst != null ? d.sst.toFixed(1) : '—') + '°C' },
+    { cat: wmo.cat, val: wmo.texto },
+    { cat: 'viento', val: Math.round(d.viento || 0) + ' km/h' },
+    { cat: 'ola', val: (d.ola != null ? d.ola.toFixed(1) : '—') + ' m' },
+    { cat: 'termometro', val: (d.sst != null ? d.sst.toFixed(1) : '—') + '°C' },
   ];
-  datosMeteo.forEach(({ ico, val }) => {
+  datosMeteo.forEach(({ cat, val }) => {
     const chip = document.createElement('div');
     chip.className = 'pp-meteo-chip';
     const icoEl = document.createElement('span');
     icoEl.className = 'pp-meteo-ico';
-    icoEl.textContent = ico;
+    icoEl.appendChild(svg(cat, 16));
     const valEl = document.createElement('span');
     valEl.textContent = val;
     chip.append(icoEl, valEl);
-    secMeteo.appendChild(chip);
+    filaMeteo.appendChild(chip);
   });
+  secMeteo.appendChild(filaMeteo);
   cuerpo.appendChild(secMeteo);
 
   const rank = especiesEn(d.fecha, st.ctx).slice(0, 3);
@@ -250,8 +299,7 @@ function modalDetalleHora(x, st) {
     rank.forEach(r => {
       const chip = document.createElement('div');
       chip.className = 'pp-esp-chip';
-      const ico = document.createElement('span');
-      ico.textContent = r.especie.icono;
+      const ico = espImgEl(r.especie, 'pp-esp-ico');
       const nombre = document.createElement('span');
       nombre.className = 'pp-esp-chip-nombre';
       nombre.textContent = r.especie.nombre;

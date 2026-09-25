@@ -226,6 +226,8 @@ ion-tab-button[selected] {
 }
 .pp-card h3 { margin: 0 0 12px; font-size: 14px; font-weight: 700; letter-spacing: .04em;
   text-transform: uppercase; color: var(--pp-texto2); }
+.pp-card-titulo { display: flex; align-items: center; gap: 7px; }
+.pp-card-titulo svg { color: var(--ion-color-primary); flex-shrink: 0; }
 .pp-nota { font-size: 11.5px; color: var(--pp-texto2); margin: 10px 0 0; line-height: 1.55; }
 
 /* Vista Especies: grid de tarjetas + ficha en modal (ver vista-especies.js) */
@@ -260,14 +262,18 @@ ion-tab-button[selected] {
   letter-spacing: .4px; color: var(--pp-texto2); text-align: right;
 }
 .pp-vent-vacio { text-align: center; padding: 28px 12px 20px; }
-.pp-vent-vacio-ico { font-size: 36px; margin-bottom: 8px; }
+.pp-vent-vacio-ico { display: flex; align-items: center; justify-content: center; color: var(--pp-texto2); margin-bottom: 8px; }
 .pp-vent-vacio p { font-size: 15px; font-weight: 600; margin: 0 0 4px; }
 .pp-vent-vacio span { font-size: 12.5px; color: var(--pp-texto2); }
 
 /* Vista Prevision: grafico horario (barras a medida, sin equivalente Ionic) */
 .pp-graf-cabecera { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 4px; }
-.pp-graf-cabecera h3 { margin: 0; }
+.pp-graf-cabecera .pp-card-titulo { margin: 0; }
 .pp-graf-nota-tap { font-size: 11.5px; color: var(--pp-texto2); }
+.pp-graf-leyenda { display: flex; flex-wrap: wrap; gap: 4px 12px; margin: 10px 0 14px; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+.pp-graf-leyenda-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--pp-texto2); }
+.pp-graf-leyenda-item i { display: block; width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.pp-graf-leyenda-aviso { margin-left: auto; }
 .pp-grafico-scroll { overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none; }
 .pp-grafico-scroll::-webkit-scrollbar { display: none; }
 .pp-grafico { display: flex; align-items: flex-end; gap: 0; height: 180px;
@@ -300,13 +306,13 @@ ion-tab-button[selected] {
 .pp-modal-sec { margin-bottom: 14px; }
 .pp-modal-sec-titulo { font-size: 11px; font-weight: 700; text-transform: uppercase;
   letter-spacing: .5px; color: var(--pp-texto2); margin: 0 0 8px; }
-.pp-modal-meteo { display: flex; gap: 8px; flex-wrap: wrap; }
+.pp-modal-meteo-fila { display: flex; gap: 8px; flex-wrap: wrap; }
 .pp-meteo-chip {
-  display: flex; align-items: center; gap: 5px; padding: 6px 10px;
+  display: flex; align-items: center; gap: 6px; padding: 6px 10px;
   background: var(--pp-panel2); border-radius: 8px; font-size: 13px;
   border: 1px solid rgba(255,255,255,0.05);
 }
-.pp-meteo-ico { font-size: 15px; }
+.pp-meteo-ico { display: flex; color: var(--pp-texto2); flex-shrink: 0; }
 .pp-modal-especies { display: flex; flex-direction: column; gap: 6px; }
 .pp-esp-chip {
   display: flex; align-items: center; gap: 8px; padding: 8px 10px;
@@ -338,8 +344,36 @@ ion-tab-button[selected] {
 .pp-galeria-celda img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
 .pp-form { display: flex; flex-direction: column; gap: 8px; }
-.pp-foto-preview { width: 100%; max-height: 240px; object-fit: cover; border-radius: 12px; border: 1px solid var(--ion-border-color); }
+
+/* Selector de fotos de una captura: grid de miniaturas + celda "Añadir".
+   Mismo radio/paleta que .pp-galeria-celda para que encaje con el resto
+   del cuaderno; la celda de añadir usa borde discontinuo para distinguirse
+   de una miniatura real sin depender del color. */
+.pp-fotos-captura { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 8px; margin-top: 2px; }
+.pp-foto-item { position: relative; aspect-ratio: 1; border-radius: var(--pp-radius-sm); overflow: hidden;
+  background: var(--pp-panel2); border: 1px solid var(--ion-border-color); }
+.pp-foto-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.pp-foto-quitar { position: absolute; top: 4px; right: 4px; width: 22px; height: 22px; border-radius: 50%;
+  background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.16); color: #fff; padding: 0;
+  display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.pp-foto-quitar ion-icon { font-size: 13px; }
+.pp-foto-add { aspect-ratio: 1; border-radius: var(--pp-radius-sm); border: 1.5px dashed var(--ion-border-color);
+  background: transparent; color: var(--pp-texto2); padding: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+  cursor: pointer; transition: transform .15s var(--pp-ease), border-color .15s var(--pp-ease), color .15s var(--pp-ease); }
+.pp-foto-add ion-icon { font-size: 22px; }
+.pp-foto-add span { font-size: 10.5px; font-weight: 600; }
+.pp-foto-add ion-spinner { width: 20px; height: 20px; }
+.pp-foto-add:active { transform: scale(0.95); }
+.pp-foto-add:hover { border-color: var(--ion-color-primary); color: var(--ion-color-primary); }
+.pp-foto-add[aria-disabled="true"] { pointer-events: none; opacity: .6; }
+.pp-foto-ayuda { font-size: 11.5px; color: var(--pp-texto2); margin: 4px 0 0; }
+
 .pp-foto-grande { width: 100%; max-height: 60vh; object-fit: contain; border-radius: 12px; background: var(--pp-panel2); min-height: 120px; }
+.pp-foto-grande-tira { display: flex; gap: 8px; overflow-x: auto; scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+.pp-foto-grande-tira::-webkit-scrollbar { display: none; }
+.pp-foto-grande-tira .pp-foto-grande { flex: 0 0 88%; width: 88%; scroll-snap-align: center; }
 
 .pp-captura-sub, .pp-captura-cond { font-size: 12px; color: var(--pp-texto2); margin-top: 2px; }
 .pp-captura-cond ion-icon, .pp-captura-sub ion-icon { font-size: 13px; vertical-align: -2px; }

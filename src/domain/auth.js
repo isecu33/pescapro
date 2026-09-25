@@ -38,19 +38,26 @@ function _initFirebase() {
 }
 
 // Llama esto al arrancar la app. Resuelve cuando se conoce el estado inicial.
+// Nunca rechaza: si Firebase no está configurado (firebase-config.js con
+// placeholders) o falla la llamada nativa, se trata como "sin sesión" en vez
+// de tirar abajo el arranque completo de la app (antes un fallo aquí dejaba
+// el DOMContentLoaded de main.js colgado, sin login ni app visibles).
 export async function iniciarAuth() {
-  _initFirebase();
-
-  const { user } = await FirebaseAuthentication.getCurrentUser();
-  const u = _mapear(user);
-  _persistir(u);
-  _notificar(u);
-
-  FirebaseAuthentication.addListener('authStateChange', ({ user }) => {
+  try {
+    _initFirebase();
+    const { user } = await FirebaseAuthentication.getCurrentUser();
     const u = _mapear(user);
     _persistir(u);
     _notificar(u);
-  });
+
+    FirebaseAuthentication.addListener('authStateChange', ({ user }) => {
+      const u = _mapear(user);
+      _persistir(u);
+      _notificar(u);
+    });
+  } catch (e) {
+    _notificar(null);
+  }
 }
 
 export async function loginGoogle() {

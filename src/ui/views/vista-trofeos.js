@@ -494,7 +494,7 @@ function modalLiga(id, repintar) {
     try {
       const codigo = codigoResultadoLiga(liga.id);
       const yo = rankingLiga(porIdLiga(liga.id)).find(p => p.esYo);
-      compartir('🏆 Mi resultado en «' + liga.nombre + '» (PescaPro): ' + (yo ? yo.detalle : '') +
+      compartir('🏆 Mi resultado en «' + liga.nombre + '» (Marante): ' + (yo ? yo.detalle : '') +
         '\nPega este código en Trofeos → Unirse/añadir código:\n' + codigo);
     } catch (e) {
       errAcciones.textContent = '⚠️ ' + e.message;
@@ -539,8 +539,8 @@ function modalConfirmarBorrado(liga, repintar) {
 
 function compartirInvitacion(liga) {
   const modoNombre = MODOS_LIGA[liga.modo] ? MODOS_LIGA[liga.modo].nombre : liga.modo;
-  compartir('🎣 Te reto en PescaPro: «' + liga.nombre + '» del ' + fmtDia(liga.desde) + ' al ' + fmtDia(liga.hasta) +
-    ' (' + modoNombre + ').\nInstala PescaPro, registra tus capturas y pega este código en Trofeos → Unirse:\n' +
+  compartir('🎣 Te reto en Marante: «' + liga.nombre + '» del ' + fmtDia(liga.desde) + ' al ' + fmtDia(liga.hasta) +
+    ' (' + modoNombre + ').\nInstala Marante, registra tus capturas y pega este código en Trofeos → Unirse:\n' +
     codigoInvitacionLiga(liga));
 }
 

@@ -1,43 +1,83 @@
 /* Pantalla de login: overlay de pantalla completa antes de arrancar la app.
    Llama onExito(usuario) al autenticar o onOmitir() si el usuario elige
-   continuar sin cuenta. Se destruye a sí misma en cualquier caso. */
+   continuar sin cuenta. Se destruye a sí misma en cualquier caso.
+
+   En modo desarrollador (import.meta.env.DEV) se añade un botón extra para
+   saltar el login directamente: mientras firebase-config.js no tenga
+   credenciales reales, los botones de Google/Apple fallarán en cuanto se
+   pulsen (auth.js atrapa el fallo y no bloquea el arranque, pero el login
+   en sí no puede completarse sin proyecto de Firebase configurado). */
 import { loginGoogle, loginApple } from '../../domain/auth.js';
+import { activo as devActivo } from '../../domain/dev.js';
+import { svg } from '../util/icons.js';
 
 const CSS = `
   .pp-login {
     position: fixed; inset: 0; z-index: 9999;
-    background: #0a1520;
     display: flex; flex-direction: column;
     align-items: center; justify-content: center;
-    gap: 0; padding: 32px 24px;
-    font-family: system-ui, sans-serif;
+    gap: 0; padding: calc(32px + env(safe-area-inset-top)) 24px calc(28px + env(safe-area-inset-bottom));
+    font-family: 'SF Pro Text', 'Helvetica Neue', system-ui, -apple-system, sans-serif;
     color: #dde8f2;
+    overflow: hidden;
+    background: #0a1420;
   }
-  .pp-login__logo {
-    font-size: 52px; margin-bottom: 8px;
+  .pp-login__atmosfera {
+    position: absolute; inset: 0; z-index: 0; pointer-events: none;
+    background:
+      radial-gradient(60% 42% at 50% 8%, rgba(255,114,0,0.16), transparent 68%),
+      radial-gradient(70% 50% at 85% 95%, rgba(20,80,110,0.35), transparent 70%),
+      radial-gradient(50% 40% at -5% 100%, rgba(255,114,0,0.06), transparent 70%);
   }
-  .pp-login__nombre {
-    font-size: 28px; font-weight: 700; letter-spacing: -0.5px;
-    color: #ffa500; margin-bottom: 4px;
+  .pp-login__marca-fondo {
+    position: absolute; z-index: 0; pointer-events: none;
+    width: 420px; height: 420px; right: -140px; bottom: -120px;
+    opacity: 0.07; transform: rotate(-8deg);
+  }
+  .pp-login__olas {
+    position: absolute; z-index: 0; pointer-events: none;
+    left: 0; right: 0; bottom: 0;
+    display: flex; justify-content: space-evenly;
+    padding: 0 4px 14px; opacity: 0.5;
+    color: #ff7200;
+    mask-image: linear-gradient(to top, black, transparent);
+  }
+  .pp-login__contenido {
+    position: relative; z-index: 1;
+    display: flex; flex-direction: column; align-items: center;
+    width: 100%;
+  }
+  .pp-login__marca {
+    display: flex; flex-direction: column; align-items: center;
+    margin-bottom: 52px;
+  }
+  .pp-login__icono {
+    width: 76px; height: 76px; margin-bottom: 14px;
+    filter: drop-shadow(0 8px 24px rgba(255, 114, 0, 0.35));
+  }
+  .pp-login__wordmark {
+    height: 22px; width: auto; margin-bottom: 10px;
   }
   .pp-login__sub {
-    font-size: 14px; color: #7a96aa; margin-bottom: 48px;
-    text-align: center; max-width: 240px;
+    font-size: 14px; color: #7a96aa; margin: 0;
+    text-align: center; max-width: 260px; line-height: 1.4;
   }
   .pp-login__titulo {
-    font-size: 16px; color: #7a96aa; margin-bottom: 20px;
+    font-size: 15px; color: #7a96aa; margin-bottom: 20px;
     text-align: center;
   }
   .pp-login__btn {
     display: flex; align-items: center; justify-content: center; gap: 10px;
     width: 100%; max-width: 300px; padding: 14px 20px;
-    border: none; border-radius: 12px; cursor: pointer;
+    border: none; border-radius: 14px; cursor: pointer;
     font-size: 16px; font-weight: 600; margin-bottom: 12px;
-    transition: opacity 0.15s; outline: none;
+    transition: transform 0.12s var(--pp-ease, ease), opacity 0.15s; outline: none;
   }
-  .pp-login__btn:active { opacity: 0.8; }
+  .pp-login__btn:active { transform: scale(0.98); }
+  .pp-login__btn:disabled { opacity: 0.6; cursor: default; transform: none; }
   .pp-login__btn--google {
     background: #fff; color: #1f1f1f;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.35);
   }
   .pp-login__btn--apple {
     background: #1c1c1e; color: #fff;
@@ -47,24 +87,52 @@ const CSS = `
     width: 20px; height: 20px; flex-shrink: 0;
   }
   .pp-login__omitir {
-    margin-top: 24px; background: none; border: none;
-    color: #7a96aa; font-size: 14px; cursor: pointer;
-    padding: 8px; text-decoration: underline; text-underline-offset: 3px;
+    margin-top: 22px; background: none;
+    border: 1px solid rgba(122,150,170,0.35); border-radius: 999px;
+    color: #a8bdcc; font-size: 14px; cursor: pointer;
+    padding: 10px 22px; transition: transform 0.12s var(--pp-ease, ease), border-color 0.15s;
   }
+  .pp-login__omitir:active { transform: scale(0.98); }
   .pp-login__error {
-    color: #d42b2b; font-size: 13px; margin-top: 12px;
+    color: #ff6b5e; font-size: 13px; margin-top: 14px;
     text-align: center; max-width: 280px;
     min-height: 18px;
   }
   .pp-login__spinner {
     width: 20px; height: 20px;
     border: 2px solid rgba(255,165,0,0.3);
-    border-top-color: #ffa500;
+    border-top-color: #ff7200;
     border-radius: 50%;
     animation: pp-spin 0.7s linear infinite;
     display: none;
   }
   @keyframes pp-spin { to { transform: rotate(360deg); } }
+
+  .pp-login__dev {
+    margin-top: 28px; padding-top: 18px; width: 100%; max-width: 300px;
+    border-top: 1px dashed rgba(122,150,170,0.3);
+    display: flex; flex-direction: column; align-items: center;
+  }
+  .pp-login__dev-etiqueta {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.12em;
+    color: #5a7285; margin-bottom: 8px;
+  }
+  .pp-login__dev-btn {
+    width: 100%; padding: 10px 16px; border-radius: 10px;
+    background: rgba(255,114,0,0.08); border: 1px dashed rgba(255,114,0,0.5);
+    color: #ffa64d; font-size: 13px; font-weight: 600; cursor: pointer;
+    transition: transform 0.12s var(--pp-ease, ease), background 0.15s;
+  }
+  .pp-login__dev-btn:active { transform: scale(0.98); background: rgba(255,114,0,0.14); }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .pp-login__marca { animation: pp-login-entrar 0.5s cubic-bezier(.25,.8,.25,1) both; }
+    .pp-login__acciones { animation: pp-login-entrar 0.5s cubic-bezier(.25,.8,.25,1) 0.08s both; }
+  }
+  @keyframes pp-login-entrar {
+    from { opacity: 0; transform: translateY(14px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
 `;
 
 const ICONO_GOOGLE = `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -78,6 +146,15 @@ const ICONO_APPLE = `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"
   <path fill="currentColor" d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.7 9.05 7.4c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.53 4zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
 </svg>`;
 
+function olasFondo() {
+  const wrap = document.createElement('div');
+  wrap.className = 'pp-login__olas';
+  for (let i = 0; i < 5; i++) {
+    wrap.appendChild(svg('ola', 40));
+  }
+  return wrap;
+}
+
 export function mostrarLogin(onExito, onOmitir) {
   const estilo = document.createElement('style');
   estilo.textContent = CSS;
@@ -85,23 +162,57 @@ export function mostrarLogin(onExito, onOmitir) {
 
   const el = document.createElement('div');
   el.className = 'pp-login';
-  el.innerHTML = `
-    <div class="pp-login__logo">🎣</div>
-    <div class="pp-login__nombre">PescaPro</div>
-    <p class="pp-login__sub">Condiciones de pesca en tiempo real</p>
-    <p class="pp-login__titulo">Accede con tu cuenta</p>
-    <button class="pp-login__btn pp-login__btn--google" id="pp-btn-google">
-      ${ICONO_GOOGLE}
-      Continuar con Google
-    </button>
-    <button class="pp-login__btn pp-login__btn--apple" id="pp-btn-apple">
-      ${ICONO_APPLE}
-      Continuar con Apple
-    </button>
-    <div class="pp-login__spinner" id="pp-spinner"></div>
-    <p class="pp-login__error" id="pp-error"></p>
-    <button class="pp-login__omitir" id="pp-btn-omitir">Continuar sin cuenta</button>
+
+  const atmosfera = document.createElement('div');
+  atmosfera.className = 'pp-login__atmosfera';
+  el.appendChild(atmosfera);
+
+  const marcaFondo = document.createElement('img');
+  marcaFondo.className = 'pp-login__marca-fondo';
+  marcaFondo.src = './iconos/png/logo-marante.png';
+  marcaFondo.alt = '';
+  marcaFondo.setAttribute('aria-hidden', 'true');
+  el.appendChild(marcaFondo);
+
+  el.appendChild(olasFondo());
+
+  const contenido = document.createElement('div');
+  contenido.className = 'pp-login__contenido';
+
+  contenido.innerHTML = `
+    <div class="pp-login__marca">
+      <img class="pp-login__icono" src="./iconos/png/logo-marante.png" alt="Marante">
+      <img class="pp-login__wordmark" src="./iconos/png/logo-marante-texto.png" alt="Marante">
+      <p class="pp-login__sub">Condiciones de pesca en tiempo real</p>
+    </div>
+    <div class="pp-login__acciones">
+      <p class="pp-login__titulo">Accede con tu cuenta</p>
+      <button class="pp-login__btn pp-login__btn--google" id="pp-btn-google">
+        ${ICONO_GOOGLE}
+        Continuar con Google
+      </button>
+      <button class="pp-login__btn pp-login__btn--apple" id="pp-btn-apple">
+        ${ICONO_APPLE}
+        Continuar con Apple
+      </button>
+      <div class="pp-login__spinner" id="pp-spinner"></div>
+      <p class="pp-login__error" id="pp-error"></p>
+      <button class="pp-login__omitir" id="pp-btn-omitir">Continuar sin cuenta</button>
+    </div>
   `;
+  el.appendChild(contenido);
+
+  if (devActivo) {
+    const dev = document.createElement('div');
+    dev.className = 'pp-login__dev';
+    dev.innerHTML = `
+      <div class="pp-login__dev-etiqueta">MODO DESARROLLADOR</div>
+      <button class="pp-login__dev-btn" id="pp-btn-dev-skip">Saltar login (sin Firebase configurado)</button>
+    `;
+    contenido.appendChild(dev);
+    dev.querySelector('#pp-btn-dev-skip').addEventListener('click', () => { destruir(); onOmitir(); });
+  }
+
   document.body.appendChild(el);
 
   const spinner = el.querySelector('#pp-spinner');

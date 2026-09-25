@@ -1,6 +1,6 @@
 {
   "appId": "com.iker.pescapro",
-  "appName": "PescaPro",
+  "appName": "Marante",
   "webDir": "dist",
   "android": {
     "allowMixedContent": false

@@ -64,7 +64,7 @@ export class PpAppShell extends HTMLElement {
     logo.slot = 'start';
     logo.className = 'pp-logo';
     const logoImg = document.createElement('img');
-    logoImg.src = './img/logo-marante.png';
+    logoImg.src = './iconos/png/logo-marante.png';
     logoImg.alt = 'Marante';
     logo.appendChild(logoImg);
     toolbar.appendChild(logo);

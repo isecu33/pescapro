@@ -784,6 +784,14 @@ pp-curva-solunar { display: block; width: 100%; margin-bottom: 4px; }
   display: block;
   padding: 6px 10px;
 }
+/* Siluetas muy alargadas (Sargo, Congrio, Caballa, Jurel): con `contain`
+   quedan como una línea diminuta frente a siluetas más cuadradas (Pulpo,
+   Dorada). `cover` las recorta por los lados para dar el mismo peso visual,
+   sin tocar el SVG compartido con modal/lista/cuaderno (ver especies.js:
+   siluetaFina). */
+.pp-esp-card-ico--fina {
+  object-fit: cover;
+}
 /* Fallback emoji en card: centrado y grande */
 span.pp-esp-card-ico {
   display: flex;

@@ -335,7 +335,8 @@ function crearExportImport(contenedor, st) {
 /* Selector de hasta `max` fotos: grid de miniaturas + celda "Añadir" (con
    spinner mientras comprime) + texto de ayuda con el contador. Acepta
    selección múltiple del selector nativo; si el usuario elige más de las
-   que caben, el resto se ignora sin más aviso que dejar el hueco lleno. */
+   que caben, el resto se descarta y se avisa en el texto de ayuda (ver
+   más abajo, "descartadas"). */
 function crearSelectorFotos(max) {
   const wrap = document.createElement('div');
 
@@ -423,6 +424,7 @@ function crearSelectorFotos(max) {
     input.value = ''; // permite volver a elegir el mismo fichero mas tarde
     if (!archivos.length) return;
     const hueco = archivos.slice(0, max - fotos.length);
+    const descartadas = archivos.length - hueco.length;
     error = null;
     procesando = true;
     render();
@@ -431,6 +433,13 @@ function crearSelectorFotos(max) {
       catch (e) { error = 'No se pudo leer una de las fotos — prueba otra.'; }
     }
     procesando = false;
+    // Si se eligieron mas fotos de las que caben, avisar del descarte en vez
+    // de ignorarlo en silencio (ver docs/ux-audit/06-cuaderno.md, item 6).
+    if (!error && descartadas > 0) {
+      error = descartadas === 1
+        ? 'Se ha descartado 1 foto: máximo ' + max + ' fotos por captura.'
+        : 'Se han descartado ' + descartadas + ' fotos: máximo ' + max + ' fotos por captura.';
+    }
     render();
   });
 

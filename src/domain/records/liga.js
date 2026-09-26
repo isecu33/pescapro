@@ -31,9 +31,12 @@ export function perfil() {
 /* `pp_perfil` lo comparte domain/perfil.js (bio, clan, banner...): se
    fusiona en vez de sobrescribir para no borrar el resto del perfil. */
 export function setNombre(n) {
+  // Misma regla que perfil.actualizar(): el nombre es uno solo en la app.
+  const nombre = String(n == null ? '' : n).trim().slice(0, 24);
+  if (!nombre) throw new Error('El nombre no puede estar vacío');
   const previo = perfil();
   const base = previo && typeof previo === 'object' ? previo : {};
-  localStorage.setItem(KEYP, JSON.stringify(Object.assign({}, base, { nombre: String(n).trim().slice(0, 24) })));
+  localStorage.setItem(KEYP, JSON.stringify(Object.assign({}, base, { nombre })));
   return perfil();
 }
 

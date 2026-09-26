@@ -63,8 +63,9 @@ describe('Supuesto: un solo nombre en toda la app (perfil <-> ligas)', () => {
   it('ambos modulos aceptan y rechazan los mismos nombres', () => {
     // Si el perfil no permite un nombre vacio, las ligas tampoco deberian
     // poder dejar al pescador sin nombre.
-    liga.setNombre('   ');
-    expect(perfil.leer().nombre, 'liga.setNombre ha guardado un nombre vacio').not.toBe('');
+    perfil.actualizar({ nombre: 'Ana' });
+    try { liga.setNombre('   '); } catch { /* rechazarlo es correcto */ }
+    expect(perfil.leer().nombre, 'liga.setNombre ha guardado un nombre vacio').toBe('Ana');
   });
 });
 

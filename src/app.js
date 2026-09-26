@@ -156,10 +156,19 @@ export function crearApp(shell) {
 
   /* ---------- Navegacion ---------- */
 
+  // Fix CRITICAL de auditoria (tab-bar desincronizado): irA() es el unico
+  // sitio que toca st.vista, asi que tambien es el punto donde se
+  // reconcilia shell.vistaActiva -- sea cual sea el origen del evento
+  // pp-cambiar-vista (clic real en ion-tab-button, que ya deja
+  // shell.vistaActiva al dia antes de emitir, o un dispatch directo desde
+  // una vista que se salte el setter). Sin esto, shell._vistaActiva
+  // (chrome) y st.vista (contenido) podian quedar desincronizados y el
+  // tab bar dejaba de reaccionar a clics (ver docs/ux-audit/02-ahora.md).
   function irA(vista) {
     if (!VISTAS.includes(vista)) return;
     st.vista = vista;
     mostrarVista(vista);
+    if (shell.vistaActiva !== vista) shell.vistaActiva = vista;
     if (vista === 'mapa') iniciarMapa();
     renderVistaActiva();
   }

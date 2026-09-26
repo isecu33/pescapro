@@ -644,10 +644,14 @@ function cardEspeciesAhora(st, fecha) {
   const verTodas = document.createElement('p');
   verTodas.className = 'pp-esp-ver-todas';
   verTodas.textContent = 'Ver todas →';
+  // Fix CRITICAL de auditoria: antes se despachaba pp-cambiar-vista suelto
+  // sobre el propio nodo, sin pasar por shell.vistaActiva -- el contenido
+  // cambiaba a Especies pero el tab bar seguia marcando "Ahora" (bug
+  // confirmado en docs/ux-audit/02-ahora.md). Se invoca el mismo camino
+  // que un clic real en ion-tab-button: el setter del shell.
   verTodas.addEventListener('click', () => {
-    verTodas.dispatchEvent(new CustomEvent('pp-cambiar-vista', {
-      detail: { vista: 'especies' }, bubbles: true, composed: true
-    }));
+    const shell = verTodas.closest('pp-app-shell');
+    if (shell) shell.vistaActiva = 'especies';
   });
   content.appendChild(verTodas);
   return card;

@@ -204,6 +204,24 @@ describe('renderPrevision', () => {
     expect(cont.querySelector('.pp-graf-dia-aviso')).not.toBeNull();
   });
 
+  it('cerrar el selector de dia (Escape/backdrop, sin seleccionar) resetea el scroll de la tira para no ocultar "Hoy"', () => {
+    const st = stConCtx();
+    const cont = document.createElement('div');
+    renderPrevision(cont, st);
+
+    cont.querySelector('.pp-dia-tile-calendario').click();
+    const modal = document.getElementById('pp-modal');
+    const scroll = cont.querySelector('.pp-semana-scroll');
+    scroll.scrollLeft = 240;
+
+    // ion-modal dismite por Escape/backdrop sin pasar por cerrarModal()/
+    // renderPrevision() -- simulamos el evento de ciclo de vida que dispara
+    // en cualquier caso, igual que ya se simula 'ionChange' de ion-datetime.
+    modal.dispatchEvent(new CustomEvent('ionModalDidDismiss'));
+
+    expect(scroll.scrollLeft).toBe(0);
+  });
+
   it('"Ver proximos dias" limpia el filtro de dia y vuelve a la vista de 96h', () => {
     const st = stConCtx();
     st.diaPrevisionSel = diasDisponibles(st.ctx, st.modo)[1];

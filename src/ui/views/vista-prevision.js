@@ -282,7 +282,16 @@ function abrirSelectorDia(contenedor, st) {
     cuerpo.appendChild(btnVolver);
   }
 
-  abrirModal(cuerpo, { breakpoints: null });
+  const modal = abrirModal(cuerpo, { breakpoints: null });
+  // Cierre por Escape/backdrop: ion-modal lo gestiona internamente y nunca
+  // llama a cerrarModal()/renderPrevision(), así que el foco vuelve por
+  // defecto al tile "Ver todos" y arrastra consigo el scroll horizontal de
+  // la tira de días, ocultando "HOY". Se corrige devolviendo ese scroll a
+  // su posición inicial en cualquier cierre del modal, sea cual sea la causa.
+  modal.addEventListener('ionModalDidDismiss', () => {
+    const scroll = contenedor.querySelector('.pp-semana-scroll');
+    if (scroll) scroll.scrollLeft = 0;
+  });
 }
 
 /* Explica qué significa el color de cada barra: sin esto el gráfico es

@@ -280,6 +280,7 @@ ion-tab-button[selected] {
   border-radius: var(--pp-radius-sm); cursor: pointer;
 }
 .pp-dia-tile:active { opacity: .8; }
+.pp-dia-tile:focus-visible { outline: 2px solid var(--acento); outline-offset: 2px; }
 .pp-dia-tile.activo { border-color: var(--ion-color-primary); background: rgba(255,114,0,0.12); }
 .pp-dia-tile-nombre { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--pp-texto2); }
 .pp-dia-tile-ico { display: flex; color: var(--pp-texto2); }

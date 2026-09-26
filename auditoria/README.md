@@ -37,26 +37,30 @@ npm run test:auditoria
 | `10-perfil` | Valores por defecto, límites, nombre único entre perfil y ligas, insignias y destacadas, clanes entre móviles, tarjeta pública sin ids |
 | `11-integridad` | Toda imagen referenciada existe en `img/`, textos sin caracteres corruptos, los scripts de `package.json` apuntan a ficheros reales |
 
-## Hallazgos (primera ejecución: 437 tests, 16 fallan)
+## Hallazgos
 
-| # | Severidad | Supuesto incumplido | Dónde |
-|---|---|---|---|
-| 1 | Alta | **El buscador de lugares está bloqueado por la CSP.** `buscarLugar()` llama a `nominatim.openstreetmap.org`, pero `connect-src` en `index.html` solo permite Open-Meteo. En la app compilada, la búsqueda falla siempre. | `index.html`, `src/domain/api.js:118` |
-| 2 | Media | **Días UTC en lugar de días locales.** `toISOString().slice(0,10)` hace que, en verano, lo pescado entre las 00:00 y las 02:00 cuente para el día anterior. Afecta a "mejor día", a los logros "día perfecto", a si una captura entra en una liga y a si una liga está activa a las 00:30 de su primer día. | `records.js:17`, `liga.js:66,75` |
-| 3 | Media | **La tira de próximos días empieza AYER** si se abre la app entre las 00:00 y la 01:59, porque `serie()` incluye 2 h pasadas. | `indice.js:120` (`serie`, usada por `diasDisponibles`) |
-| 4 | Media | **Horas del móvil, no del spot.** Un spot en Canarias consultado con el móvil en hora peninsular desplaza 1 h mareas, amanecer e índice: `fusionar()` ignora `utc_offset_seconds`. | `api.js:142` |
-| 5 | Media | **Importar un fichero con entradas inválidas deja el cuaderno inservible:** `estadisticas()` lanza `TypeError` en cada llamada posterior. | `cuaderno.js:80` (`importar`) |
-| 6 | Media | **Participantes duplicados:** reimportar el resultado de un amigo con un nombre de más de 24 caracteres añade un participante nuevo cada vez, porque busca por el nombre completo pero guarda el nombre recortado. | `liga.js:214-216` |
-| 7 | Baja | **Mojibake en textos visibles:** la ficha del calamar muestra "dÃ¡rsenas" y la del pulpo "estÃ¡ … CantÃ¡brico". | `especies.js` (zonas del calamar, notas del pulpo) |
-| 8 | Baja | **"Madrugador" usa siempre el amanecer de A Coruña,** no el del lugar de la captura. En Canarias, una captura al amanecer local no desbloquea el logro. | `logros.js:10-11,114` |
-| 9 | Baja | **Códigos WMO 56 y 57 (llovizna helada) sin texto ni icono:** la UI muestra "—". | `config.js` `WMO`, `icons.js` `WMO_ICO` |
-| 10 | Baja | **`liga.setNombre('   ')` guarda un nombre vacío,** aunque el perfil lo prohíbe, y deja al pescador sin nombre. | `liga.js:32` |
-| 11 | Doc | **El README dice "viento > 45, rachas > 60, olas > 3 m",** pero el código usa `>=`. Hay que alinear una de las dos cosas. | `indice.js:37-39` / README |
+En la primera ejecución fallaron 16 de 437 tests. **Todos están corregidos**
+(un commit `fix(...)` por hallazgo) y la suite pasa entera. La columna
+"Dónde" se refiere al código anterior a los arreglos.
 
-Además, la suite existente (`npm run test:vitest`) tiene **dos tests que
-dependen de la hora a la que se ejecutan**:
-`indice.test.js › resumenDias()` y `logros.test.js › logro nocturno`. Fallan
-de noche.
+| # | Severidad | Supuesto incumplido | Dónde | Estado |
+|---|---|---|---|---|
+| 1 | Alta | **El buscador de lugares está bloqueado por la CSP.** `buscarLugar()` llama a `nominatim.openstreetmap.org`, pero `connect-src` en `index.html` solo permite Open-Meteo. En la app compilada, la búsqueda falla siempre. | `index.html`, `src/domain/api.js:118` | Corregido |
+| 2 | Media | **Días UTC en lugar de días locales.** `toISOString().slice(0,10)` hace que, en verano, lo pescado entre las 00:00 y las 02:00 cuente para el día anterior. Afecta a "mejor día", a los logros "día perfecto", a si una captura entra en una liga y a si una liga está activa a las 00:30 de su primer día. | `records.js:17`, `liga.js:66,75` | Corregido |
+| 3 | Media | **La tira de próximos días empieza AYER** si se abre la app entre las 00:00 y la 01:59, porque `serie()` incluye 2 h pasadas. | `indice.js:120` (`serie`, usada por `diasDisponibles`) | Corregido |
+| 4 | Media | **Horas del móvil, no del spot.** Un spot en Canarias consultado con el móvil en hora peninsular desplaza 1 h mareas, amanecer e índice: `fusionar()` ignora `utc_offset_seconds`. | `api.js:142` | Corregido |
+| 5 | Media | **Importar un fichero con entradas inválidas deja el cuaderno inservible:** `estadisticas()` lanza `TypeError` en cada llamada posterior. | `cuaderno.js:80` (`importar`) | Corregido |
+| 6 | Media | **Participantes duplicados:** reimportar el resultado de un amigo con un nombre de más de 24 caracteres añade un participante nuevo cada vez, porque busca por el nombre completo pero guarda el nombre recortado. | `liga.js:214-216` | Corregido |
+| 7 | Baja | **Mojibake en textos visibles:** la ficha del calamar muestra "dÃ¡rsenas" y la del pulpo "estÃ¡ … CantÃ¡brico". | `especies.js` (zonas del calamar, notas del pulpo) | Corregido |
+| 8 | Baja | **"Madrugador" usa siempre el amanecer de A Coruña,** no el del lugar de la captura. En Canarias, una captura al amanecer local no desbloquea el logro. | `logros.js:10-11,114` | Corregido |
+| 9 | Baja | **Códigos WMO 56 y 57 (llovizna helada) sin texto ni icono:** la UI muestra "—". | `config.js` `WMO`, `icons.js` `WMO_ICO` | Corregido |
+| 10 | Baja | **`liga.setNombre('   ')` guarda un nombre vacío,** aunque el perfil lo prohíbe, y deja al pescador sin nombre. | `liga.js:32` | Corregido |
+| 11 | Doc | **El README dice "viento > 45, rachas > 60, olas > 3 m",** pero el código usa `>=`. Hay que alinear una de las dos cosas. | `indice.js:37-39` / README | README corregido a ≥ |
+
+Además, la suite existente (`npm run test:vitest`) tenía **dos tests que
+dependían de la hora o de la máquina**: `indice.test.js › resumenDias()` y
+`logros.test.js › logro nocturno`. Corregido con `vitest.setup.js` (zona
+horaria fija) y con la tormenta del fixture en la hora actual.
 
 ### Comprobados y correctos
 

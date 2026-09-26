@@ -64,6 +64,14 @@ export function normalizarUsuario(u) {
   return String(u == null ? '' : u).trim().replace(/^@+/, '').toLowerCase();
 }
 
+/* Valida un @usuario ya normalizado (ver normalizarUsuario). Vacio es valido
+   (campo opcional). La usan tanto actualizar() como la vista previa en vivo
+   del editor, para que esta nunca muestre como valido algo que el guardado
+   real rechazaria. */
+export function usuarioValido(u) {
+  return !u || RE_USUARIO.test(u);
+}
+
 /* Valida y aplica los campos editables basicos. Lanza Error con mensaje
    claro para que el formulario lo muestre. */
 export function actualizar(cambios) {
@@ -75,7 +83,7 @@ export function actualizar(cambios) {
   }
   if ('usuario' in cambios) {
     const u = normalizarUsuario(cambios.usuario);
-    if (u && !RE_USUARIO.test(u)) {
+    if (!usuarioValido(u)) {
       throw new Error('El usuario debe tener 3-20 caracteres: letras minúsculas, números, "_" o "."');
     }
     p.usuario = u;

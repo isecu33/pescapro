@@ -17,6 +17,7 @@ import {
   leer as leerPerfil, actualizar as actualizarPerfil, publico as perfilPublico,
   alternarInsignia, alternarDestacada, destacadasVigentes,
   crearClan, unirseClan, salirClan, codigoClan,
+  normalizarUsuario, usuarioValido,
   BANNERS, LIMITES, FOTO_BANNER, FOTO_AVATAR
 } from '../../domain/perfil.js';
 import { crearTarjetaPerfil, cargarImagenesPropias, crearIcoLogro } from '../util/perfil-tarjeta.js';
@@ -348,7 +349,7 @@ function campoTexto(etiqueta, valor, opts) {
   if (opts.multilinea) input.rows = 3;
   input.value = valor || '';
   wrap.append(lbl, input);
-  if (opts.max && opts.multilinea) {
+  if (opts.max) {
     const cont = document.createElement('small');
     cont.className = 'pp-perfil-contador';
     const act = () => { cont.textContent = input.value.length + '/' + opts.max; };
@@ -410,11 +411,15 @@ function modalInvitarClan() {
   copiar.classList.add('pp-mt');
   copiar.addEventListener('click', () => {
     const texto = codigo.input.value;
-    const hecho = () => { copiar.textContent = 'Copiado ✓'; };
-    if (typeof navigator !== 'undefined' && navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(texto).then(hecho, () => { codigo.input.select(); });
-    } else {
+    const marcarCopiado = () => { copiar.textContent = 'Copiado ✓'; };
+    const marcarSeleccionado = () => {
       codigo.input.select();
+      copiar.textContent = 'Selecciona y copia (Ctrl+C)';
+    };
+    if (typeof navigator !== 'undefined' && navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(texto).then(marcarCopiado, marcarSeleccionado);
+    } else {
+      marcarSeleccionado();
     }
   });
   cuerpo.append(codigo.wrap, copiar);
@@ -468,9 +473,10 @@ function modalEditar(repintar) {
   const error = crearError();
 
   const pintarPreview = () => {
+    const usuarioPreview = normalizarUsuario(usuario.input.value);
     const datos = perfilPublico(Object.assign({}, p, {
       nombre: nombre.input.value.trim(),
-      usuario: String(usuario.input.value).trim().replace(/^@+/, '').toLowerCase(),
+      usuario: usuarioValido(usuarioPreview) ? usuarioPreview : '',
       bio: bio.input.value.trim(),
       banner: estado.banner
     }));

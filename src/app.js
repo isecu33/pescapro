@@ -454,11 +454,17 @@ export function crearApp(shell) {
     }
   }
 
+  // Recuperado tras auditoria UX (quick win #3): confirmacion textual
+  // discreta de frescura tras refrescar, en segundos al principio para
+  // que el usuario vea progresar el dato justo tras pulsar "refrescar".
   function textoActualizado() {
     if (!st.datos || !st.datos.obtenido) return st.cargando ? 'cargando…' : 'sin datos';
     if (st.cargando) return 'actualizando…';
-    const min = Math.round((Date.now() - st.datos.obtenido) / 60000);
-    return min <= 1 ? 'ahora mismo' : 'hace ' + (min < 60 ? min + ' min' : Math.round(min / 60) + ' h');
+    const seg = Math.round((Date.now() - st.datos.obtenido) / 1000);
+    if (seg < 5) return 'actualizado ahora';
+    if (seg < 60) return 'actualizado hace ' + seg + 's';
+    const min = Math.round(seg / 60);
+    return 'actualizado hace ' + (min < 60 ? min + ' min' : Math.round(min / 60) + ' h');
   }
 
   /* ---------- Cableado inicial ---------- */

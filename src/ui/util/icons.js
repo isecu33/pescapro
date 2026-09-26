@@ -62,6 +62,8 @@ export const WMO_ICO = {
   51: { texto: 'Llovizna débil',               cat: 'lluvia' },
   53: { texto: 'Llovizna',                     cat: 'lluvia' },
   55: { texto: 'Llovizna intensa',             cat: 'lluvia' },
+  56: { texto: 'Llovizna helada',              cat: 'lluvia' },
+  57: { texto: 'Llovizna helada intensa',      cat: 'lluvia' },
   61: { texto: 'Lluvia débil',                 cat: 'lluvia' },
   63: { texto: 'Lluvia',                       cat: 'lluvia' },
   65: { texto: 'Lluvia fuerte',                cat: 'lluvia' },

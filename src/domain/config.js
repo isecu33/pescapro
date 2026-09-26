@@ -91,6 +91,7 @@ export const WMO = {
   0:['Despejado','☀️'],1:['Mayormente despejado','🌤️'],2:['Parcialmente nuboso','⛅'],3:['Nuboso','☁️'],
   45:['Niebla','🌫️'],48:['Niebla con cencellada','🌫️'],
   51:['Llovizna débil','🌦️'],53:['Llovizna','🌦️'],55:['Llovizna intensa','🌧️'],
+  56:['Llovizna helada','🌧️'],57:['Llovizna helada intensa','🌧️'],
   61:['Lluvia débil','🌦️'],63:['Lluvia','🌧️'],65:['Lluvia fuerte','🌧️'],
   66:['Lluvia helada','🌧️'],67:['Lluvia helada fuerte','🌧️'],
   71:['Nieve débil','🌨️'],73:['Nieve','🌨️'],75:['Nieve fuerte','❄️'],77:['Cinarra','🌨️'],

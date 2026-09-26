@@ -1,4 +1,5 @@
 /* PescaPro - Récords personales, derivados del cuaderno de capturas. */
+import { util } from '../config.js';
 
 export function calcular(capturas) {
   const st = {
@@ -14,7 +15,7 @@ export function calcular(capturas) {
     especies.add(c.especie);
     if (c.fotoId) st.conFoto++;
     if (c.spot && c.spot.nombre) spots.add(c.spot.nombre);
-    const dia = (c.fecha || '').slice(0, 10);
+    const dia = util.diaLocal(c.fecha);
     if (dia) porDia[dia] = (porDia[dia] || 0) + 1;
 
     const e = st.porEspecie[c.especie] || (st.porEspecie[c.especie] = { n: 0, talla: null, peso: null });

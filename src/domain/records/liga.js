@@ -9,6 +9,7 @@
    validarResultado mas abajo). */
 import { leer as leerCuaderno } from '../cuaderno.js';
 import { especiePorId } from '../especies.js';
+import { util } from '../config.js';
 
 const KEY = 'pp_ligas', KEYP = 'pp_perfil';
 const PREFIJO = 'PESCAPRO1:';
@@ -63,7 +64,7 @@ export function crear(cfg) {
 export function borrar(id) { guardar(listar().filter(l => l.id !== id)); }
 
 export function estado(liga, ahora) {
-  const hoy = (ahora || new Date()).toISOString().slice(0, 10);
+  const hoy = util.diaLocal(ahora || new Date());
   if (hoy < liga.desde) return 'próxima';
   if (hoy > liga.hasta) return 'finalizada';
   return 'activa';
@@ -72,7 +73,7 @@ export function estado(liga, ahora) {
 /* ---- capturas y puntuación ---- */
 
 export function dentroDelPeriodo(fechaISO, liga) {
-  const d = (fechaISO || '').slice(0, 10);
+  const d = util.diaLocal(fechaISO);
   return d >= liga.desde && d <= liga.hasta;
 }
 

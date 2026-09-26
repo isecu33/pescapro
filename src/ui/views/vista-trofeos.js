@@ -17,6 +17,7 @@ import { leer as leerCuaderno } from '../../domain/cuaderno.js';
 import { calcular as calcularRecords } from '../../domain/records/records.js';
 import { evaluar as evaluarLogros } from '../../domain/records/logros.js';
 import { especiePorId, espImgEl } from '../../domain/especies.js';
+import { util } from '../../domain/config.js';
 import {
   MODOS_LIGA,
   perfil as perfilLiga,
@@ -118,7 +119,7 @@ function seccionRecords(capturas) {
         const especie = especiePorId(id);
         const d = r.porEspecie[id];
         const partes = [];
-        if (d.talla) partes.push(d.talla.valor + ' cm' + (d.talla.fecha ? ' (' + fmtDia(d.talla.fecha.slice(0, 10)) + ')' : ''));
+        if (d.talla) partes.push(d.talla.valor + ' cm' + (d.talla.fecha ? ' (' + fmtDia(util.diaLocal(d.talla.fecha)) + ')' : ''));
         if (d.peso) partes.push(d.peso.valor + ' kg');
         const fila = document.createElement('div');
         fila.className = 'pp-record-fila';
@@ -379,10 +380,10 @@ function modalCrear(repintar) {
   const fin = new Date(Date.now() + 14 * 86400e3);
   const desde = document.createElement('ion-input');
   desde.type = 'date';
-  desde.value = hoy.toISOString().slice(0, 10);
+  desde.value = util.diaLocal(hoy);
   const hasta = document.createElement('ion-input');
   hasta.type = 'date';
-  hasta.value = fin.toISOString().slice(0, 10);
+  hasta.value = util.diaLocal(fin);
 
   const modo = document.createElement('ion-select');
   modo.setAttribute('interface', 'popover');

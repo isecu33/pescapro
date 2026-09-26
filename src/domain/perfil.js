@@ -12,6 +12,7 @@
    codigo de invitacion (texto) que se comparte por chat; unirse = pegar
    ese codigo. Los codigos vienen de OTRO dispositivo -> entrada no
    confiable, se valida el esquema antes de persistir nada. */
+import { util } from './config.js';
 
 const KEY = 'pp_perfil';
 const PREFIJO_CLAN = 'PESCAPRO-CLAN1:';
@@ -149,7 +150,7 @@ export function crearClan(cfg) {
   const p = leer();
   p.clan = {
     id: 'c_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
-    nombre, etiqueta, fundador: true, desde: new Date().toISOString().slice(0, 10)
+    nombre, etiqueta, fundador: true, desde: util.diaLocal(new Date())
   };
   return guardar(p);
 }
@@ -179,7 +180,7 @@ export function unirseClan(codigo) {
   const p = leer();
   p.clan = {
     id: o.id, nombre: o.nombre.trim().slice(0, LIMITES.clan), etiqueta: o.etiqueta,
-    fundador: false, desde: new Date().toISOString().slice(0, 10)
+    fundador: false, desde: util.diaLocal(new Date())
   };
   return guardar(p);
 }

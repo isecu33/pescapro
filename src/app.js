@@ -2,7 +2,7 @@
    periodico, busqueda de spots, GPS y mapa. Reemplaza www/js/app.js,
    adaptado para trabajar con el shell Ionic (<pp-app-shell>, Fase3) y
    los modulos de vista (src/ui/views/*.js) en vez de globals PP.*. */
-import { CONFIG } from './domain/config.js';
+import { CONFIG, util } from './domain/config.js';
 import { cargarTodo, desdeCache, buscarLugar } from './domain/api.js';
 import { preparar, indiceHora, horaMasCercana } from './domain/indice.js';
 import { favoritos } from './domain/cuaderno.js';
@@ -126,7 +126,7 @@ export function crearApp(shell) {
 
   function _guardarPicoDia(modo) {
     if (!st.datos || !st.ctx) return;
-    const hoyStr = new Date().toISOString().slice(0, 10);
+    const hoyStr = util.diaLocal(new Date());
     try {
       const r = JSON.parse(localStorage.getItem(PICO_KEY) || '{}');
       const valorHoy = Math.max(...st.datos.horas.map(h => indiceHora(h, modo, st.ctx).valor));

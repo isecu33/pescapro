@@ -122,6 +122,15 @@ export const util = {
     return dias[d.getDay()] + ' ' + d.getDate();
   },
   fmtFecha(d) { return d.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' }); },
+  // Dia de calendario LOCAL 'YYYY-MM-DD' de un Date o de un string ISO.
+  // No usar toISOString().slice(0,10): da el dia UTC y, en verano, lo que
+  // ocurre entre las 00:00 y las 02:00 caeria en el dia anterior.
+  diaLocal(f) {
+    if (typeof f === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(f)) return f;
+    const d = f instanceof Date ? f : new Date(f);
+    if (f == null || f === '' || isNaN(d)) return '';
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  },
   esMismoDia(a, b) { return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate(); },
   colorIndice(v) {
     if (v >= 70) return '#ff9500';

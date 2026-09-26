@@ -1261,6 +1261,14 @@ span.pp-logro-ico {
   margin-bottom: 12px;
 }
 
+/* Mismo contrato visual que el grid (.pp-logro sin .conseguido): un logro
+   bloqueado se ve igual de bloqueado en el modal de detalle. */
+.pp-modal-logro-img.bloqueado,
+.pp-modal-logro-ico.bloqueado {
+  filter: grayscale(1);
+  opacity: .5;
+}
+
 /* Toast de celebración — logro recién conseguido */
 .pp-celebracion-overlay {
   position: fixed;

@@ -215,13 +215,13 @@ function modalLogro(l) {
   cuerpo.className = 'pp-modal-logro';
   if (l.img) {
     const img = document.createElement('img');
-    img.className = 'pp-modal-logro-img';
+    img.className = 'pp-modal-logro-img' + (l.conseguido ? '' : ' bloqueado');
     img.src = l.img;
     img.alt = l.nombre;
     cuerpo.appendChild(img);
   } else {
     const ico = document.createElement('div');
-    ico.className = 'pp-modal-logro-ico';
+    ico.className = 'pp-modal-logro-ico' + (l.conseguido ? '' : ' bloqueado');
     ico.textContent = l.icono;
     cuerpo.appendChild(ico);
   }

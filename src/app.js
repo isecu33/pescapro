@@ -80,6 +80,13 @@ export function crearApp(shell) {
     conectarUI();
     actualizarCabecera();
     mostrarVista(st.vista);
+    // Fix CRITICAL de auditoria (pantalla negra en arranque en frio): antes
+    // nada llamaba a renderVistaActiva() en este camino hasta que los datos
+    // resolvian (cache o refrescar()), dejando elCargando() -- ya escrito
+    // en vista-ahora.js -- como codigo muerto y la pantalla en negro varios
+    // segundos. Se pinta el estado de carga desde el primer instante; si
+    // hay cache se vuelve a renderizar de inmediato con datos reales.
+    renderVistaActiva();
 
     const cache = desdeCache(st.spot.lat, st.spot.lon);
     if (cache) {

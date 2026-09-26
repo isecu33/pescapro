@@ -15,7 +15,7 @@
 import { abrirModal, cerrarModal } from '../util/modal.js';
 import { leer as leerCuaderno } from '../../domain/cuaderno.js';
 import { calcular as calcularRecords } from '../../domain/records/records.js';
-import { evaluar as evaluarLogros } from '../../domain/records/logros.js';
+import { evaluar as evaluarLogros, CATEGORIAS as CATEGORIAS_LOGROS } from '../../domain/records/logros.js';
 import { especiePorId, espImgEl } from '../../domain/especies.js';
 import {
   MODOS_LIGA,
@@ -176,37 +176,52 @@ export function crearIcoLogro(l) {
   return span;
 }
 
+function crearTarjetaLogro(l) {
+  const c = document.createElement('div');
+  c.className = 'pp-logro' + (l.conseguido ? ' conseguido' : '');
+  c.append(crearIcoLogro(l));
+
+  const nombre = document.createElement('div');
+  nombre.className = 'pp-logro-nombre';
+  nombre.textContent = l.nombre;
+  c.appendChild(nombre);
+
+  if (!l.conseguido && l.progreso) {
+    const prog = document.createElement('div');
+    prog.className = 'pp-logro-prog';
+    prog.textContent = l.progreso[0] + '/' + l.progreso[1];
+    c.appendChild(prog);
+  }
+
+  c.addEventListener('click', () => modalLogro(l));
+  return c;
+}
+
 function seccionLogros(capturas) {
   const card = document.createElement('div');
   card.className = 'pp-card';
   const logros = evaluarLogros(capturas);
+  const porId = new Map(logros.map(l => [l.id, l]));
   const conseguidos = logros.filter(l => l.conseguido).length;
   card.appendChild(crearTitulo('Logros (' + conseguidos + '/' + logros.length + ')'));
 
-  const grid = document.createElement('div');
-  grid.className = 'pp-logros';
+  // Grid agrupado por categoría (reutiliza .pp-stats-titulo, el mismo
+  // patrón que ya usa "Mejores piezas" en seccionRecords) en vez de una
+  // lista plana de 21 hexágonos sin estructura visible.
+  CATEGORIAS_LOGROS.forEach(cat => {
+    const items = cat.ids.map(id => porId.get(id)).filter(Boolean);
+    if (!items.length) return;
 
-  logros.forEach(l => {
-    const c = document.createElement('div');
-    c.className = 'pp-logro' + (l.conseguido ? ' conseguido' : '');
-    c.append(crearIcoLogro(l));
+    const titulo = document.createElement('div');
+    titulo.className = 'pp-stats-titulo pp-mt';
+    titulo.textContent = cat.titulo;
+    card.appendChild(titulo);
 
-    const nombre = document.createElement('div');
-    nombre.className = 'pp-logro-nombre';
-    nombre.textContent = l.nombre;
-    c.appendChild(nombre);
-
-    if (!l.conseguido && l.progreso) {
-      const prog = document.createElement('div');
-      prog.className = 'pp-logro-prog';
-      prog.textContent = l.progreso[0] + '/' + l.progreso[1];
-      c.appendChild(prog);
-    }
-
-    c.addEventListener('click', () => modalLogro(l));
-    grid.appendChild(c);
+    const grid = document.createElement('div');
+    grid.className = 'pp-logros';
+    items.forEach(l => grid.appendChild(crearTarjetaLogro(l)));
+    card.appendChild(grid);
   });
-  card.appendChild(grid);
   return card;
 }
 
@@ -215,13 +230,13 @@ function modalLogro(l) {
   cuerpo.className = 'pp-modal-logro';
   if (l.img) {
     const img = document.createElement('img');
-    img.className = 'pp-modal-logro-img';
+    img.className = 'pp-modal-logro-img' + (l.conseguido ? '' : ' bloqueado');
     img.src = l.img;
     img.alt = l.nombre;
     cuerpo.appendChild(img);
   } else {
     const ico = document.createElement('div');
-    ico.className = 'pp-modal-logro-ico';
+    ico.className = 'pp-modal-logro-ico' + (l.conseguido ? '' : ' bloqueado');
     ico.textContent = l.icono;
     cuerpo.appendChild(ico);
   }
@@ -281,12 +296,21 @@ function mostrarCelebracionEnCola(lista, idx) {
   desc.className = 'pp-celebracion-desc';
   desc.textContent = l.desc;
 
+  const acciones = document.createElement('div');
+  acciones.className = 'pp-acciones pp-celebracion-acciones';
+
+  const bCompartir = crearBoton('Compartir');
+  bCompartir.addEventListener('click', () => {
+    compartir('🎖️ ¡Logro conseguido en Marante! ' + l.nombre + ': ' + l.desc);
+  });
+
   const bOk = document.createElement('ion-button');
   bOk.textContent = '¡Genial!';
   bOk.setAttribute('fill', 'solid');
   bOk.className = 'pp-celebracion-ok';
 
-  tarjeta.append(cabecera, nombre, desc, bOk);
+  acciones.append(bCompartir, bOk);
+  tarjeta.append(cabecera, nombre, desc, acciones);
   overlay.appendChild(tarjeta);
   document.body.appendChild(overlay);
 
@@ -486,10 +510,15 @@ function modalLiga(id, repintar) {
 
   const errAcciones = crearNota('');
 
-  const bInv = crearBoton('Compartir invitación');
+  // Acción primaria diferenciada según el estado de la liga: recién creada
+  // (solo yo) lo prioritario es invitar; con más gente, enviar mi resultado.
+  // El resto de acciones (añadir resultado, borrar) queda en 'outline'.
+  const soloYo = liga.participantes.length <= 1;
+
+  const bInv = crearBoton('Compartir invitación', { fill: soloYo ? 'solid' : 'outline' });
   bInv.addEventListener('click', () => compartirInvitacion(liga));
 
-  const bRes = crearBoton('Enviar mi resultado');
+  const bRes = crearBoton('Enviar mi resultado', { fill: soloYo ? 'outline' : 'solid' });
   bRes.addEventListener('click', () => {
     try {
       const codigo = codigoResultadoLiga(liga.id);

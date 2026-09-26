@@ -1261,6 +1261,14 @@ span.pp-logro-ico {
   margin-bottom: 12px;
 }
 
+/* Mismo contrato visual que el grid (.pp-logro sin .conseguido): un logro
+   bloqueado se ve igual de bloqueado en el modal de detalle. */
+.pp-modal-logro-img.bloqueado,
+.pp-modal-logro-ico.bloqueado {
+  filter: grayscale(1);
+  opacity: .5;
+}
+
 /* Toast de celebración — logro recién conseguido */
 .pp-celebracion-overlay {
   position: fixed;
@@ -1347,6 +1355,10 @@ span.pp-logro-ico {
 
 .pp-celebracion-ok {
   --border-radius: 12px;
+}
+
+.pp-celebracion-acciones {
+  justify-content: center;
 }
 
 /* ── Perfil: tarjeta publica (menu lateral + vista Perfil) ─────────── */

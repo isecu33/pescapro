@@ -20,6 +20,7 @@ export class PpRankFila extends HTMLElement {
       .pos { flex: 0 0 34px; font-size: 16px; }
       .nombre { flex: 1; font-weight: 650; }
       .detalle { color: var(--texto2, #888888); font-size: 12.5px; text-align: right; }
+      .detalle .evidencia { color: var(--ion-text-color, #f0f0f0); font-weight: 650; }
     `;
     shadow.appendChild(style);
     this._root = document.createElement('div');
@@ -47,7 +48,20 @@ export class PpRankFila extends HTMLElement {
 
     const detalle = document.createElement('span');
     detalle.className = 'detalle';
-    detalle.textContent = e.detalle;
+    // El rastro de evidencia ("· N capturas") se separa con más contraste
+    // que el resto del detalle: es la parte comprobable de la puntuación,
+    // no un metadato decorativo (docs/ux-audit/07-trofeos.md item 5).
+    const texto = String(e.detalle == null ? '' : e.detalle);
+    const conEvidencia = /^(.*?)((?:\s*·\s*)?\d+\s+capturas)$/.exec(texto);
+    if (conEvidencia) {
+      detalle.append(document.createTextNode(conEvidencia[1]));
+      const evidencia = document.createElement('span');
+      evidencia.className = 'evidencia';
+      evidencia.textContent = conEvidencia[2];
+      detalle.appendChild(evidencia);
+    } else {
+      detalle.textContent = texto;
+    }
 
     this._root.append(pos, nombre, detalle);
   }

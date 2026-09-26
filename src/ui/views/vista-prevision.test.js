@@ -51,6 +51,21 @@ describe('renderPrevision', () => {
     expect(primerMotivo.textContent).toBe(motivoVentana(vents[0]));
   });
 
+  it('pulsar una fila de "mejores ventanas" abre el modal de detalle de su mejor hora', () => {
+    const st = stConCtx();
+    const cont = document.createElement('div');
+    renderPrevision(cont, st);
+
+    const vents = mejoresVentanas(st.ctx, st.modo);
+    expect(document.getElementById('pp-modal')).toBeNull();
+    cont.querySelector('.pp-vent-lista .pp-ventana').click();
+
+    const modal = document.getElementById('pp-modal');
+    expect(modal).not.toBeNull();
+    expect(modal.querySelector('ion-content .pp-factores-wrap .pp-factor')).not.toBeNull();
+    expect(modal.querySelector('.pp-modal-idx').textContent).toBe(String(vents[0].mejorHora.valor));
+  });
+
   it('sin ventanas buenas muestra la nota en vez de una lista vacia', () => {
     // viento/ola siempre por debajo de lo optimo => indice bajo, sin
     // ventanas >= 55 en todas las modalidades.
@@ -187,6 +202,24 @@ describe('renderPrevision', () => {
     expect(barras.length).toBe(horasEsperadas);
     expect(barras.length).toBeLessThanOrEqual(24);
     expect(cont.querySelector('.pp-graf-dia-aviso')).not.toBeNull();
+  });
+
+  it('cerrar el selector de dia (Escape/backdrop, sin seleccionar) resetea el scroll de la tira para no ocultar "Hoy"', () => {
+    const st = stConCtx();
+    const cont = document.createElement('div');
+    renderPrevision(cont, st);
+
+    cont.querySelector('.pp-dia-tile-calendario').click();
+    const modal = document.getElementById('pp-modal');
+    const scroll = cont.querySelector('.pp-semana-scroll');
+    scroll.scrollLeft = 240;
+
+    // ion-modal dismite por Escape/backdrop sin pasar por cerrarModal()/
+    // renderPrevision() -- simulamos el evento de ciclo de vida que dispara
+    // en cualquier caso, igual que ya se simula 'ionChange' de ion-datetime.
+    modal.dispatchEvent(new CustomEvent('ionModalDidDismiss'));
+
+    expect(scroll.scrollLeft).toBe(0);
   });
 
   it('"Ver proximos dias" limpia el filtro de dia y vuelve a la vista de 96h', () => {

@@ -248,8 +248,10 @@ ion-tab-button[selected] {
 .pp-ventana {
   display: flex; align-items: center; gap: 12px; padding: 10px 12px;
   background: var(--pp-panel2); border-radius: var(--pp-radius-sm);
-  border: 1px solid rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.05); width: 100%; text-align: left;
+  cursor: pointer;
 }
+.pp-ventana:active { opacity: .8; }
 .pp-ventana-idx {
   flex: 0 0 46px; height: 46px; border-radius: 10px; color: #000;
   font-weight: 900; font-size: 18px; display: flex; align-items: center; justify-content: center;
@@ -278,6 +280,7 @@ ion-tab-button[selected] {
   border-radius: var(--pp-radius-sm); cursor: pointer;
 }
 .pp-dia-tile:active { opacity: .8; }
+.pp-dia-tile:focus-visible { outline: 2px solid var(--acento); outline-offset: 2px; }
 .pp-dia-tile.activo { border-color: var(--ion-color-primary); background: rgba(255,114,0,0.12); }
 .pp-dia-tile-nombre { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--pp-texto2); }
 .pp-dia-tile-ico { display: flex; color: var(--pp-texto2); }

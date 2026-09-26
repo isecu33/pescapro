@@ -125,12 +125,16 @@ export function serie(ctx, modo) {
 
 /* Días con datos en la previsión actual (para el selector de calendario):
    una entrada por dia calendario, a medianoche local, en el orden en que
-   aparecen en la serie (ya filtrada a horas futuras, ver serie()). */
+   aparecen en la serie (ya filtrada a horas futuras, ver serie()).
+   serie() incluye 2 h pasadas: entre las 00:00 y las 02:00 esas horas son
+   de AYER, y la tira no debe empezar en un dia que ya ha terminado. */
 export function diasDisponibles(ctx, modo) {
   const vistos = new Set();
   const dias = [];
+  const hoy = new Date(); hoy.setHours(0, 0, 0, 0);
   serie(ctx, modo).forEach(x => {
     const f = x.hora.fecha;
+    if (f < hoy) return;
     const clave = f.getFullYear() + '-' + f.getMonth() + '-' + f.getDate();
     if (vistos.has(clave)) return;
     vistos.add(clave);

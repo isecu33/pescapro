@@ -51,6 +51,21 @@ describe('renderPrevision', () => {
     expect(primerMotivo.textContent).toBe(motivoVentana(vents[0]));
   });
 
+  it('pulsar una fila de "mejores ventanas" abre el modal de detalle de su mejor hora', () => {
+    const st = stConCtx();
+    const cont = document.createElement('div');
+    renderPrevision(cont, st);
+
+    const vents = mejoresVentanas(st.ctx, st.modo);
+    expect(document.getElementById('pp-modal')).toBeNull();
+    cont.querySelector('.pp-vent-lista .pp-ventana').click();
+
+    const modal = document.getElementById('pp-modal');
+    expect(modal).not.toBeNull();
+    expect(modal.querySelector('ion-content .pp-factores-wrap .pp-factor')).not.toBeNull();
+    expect(modal.querySelector('.pp-modal-idx').textContent).toBe(String(vents[0].mejorHora.valor));
+  });
+
   it('sin ventanas buenas muestra la nota en vez de una lista vacia', () => {
     // viento/ola siempre por debajo de lo optimo => indice bajo, sin
     // ventanas >= 55 en todas las modalidades.

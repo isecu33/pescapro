@@ -146,14 +146,16 @@ function cardVentanas(st) {
 
   const lista = document.createElement('div');
   lista.className = 'pp-vent-lista';
-  vents.forEach(v => lista.appendChild(filaVentana(v)));
+  vents.forEach(v => lista.appendChild(filaVentana(v, st)));
   card.appendChild(lista);
   return card;
 }
 
-function filaVentana(v) {
-  const item = document.createElement('div');
+function filaVentana(v, st) {
+  const item = document.createElement('button');
+  item.type = 'button';
   item.className = 'pp-ventana';
+  item.addEventListener('click', () => modalDetalleHora(v.mejorHora, st));
 
   const idx = document.createElement('div');
   idx.className = 'pp-ventana-idx';

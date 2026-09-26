@@ -248,8 +248,10 @@ ion-tab-button[selected] {
 .pp-ventana {
   display: flex; align-items: center; gap: 12px; padding: 10px 12px;
   background: var(--pp-panel2); border-radius: var(--pp-radius-sm);
-  border: 1px solid rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.05); width: 100%; text-align: left;
+  cursor: pointer;
 }
+.pp-ventana:active { opacity: .8; }
 .pp-ventana-idx {
   flex: 0 0 46px; height: 46px; border-radius: 10px; color: #000;
   font-weight: 900; font-size: 18px; display: flex; align-items: center; justify-content: center;

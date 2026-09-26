@@ -148,20 +148,14 @@ html, body {
 .pp-input:focus { outline: none; border-color: var(--acento); }
 .pp-input::placeholder { color: var(--pp-texto2); }
 
-/* Modal centrado (div-based, equivalente al modal() legacy pero centrado) */
-.pp-modal-fondo { position: fixed; inset: 0; background: rgba(0,0,0,0.72); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 0 16px; }
-.pp-modal { position: relative; background: var(--pp-panel); border: 1px solid var(--ion-border-color); border-radius: 14px; padding: 20px 16px 16px; width: 100%; max-width: 480px; max-height: 80vh; overflow-y: auto; }
-.pp-modal h3 { margin: 0 0 14px; font-size: 18px; font-weight: 800; display: flex; align-items: center; gap: 6px; }
-.pp-modal-x { position: absolute; right: 12px; top: 12px; background: rgba(255,255,255,0.08); color: inherit; border: 1px solid rgba(255,255,255,0.12); border-radius: 50%; width: 32px; height: 32px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-.pp-modal-x .pp-ico { width: 14px; height: 14px; }
-
 /* Filas de resultado / favoritos en modales */
 .pp-lugar { padding: 13px 10px; border-bottom: 1px solid rgba(255,255,255,0.08); cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 52px; }
 .pp-lugar:active { background: rgba(255,255,255,0.06); border-radius: 6px; }
 .pp-lugar small { color: var(--pp-texto2); font-size: 12px; display: block; }
 .pp-borrar { background: none; border: none; color: var(--pp-texto2); cursor: pointer; padding: 4px; display: flex; align-items: center; flex-shrink: 0; }
 .pp-borrar:hover { color: var(--rojo); }
-.pp-modal-buscar-content { padding: 0; }
+.pp-modal-buscar-content { padding: 16px; }
+.pp-modal-buscar-content h3 { margin: 0 0 14px; font-size: 18px; font-weight: 800; display: flex; align-items: center; gap: 6px; }
 .pp-modal-gps-sep { margin-top: 14px; }
 
 /* Nav inferior fijo (no se usa ion-tabs/router, ver app-shell.js) */

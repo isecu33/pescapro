@@ -6,7 +6,7 @@ import { CONFIG } from './domain/config.js';
 import { cargarTodo, desdeCache, buscarLugar } from './domain/api.js';
 import { preparar, indiceHora, horaMasCercana } from './domain/indice.js';
 import { favoritos } from './domain/cuaderno.js';
-import { abrirModal, cerrarModal, abrirModalCentrado } from './ui/util/modal.js';
+import { abrirModal, cerrarModal } from './ui/util/modal.js';
 import { svg } from './domain/iconos.js';
 import { renderAhora } from './ui/views/vista-ahora.js';
 import { renderPrevision } from './ui/views/vista-prevision.js';
@@ -276,7 +276,7 @@ export function crearApp(shell) {
     acciones.append(btnCancelar, btnGuardar);
     cuerpo.appendChild(acciones);
 
-    abrirModalCentrado(cuerpo);
+    abrirModal(cuerpo);
     setTimeout(() => { input.focus(); input.select(); }, 80);
   }
 
@@ -422,7 +422,7 @@ export function crearApp(shell) {
         cuerpo.appendChild(fila);
       });
     }
-    abrirModalCentrado(cuerpo);
+    abrirModal(cuerpo);
   }
 
   /* ---------- Desarrollador ---------- */

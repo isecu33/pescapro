@@ -15,7 +15,7 @@
    datos de una captura en ningun otro punto (galeria, visor de foto,
    formulario). Regla de esta vista: CERO innerHTML con datos dinamicos. */
 import '../components/pp-captura-card.js';
-import { leer, anadir, borrar as borrarCaptura, estadisticas, exportar, importar, favoritos, MAX_FOTOS } from '../../domain/cuaderno.js';
+import { leer, anadir, borrar as borrarCaptura, estadisticas, exportar, importar, favoritos, MAX_FOTOS, condicionesIncompletas } from '../../domain/cuaderno.js';
 import { obtener as obtenerFoto, comprimir as comprimirFoto, guardar as guardarFoto } from '../../domain/fotos.js';
 import { ESPECIES, especiePorId, espImgEl } from '../../domain/especies.js';
 import { MODOS } from '../../domain/config.js';
@@ -456,6 +456,29 @@ function candidatosSpot(spotActivo) {
   });
 }
 
+/* Snapshot de condiciones para una captura: viene del pronostico ya cargado
+   para st.spot -- si el usuario elige un spot distinto, o una fecha fuera de
+   la ventana de pronostico cargada, no hay datos fiables y se devuelve
+   null/parcial (mejor eso que un dato erroneo). Usada tanto por el aviso
+   junto a Fecha (previsualizacion, no guarda nada) como por el handler de
+   guardado -- misma logica, un solo sitio (ver docs/ux-audit/06-cuaderno.md,
+   item 2). */
+function calcularCondiciones(spotSel, fechaSel, modo, st) {
+  const mismoSpot = Math.abs(spotSel.lat - st.spot.lat) < 1e-4 && Math.abs(spotSel.lon - st.spot.lon) < 1e-4;
+  if (!st.ctx || !mismoSpot) return null;
+  const h = horaMasCercana(st.datos.horas, fechaSel);
+  if (!h) return null;
+  const idx = indiceHora(h, modo, st.ctx);
+  const estado = st.ctx.mareas.estadoEn(fechaSel);
+  const lunaInfo = lunaEn(fechaSel, st.spot.lat, st.spot.lon);
+  return {
+    viento: h.viento, ola: h.ola, sst: h.sst, presion: h.presion,
+    faseMarea: estado ? estado.fase : null, luna: lunaInfo.nombre,
+    momento: momentoDelDia(fechaSel, st.spot.lat, st.spot.lon),
+    indice: idx.valor
+  };
+}
+
 function abrirModalCaptura(contenedor, st) {
   const cuerpo = document.createElement('div');
   const h3 = document.createElement('h3');
@@ -536,6 +559,24 @@ function abrirModalCaptura(contenedor, st) {
   hora.value = fmtHoraHHMM(ahoraIni);
   filaFecha.append(fecha, hora);
 
+  // Aviso junto a Fecha cuando la fecha/hora elegida (o el spot) cae fuera de
+  // la ventana de pronostico cargada -- antes esto se guardaba en silencio,
+  // sin faseMarea ni luna (ver docs/ux-audit/06-cuaderno.md, item 2).
+  const avisoFecha = document.createElement('p');
+  avisoFecha.className = 'pp-nota pp-fecha-aviso';
+  function actualizarAvisoFecha() {
+    const spotSel = candidatos[Number(selSpot.value)] || st.spot;
+    const fechaSel = leerFechaHora(fecha, hora);
+    const cond = calcularCondiciones(spotSel, fechaSel, selModo.value, st);
+    avisoFecha.textContent = condicionesIncompletas(cond)
+      ? 'Sin datos de marea/luna para esta fecha: la captura se guardará sin ese snapshot.'
+      : '';
+  }
+  fecha.addEventListener('ionChange', actualizarAvisoFecha);
+  hora.addEventListener('ionChange', actualizarAvisoFecha);
+  selSpot.addEventListener('ionChange', actualizarAvisoFecha);
+  actualizarAvisoFecha();
+
   const senuelo = document.createElement('ion-input');
   senuelo.setAttribute('label', 'Señuelo / cebo');
   senuelo.setAttribute('placeholder', 'Señuelo / cebo');
@@ -547,7 +588,7 @@ function abrirModalCaptura(contenedor, st) {
   // Fotos: cámara o galería (el selector del sistema ofrece ambas), hasta MAX_FOTOS
   const selectorFotos = crearSelectorFotos(MAX_FOTOS);
 
-  [selEsp, talla, peso, selModo, selSpot, filaFecha, senuelo, notas, selectorFotos.el]
+  [selEsp, talla, peso, selModo, selSpot, filaFecha, avisoFecha, senuelo, notas, selectorFotos.el]
     .forEach(x => form.appendChild(x));
 
   const guardar = document.createElement('ion-button');
@@ -557,24 +598,7 @@ function abrirModalCaptura(contenedor, st) {
     guardar.disabled = true;
     const spotSel = candidatos[Number(selSpot.value)] || st.spot;
     const fechaSel = leerFechaHora(fecha, hora);
-    // Las condiciones (marea/viento/oleaje...) vienen del pronostico ya
-    // cargado para st.spot -- si el usuario elige un spot distinto no hay
-    // datos fiables para ese sitio, asi que la captura se guarda igual
-    // pero sin snapshot de condiciones (mejor nada que un dato erroneo).
-    const mismoSpot = Math.abs(spotSel.lat - st.spot.lat) < 1e-4 && Math.abs(spotSel.lon - st.spot.lon) < 1e-4;
-    let condiciones = null;
-    if (st.ctx && mismoSpot) {
-      const h = horaMasCercana(st.datos.horas, fechaSel);
-      const idx = indiceHora(h, selModo.value, st.ctx);
-      const estado = st.ctx.mareas.estadoEn(fechaSel);
-      const lunaInfo = lunaEn(fechaSel, st.spot.lat, st.spot.lon);
-      condiciones = {
-        viento: h.viento, ola: h.ola, sst: h.sst, presion: h.presion,
-        faseMarea: estado ? estado.fase : null, luna: lunaInfo.nombre,
-        momento: momentoDelDia(fechaSel, st.spot.lat, st.spot.lon),
-        indice: idx.valor
-      };
-    }
+    const condiciones = calcularCondiciones(spotSel, fechaSel, selModo.value, st);
     const fotoIds = [];
     for (const dataUrl of selectorFotos.getFotos()) {
       const fotoId = 'f_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);

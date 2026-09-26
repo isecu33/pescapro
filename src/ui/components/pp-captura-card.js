@@ -22,6 +22,7 @@
    componente desacoplado de la orquestacion de la app. */
 import { especiePorId, espImgEl } from '../../domain/especies.js';
 import { obtener as obtenerFoto } from '../../domain/fotos.js';
+import { condicionesIncompletas } from '../../domain/cuaderno.js';
 
 export class PpCapturaCard extends HTMLElement {
   constructor() {
@@ -38,7 +39,9 @@ export class PpCapturaCard extends HTMLElement {
         color: #fff; font-size: 9px; font-weight: 700; line-height: 1.3; padding: 1px 4px; border-radius: 6px; }
       .cuerpo { flex: 1; min-width: 0; }
       .cab { display: flex; align-items: center; gap: 6px; }
-      .sub, .cond { font-size: 12px; color: var(--texto2, #888888); margin-top: 2px; }
+      .sub, .cond, .parcial { font-size: 12px; color: var(--texto2, #888888); margin-top: 2px; }
+      .parcial { font-style: italic; }
+      .parcial ion-icon { font-size: 13px; vertical-align: -2px; margin-right: 3px; }
       .notas { font-size: 12.5px; margin-top: 3px; font-style: italic; }
       .borrar { margin-left: auto; background: none; border: none; color: var(--texto2, #888888);
         cursor: pointer; font-size: 18px; display: flex; align-items: center; padding: 0 2px; }
@@ -139,6 +142,15 @@ export class PpCapturaCard extends HTMLElement {
       }
       if (cond.indice != null) add([document.createTextNode('índice ' + cond.indice)]);
       cuerpo.appendChild(condDiv);
+    }
+
+    if (condicionesIncompletas(c.condiciones)) {
+      const parcial = document.createElement('div');
+      parcial.className = 'parcial';
+      const icoP = document.createElement('ion-icon');
+      icoP.setAttribute('name', 'information-circle-outline');
+      parcial.append(icoP, document.createTextNode('Condiciones incompletas para esta fecha'));
+      cuerpo.appendChild(parcial);
     }
 
     if (c.notas) {

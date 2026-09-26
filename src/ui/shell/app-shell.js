@@ -104,6 +104,7 @@ export class PpAppShell extends HTMLElement {
 
     const acciones = document.createElement('div');
     acciones.slot = 'end';
+    acciones.className = 'pp-header-acciones';
     const btnFav = document.createElement('ion-button');
     btnFav.setAttribute('fill', 'clear');
     btnFav.className = 'pp-accion-btn';

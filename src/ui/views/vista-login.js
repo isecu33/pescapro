@@ -94,9 +94,12 @@ const CSS = `
   }
   .pp-login__omitir:active { transform: scale(0.98); }
   .pp-login__error {
-    color: #ff6b5e; font-size: 13px; margin-top: 14px;
+    color: #ff6b5e; font-size: 13px; line-height: 1.4; margin-top: 14px;
     text-align: center; max-width: 280px;
-    min-height: 18px;
+    min-height: 37px;
+  }
+  .pp-login__error-enlace {
+    text-decoration: underline; cursor: pointer;
   }
   .pp-login__spinner {
     width: 20px; height: 20px;
@@ -118,8 +121,8 @@ const CSS = `
     color: #5a7285; margin-bottom: 8px;
   }
   .pp-login__dev-btn {
-    width: 100%; padding: 10px 16px; border-radius: 10px;
-    background: rgba(255,114,0,0.08); border: 1px dashed rgba(255,114,0,0.5);
+    width: 100%; padding: 10px 16px; border-radius: 999px;
+    background: rgba(255,114,0,0.14); border: 1px solid rgba(122,150,170,0.35);
     color: #ffa64d; font-size: 13px; font-weight: 600; cursor: pointer;
     transition: transform 0.12s var(--pp-ease, ease), background 0.15s;
   }
@@ -238,7 +241,12 @@ export function mostrarLogin(onExito, onOmitir) {
     } catch (e) {
       // El usuario canceló el diálogo: no mostrar error
       if (e?.code !== 'sign_in_cancelled' && e?.message !== 'sign_in_cancelled') {
-        errorEl.textContent = 'No se pudo iniciar sesión. Inténtalo de nuevo.';
+        errorEl.append('No se pudo iniciar sesión. ');
+        const enlaceOmitir = document.createElement('span');
+        enlaceOmitir.className = 'pp-login__error-enlace';
+        enlaceOmitir.textContent = 'Continuar sin cuenta';
+        enlaceOmitir.addEventListener('click', () => { destruir(); onOmitir(); });
+        errorEl.appendChild(enlaceOmitir);
       }
     } finally {
       setCargando(false);

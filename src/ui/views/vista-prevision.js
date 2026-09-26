@@ -27,12 +27,17 @@ const NOMBRES_FACTOR = {
   corriente: 'Corriente', sst: 'Tª agua'
 };
 
+/* Sistema de 2 tokens de tamaño de icono (antes 15/16/17/18px sueltos sin
+   criterio): cabecera para títulos de tarjeta/modal, inline para el resto. */
+const ICONO_CABECERA = 16;
+const ICONO_INLINE = 18;
+
 /* Cabecera de tarjeta con icono + título, consistente entre las dos tarjetas
    de la vista (evita el emoji suelto que llevaba el título original). */
 function tituloConIcono(cat, texto) {
   const titulo = document.createElement('h3');
   titulo.className = 'pp-card-titulo';
-  titulo.appendChild(svg(cat, 15));
+  titulo.appendChild(svg(cat, ICONO_CABECERA));
   titulo.appendChild(document.createTextNode(texto));
   return titulo;
 }
@@ -85,7 +90,7 @@ function cardResumenSemana(contenedor, st) {
     const wmo = WMO_ICO[r.codigo] || { cat: 'nube-sol' };
     const ico = document.createElement('span');
     ico.className = 'pp-dia-tile-ico';
-    ico.appendChild(svg(wmo.cat, 18));
+    ico.appendChild(svg(wmo.cat, ICONO_INLINE));
     tile.appendChild(ico);
 
     const idx = document.createElement('span');
@@ -112,7 +117,7 @@ function cardResumenSemana(contenedor, st) {
   const tileCalendario = document.createElement('button');
   tileCalendario.type = 'button';
   tileCalendario.className = 'pp-dia-tile pp-dia-tile-calendario';
-  tileCalendario.appendChild(svg('calendario', 18));
+  tileCalendario.appendChild(svg('calendario', ICONO_INLINE));
   tileCalendario.appendChild(document.createTextNode('Ver todos'));
   tileCalendario.addEventListener('click', () => abrirSelectorDia(contenedor, st));
   fila.appendChild(tileCalendario);
@@ -246,7 +251,7 @@ function abrirSelectorDia(contenedor, st) {
   cuerpo.className = 'pp-modal-selector-dia';
 
   const titulo = document.createElement('h3');
-  titulo.appendChild(svg('calendario', 17));
+  titulo.appendChild(svg('calendario', ICONO_CABECERA));
   titulo.appendChild(document.createTextNode('Elegir día'));
   cuerpo.appendChild(titulo);
 
@@ -430,7 +435,7 @@ function modalDetalleHora(x, st) {
     chip.className = 'pp-meteo-chip';
     const icoEl = document.createElement('span');
     icoEl.className = 'pp-meteo-ico';
-    icoEl.appendChild(svg(cat, 16));
+    icoEl.appendChild(svg(cat, ICONO_INLINE));
     const valEl = document.createElement('span');
     valEl.textContent = val;
     chip.append(icoEl, valEl);

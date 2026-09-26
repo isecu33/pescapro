@@ -15,7 +15,7 @@
    datos de una captura en ningun otro punto (galeria, visor de foto,
    formulario). Regla de esta vista: CERO innerHTML con datos dinamicos. */
 import '../components/pp-captura-card.js';
-import { leer, anadir, borrar as borrarCaptura, estadisticas, exportar, importar, favoritos, MAX_FOTOS } from '../../domain/cuaderno.js';
+import { leer, anadir, borrar as borrarCaptura, estadisticas, exportar, importar, favoritos, MAX_FOTOS, condicionesIncompletas } from '../../domain/cuaderno.js';
 import { obtener as obtenerFoto, comprimir as comprimirFoto, guardar as guardarFoto } from '../../domain/fotos.js';
 import { ESPECIES, especiePorId, espImgEl } from '../../domain/especies.js';
 import { MODOS } from '../../domain/config.js';
@@ -335,7 +335,8 @@ function crearExportImport(contenedor, st) {
 /* Selector de hasta `max` fotos: grid de miniaturas + celda "Añadir" (con
    spinner mientras comprime) + texto de ayuda con el contador. Acepta
    selección múltiple del selector nativo; si el usuario elige más de las
-   que caben, el resto se ignora sin más aviso que dejar el hueco lleno. */
+   que caben, el resto se descarta y se avisa en el texto de ayuda (ver
+   más abajo, "descartadas"). */
 function crearSelectorFotos(max) {
   const wrap = document.createElement('div');
 
@@ -393,12 +394,20 @@ function crearSelectorFotos(max) {
       add.type = 'button';
       add.className = 'pp-foto-add';
       add.setAttribute('aria-label', 'Añadir foto');
+      // Primer slot (sin fotos aun) mas grande: es la feature mas nueva del
+      // release y merece destacar de un vistazo, no solo tras 8 campos de
+      // texto (ver docs/ux-audit/06-cuaderno.md, item 4).
+      if (!fotos.length) {
+        add.style.gridColumn = 'span 2';
+        add.style.gridRow = 'span 2';
+      }
       if (procesando) {
         add.setAttribute('aria-disabled', 'true');
         add.appendChild(document.createElement('ion-spinner'));
       } else {
         const icoA = document.createElement('ion-icon');
         icoA.setAttribute('name', 'camera-outline');
+        if (!fotos.length) icoA.style.fontSize = '30px';
         const txt = document.createElement('span');
         txt.textContent = 'Añadir';
         add.append(icoA, txt);
@@ -415,6 +424,7 @@ function crearSelectorFotos(max) {
     input.value = ''; // permite volver a elegir el mismo fichero mas tarde
     if (!archivos.length) return;
     const hueco = archivos.slice(0, max - fotos.length);
+    const descartadas = archivos.length - hueco.length;
     error = null;
     procesando = true;
     render();
@@ -423,6 +433,13 @@ function crearSelectorFotos(max) {
       catch (e) { error = 'No se pudo leer una de las fotos — prueba otra.'; }
     }
     procesando = false;
+    // Si se eligieron mas fotos de las que caben, avisar del descarte en vez
+    // de ignorarlo en silencio (ver docs/ux-audit/06-cuaderno.md, item 6).
+    if (!error && descartadas > 0) {
+      error = descartadas === 1
+        ? 'Se ha descartado 1 foto: máximo ' + max + ' fotos por captura.'
+        : 'Se han descartado ' + descartadas + ' fotos: máximo ' + max + ' fotos por captura.';
+    }
     render();
   });
 
@@ -456,11 +473,43 @@ function candidatosSpot(spotActivo) {
   });
 }
 
+/* Snapshot de condiciones para una captura: viene del pronostico ya cargado
+   para st.spot -- si el usuario elige un spot distinto, o una fecha fuera de
+   la ventana de pronostico cargada, no hay datos fiables y se devuelve
+   null/parcial (mejor eso que un dato erroneo). Usada tanto por el aviso
+   junto a Fecha (previsualizacion, no guarda nada) como por el handler de
+   guardado -- misma logica, un solo sitio (ver docs/ux-audit/06-cuaderno.md,
+   item 2). */
+function calcularCondiciones(spotSel, fechaSel, modo, st) {
+  const mismoSpot = Math.abs(spotSel.lat - st.spot.lat) < 1e-4 && Math.abs(spotSel.lon - st.spot.lon) < 1e-4;
+  if (!st.ctx || !mismoSpot) return null;
+  const h = horaMasCercana(st.datos.horas, fechaSel);
+  if (!h) return null;
+  const idx = indiceHora(h, modo, st.ctx);
+  const estado = st.ctx.mareas.estadoEn(fechaSel);
+  const lunaInfo = lunaEn(fechaSel, st.spot.lat, st.spot.lon);
+  return {
+    viento: h.viento, ola: h.ola, sst: h.sst, presion: h.presion,
+    faseMarea: estado ? estado.fase : null, luna: lunaInfo.nombre,
+    momento: momentoDelDia(fechaSel, st.spot.lat, st.spot.lon),
+    indice: idx.valor
+  };
+}
+
 function abrirModalCaptura(contenedor, st) {
   const cuerpo = document.createElement('div');
   const h3 = document.createElement('h3');
   h3.textContent = 'Registrar captura';
   cuerpo.appendChild(h3);
+
+  // Aviso visible desde el principio del formulario: el selector de fotos
+  // (mas abajo) es la feature mas nueva del release y merece destacar de un
+  // vistazo, no solo tras 8 campos de texto (ver docs/ux-audit/06-cuaderno.md,
+  // item 4).
+  const ayudaFotosArriba = document.createElement('p');
+  ayudaFotosArriba.className = 'pp-nota';
+  ayudaFotosArriba.textContent = 'Puedes añadir hasta ' + MAX_FOTOS + ' fotos de la captura.';
+  cuerpo.appendChild(ayudaFotosArriba);
 
   const form = document.createElement('div');
   form.className = 'pp-form';
@@ -468,6 +517,7 @@ function abrirModalCaptura(contenedor, st) {
   const selEsp = document.createElement('ion-select');
   selEsp.setAttribute('label', 'Especie');
   selEsp.setAttribute('interface', 'action-sheet');
+  selEsp.setAttribute('cancel-text', 'Cancelar');
   ESPECIES.forEach(e => {
     const o = document.createElement('ion-select-option');
     o.value = e.id;
@@ -494,6 +544,7 @@ function abrirModalCaptura(contenedor, st) {
   const selModo = document.createElement('ion-select');
   selModo.setAttribute('label', 'Modalidad');
   selModo.setAttribute('interface', 'action-sheet');
+  selModo.setAttribute('cancel-text', 'Cancelar');
   Object.values(MODOS).forEach(m => {
     const o = document.createElement('ion-select-option');
     o.value = m.id;
@@ -508,6 +559,7 @@ function abrirModalCaptura(contenedor, st) {
   const selSpot = document.createElement('ion-select');
   selSpot.setAttribute('label', 'Spot');
   selSpot.setAttribute('interface', 'action-sheet');
+  selSpot.setAttribute('cancel-text', 'Cancelar');
   candidatos.forEach((s, i) => {
     const o = document.createElement('ion-select-option');
     o.value = String(i);
@@ -533,6 +585,24 @@ function abrirModalCaptura(contenedor, st) {
   hora.value = fmtHoraHHMM(ahoraIni);
   filaFecha.append(fecha, hora);
 
+  // Aviso junto a Fecha cuando la fecha/hora elegida (o el spot) cae fuera de
+  // la ventana de pronostico cargada -- antes esto se guardaba en silencio,
+  // sin faseMarea ni luna (ver docs/ux-audit/06-cuaderno.md, item 2).
+  const avisoFecha = document.createElement('p');
+  avisoFecha.className = 'pp-nota pp-fecha-aviso';
+  function actualizarAvisoFecha() {
+    const spotSel = candidatos[Number(selSpot.value)] || st.spot;
+    const fechaSel = leerFechaHora(fecha, hora);
+    const cond = calcularCondiciones(spotSel, fechaSel, selModo.value, st);
+    avisoFecha.textContent = condicionesIncompletas(cond)
+      ? 'Sin datos de marea/luna para esta fecha: la captura se guardará sin ese snapshot.'
+      : '';
+  }
+  fecha.addEventListener('ionChange', actualizarAvisoFecha);
+  hora.addEventListener('ionChange', actualizarAvisoFecha);
+  selSpot.addEventListener('ionChange', actualizarAvisoFecha);
+  actualizarAvisoFecha();
+
   const senuelo = document.createElement('ion-input');
   senuelo.setAttribute('label', 'Señuelo / cebo');
   senuelo.setAttribute('placeholder', 'Señuelo / cebo');
@@ -544,7 +614,7 @@ function abrirModalCaptura(contenedor, st) {
   // Fotos: cámara o galería (el selector del sistema ofrece ambas), hasta MAX_FOTOS
   const selectorFotos = crearSelectorFotos(MAX_FOTOS);
 
-  [selEsp, talla, peso, selModo, selSpot, filaFecha, senuelo, notas, selectorFotos.el]
+  [selEsp, talla, peso, selModo, selSpot, filaFecha, avisoFecha, senuelo, notas, selectorFotos.el]
     .forEach(x => form.appendChild(x));
 
   const guardar = document.createElement('ion-button');
@@ -554,24 +624,7 @@ function abrirModalCaptura(contenedor, st) {
     guardar.disabled = true;
     const spotSel = candidatos[Number(selSpot.value)] || st.spot;
     const fechaSel = leerFechaHora(fecha, hora);
-    // Las condiciones (marea/viento/oleaje...) vienen del pronostico ya
-    // cargado para st.spot -- si el usuario elige un spot distinto no hay
-    // datos fiables para ese sitio, asi que la captura se guarda igual
-    // pero sin snapshot de condiciones (mejor nada que un dato erroneo).
-    const mismoSpot = Math.abs(spotSel.lat - st.spot.lat) < 1e-4 && Math.abs(spotSel.lon - st.spot.lon) < 1e-4;
-    let condiciones = null;
-    if (st.ctx && mismoSpot) {
-      const h = horaMasCercana(st.datos.horas, fechaSel);
-      const idx = indiceHora(h, selModo.value, st.ctx);
-      const estado = st.ctx.mareas.estadoEn(fechaSel);
-      const lunaInfo = lunaEn(fechaSel, st.spot.lat, st.spot.lon);
-      condiciones = {
-        viento: h.viento, ola: h.ola, sst: h.sst, presion: h.presion,
-        faseMarea: estado ? estado.fase : null, luna: lunaInfo.nombre,
-        momento: momentoDelDia(fechaSel, st.spot.lat, st.spot.lon),
-        indice: idx.valor
-      };
-    }
+    const condiciones = calcularCondiciones(spotSel, fechaSel, selModo.value, st);
     const fotoIds = [];
     for (const dataUrl of selectorFotos.getFotos()) {
       const fotoId = 'f_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);

@@ -85,6 +85,17 @@ export function estadisticas() {
   return st;
 }
 
+/* Un snapshot de condiciones se considera incompleto cuando falta la fase de
+   marea o la luna -- los dos datos que alimentan "Tus patrones" (ver
+   estadisticas()) y que pueden faltar en silencio cuando la fecha de la
+   captura se edita fuera de la ventana de pronostico cargada (ver
+   docs/ux-audit/06-cuaderno.md). Se usa tanto en el formulario de registro
+   (aviso antes de guardar) como en la tarjeta de historial (marca tras
+   guardar) -- misma señal, una sola definicion. */
+export function condicionesIncompletas(cond) {
+  return !cond || cond.faseMarea == null || cond.luna == null;
+}
+
 export function exportar() {
   return JSON.stringify(leer(), null, 2);
 }

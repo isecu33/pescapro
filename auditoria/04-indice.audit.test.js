@@ -90,10 +90,10 @@ describe('Supuesto de seguridad del README (aviso rojo + indice capado)', () => 
     const s = seguridad(horaBase(fecha));
     expect(s).toEqual({ nivel: 'ok', motivos: [] });
   });
-  it('umbral exacto: README dice "viento > 45, rachas > 60, olas > 3 m" (estricto)', () => {
-    expect(seguridad(horaBase(fecha, { viento: 45 })).nivel).not.toBe('rojo');
-    expect(seguridad(horaBase(fecha, { racha: 60 })).nivel).not.toBe('rojo');
-    expect(seguridad(horaBase(fecha, { ola: 3.0 })).nivel).not.toBe('rojo');
+  it('umbral exacto: README dice "viento ≥ 45, rachas ≥ 60, olas ≥ 3 m"', () => {
+    expect(seguridad(horaBase(fecha, { viento: 45 })).nivel).toBe('rojo');
+    expect(seguridad(horaBase(fecha, { racha: 60 })).nivel).toBe('rojo');
+    expect(seguridad(horaBase(fecha, { ola: 3.0 })).nivel).toBe('rojo');
   });
   it('amarillo por viento, racha, ola o lluvia fuerte', () => {
     expect(seguridad(horaBase(fecha, { viento: 35 })).nivel).toBe('amarillo');

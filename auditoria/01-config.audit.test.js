@@ -26,7 +26,7 @@ describe('Supuesto: "los pesos de cada factor suman 1" (config.js)', () => {
 });
 
 describe('Supuesto: umbrales de seguridad coherentes (README "Seguridad")', () => {
-  it('README: rojo con viento > 45, rachas > 60, olas > 3 m', () => {
+  it('README: rojo con viento ≥ 45, rachas ≥ 60, olas ≥ 3 m', () => {
     expect(SEGURIDAD.rojo).toEqual({ viento: 45, racha: 60, ola: 3.0 });
   });
   it('amarillo es estrictamente menos severo que rojo en cada magnitud', () => {

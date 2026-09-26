@@ -80,11 +80,15 @@ export const LISTA = [
     check: (st, caps) => caps.some(c => cercaDeFaro(c)) },
 
   // === DÍA PERFECTO ===
-  { id: 'dia-perfecto-plata', img: './logros/dia-perfecto-plata.png', icono: '🔥', nombre: 'Día perfecto', desc: '3 capturas en un mismo día',
+  // Tres tiers del mismo logro: comparten nombre base, se diferencian con un
+  // sufijo numeral (I/II/III) para que no se lean como duplicados en el grid
+  // (hallazgo docs/ux-audit/08-perfil.md item 3, corregido aquí porque toca
+  // este mismo archivo).
+  { id: 'dia-perfecto-plata', img: './logros/dia-perfecto-plata.png', icono: '🔥', nombre: 'Día perfecto I', desc: '3 capturas en un mismo día',
     check: (st) => !!(st.mejorDia && st.mejorDia.n >= 3), prog: (st) => [Math.min(st.mejorDia ? st.mejorDia.n : 0, 3), 3] },
-  { id: 'dia-perfecto-oro', img: './logros/dia-perfecto-oro.png', icono: '🔥', nombre: 'Día perfecto', desc: '5 capturas en un mismo día',
+  { id: 'dia-perfecto-oro', img: './logros/dia-perfecto-oro.png', icono: '🔥', nombre: 'Día perfecto II', desc: '5 capturas en un mismo día',
     check: (st) => !!(st.mejorDia && st.mejorDia.n >= 5), prog: (st) => [Math.min(st.mejorDia ? st.mejorDia.n : 0, 5), 5] },
-  { id: 'dia-perfecto-platino', img: './logros/dia-perfecto-platino.png', icono: '🔥', nombre: 'Día perfecto', desc: '10 capturas en un mismo día',
+  { id: 'dia-perfecto-platino', img: './logros/dia-perfecto-platino.png', icono: '🔥', nombre: 'Día perfecto III', desc: '10 capturas en un mismo día',
     check: (st) => !!(st.mejorDia && st.mejorDia.n >= 10), prog: (st) => [Math.min(st.mejorDia ? st.mejorDia.n : 0, 10), 10] },
 
   // === ESPECIALES 2 ===
@@ -96,6 +100,20 @@ export const LISTA = [
     check: (st) => st.conFoto >= 5, prog: (st) => [Math.min(st.conFoto, 5), 5] },
   { id: 'viajero', img: './logros/viajero.png', icono: '🧭', nombre: 'Explorador de costas', desc: 'Capturas en 5 spots distintos',
     check: (st) => st.spotsDistintos >= 5, prog: (st) => [Math.min(st.spotsDistintos, 5), 5] }
+];
+
+/* Agrupación de LISTA por categoría, para que la vista pueda renderizar
+   cabeceras de grupo en vez de un grid plano de 21 logros (hallazgo
+   docs/ux-audit/07-trofeos.md item 2). Refleja los mismos bloques que ya
+   existían como comentarios de sección en LISTA, sin cambiar la forma de
+   los objetos que devuelve evaluar(). */
+export const CATEGORIAS = [
+  { titulo: 'Capturas', ids: ['captura-bronce', 'captura-plata', 'captura-oro', 'captura-platino'] },
+  { titulo: 'Coleccionista', ids: ['coleccionista-plata', 'coleccionista-oro', 'coleccionista-platino'] },
+  { titulo: 'Eging', ids: ['egging-bronce', 'egging-plata', 'egging-oro', 'egging-platino'] },
+  { titulo: 'Especiales', ids: ['madrugador', 'nocturno', 'faro'] },
+  { titulo: 'Día perfecto', ids: ['dia-perfecto-plata', 'dia-perfecto-oro', 'dia-perfecto-platino'] },
+  { titulo: 'Retos especiales', ids: ['trofeo-lubina', 'contracorriente', 'fotografo', 'viajero'] }
 ];
 
 function cefalopodos(st) {

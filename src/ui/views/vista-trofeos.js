@@ -501,10 +501,15 @@ function modalLiga(id, repintar) {
 
   const errAcciones = crearNota('');
 
-  const bInv = crearBoton('Compartir invitación');
+  // Acción primaria diferenciada según el estado de la liga: recién creada
+  // (solo yo) lo prioritario es invitar; con más gente, enviar mi resultado.
+  // El resto de acciones (añadir resultado, borrar) queda en 'outline'.
+  const soloYo = liga.participantes.length <= 1;
+
+  const bInv = crearBoton('Compartir invitación', { fill: soloYo ? 'solid' : 'outline' });
   bInv.addEventListener('click', () => compartirInvitacion(liga));
 
-  const bRes = crearBoton('Enviar mi resultado');
+  const bRes = crearBoton('Enviar mi resultado', { fill: soloYo ? 'outline' : 'solid' });
   bRes.addEventListener('click', () => {
     try {
       const codigo = codigoResultadoLiga(liga.id);

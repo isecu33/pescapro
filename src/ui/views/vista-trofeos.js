@@ -296,12 +296,21 @@ function mostrarCelebracionEnCola(lista, idx) {
   desc.className = 'pp-celebracion-desc';
   desc.textContent = l.desc;
 
+  const acciones = document.createElement('div');
+  acciones.className = 'pp-acciones pp-celebracion-acciones';
+
+  const bCompartir = crearBoton('Compartir');
+  bCompartir.addEventListener('click', () => {
+    compartir('🎖️ ¡Logro conseguido en Marante! ' + l.nombre + ': ' + l.desc);
+  });
+
   const bOk = document.createElement('ion-button');
   bOk.textContent = '¡Genial!';
   bOk.setAttribute('fill', 'solid');
   bOk.className = 'pp-celebracion-ok';
 
-  tarjeta.append(cabecera, nombre, desc, bOk);
+  acciones.append(bCompartir, bOk);
+  tarjeta.append(cabecera, nombre, desc, acciones);
   overlay.appendChild(tarjeta);
   document.body.appendChild(overlay);
 

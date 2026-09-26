@@ -1357,6 +1357,10 @@ span.pp-logro-ico {
   --border-radius: 12px;
 }
 
+.pp-celebracion-acciones {
+  justify-content: center;
+}
+
 /* ── Perfil: tarjeta publica (menu lateral + vista Perfil) ─────────── */
 .pp-perfil-tarjeta {
   position: relative; overflow: hidden;

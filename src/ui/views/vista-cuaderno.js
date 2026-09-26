@@ -260,8 +260,8 @@ function abrirModalFoto(c) {
    no disponible...), degrada a prompt() de solo-lectura con el JSON ya
    seleccionado -- igual que el original, evita depender de un modal
    nuevo solo para este caso raro.
-   Importar: importar() lanza si el JSON no es un array (no valida el
-   contenido de cada captura, eso queda fuera de esta tarea); aquí solo
+   Importar: importar() lanza si el JSON no es un array o no trae ninguna
+   captura valida (las entradas invalidas se descartan); aquí solo
    capturamos ese throw y lo mostramos con alert(). ---- */
 
 function crearExportImport(contenedor, st) {

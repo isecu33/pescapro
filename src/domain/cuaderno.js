@@ -25,11 +25,15 @@ function guardar(lista) {
   }
 }
 
+function nuevoId() {
+  return Date.now() + '_' + Math.random().toString(36).slice(2, 7);
+}
+
 /* Crea una captura. condiciones = snapshot {viento, ola, sst, presion, faseMarea, luna, indice, momento} */
 export function anadir(c) {
   const lista = leer();
   lista.unshift({
-    id: Date.now() + '_' + Math.random().toString(36).slice(2, 7),
+    id: nuevoId(),
     fecha: c.fecha || new Date().toISOString(),
     especie: c.especie || 'otra',
     talla: c.talla || null,
@@ -77,11 +81,26 @@ export function exportar() {
   return JSON.stringify(leer(), null, 2);
 }
 
+/* El fichero importado es texto libre pegado por el usuario (editado a
+   mano, de otra version...): se descartan las entradas que no son una
+   captura y se completan id/especie, para que estadisticas() y los
+   records no fallen despues en cada lectura del cuaderno. */
+function sanearCaptura(c) {
+  if (!c || typeof c !== 'object' || Array.isArray(c)) return null;
+  const limpia = Object.assign({}, c);
+  if (typeof limpia.id !== 'string' || !limpia.id) limpia.id = nuevoId();
+  if (typeof limpia.especie !== 'string' || !limpia.especie) limpia.especie = 'otra';
+  if (limpia.condiciones != null && (typeof limpia.condiciones !== 'object' || Array.isArray(limpia.condiciones))) limpia.condiciones = null;
+  return limpia;
+}
+
 export function importar(json) {
   const arr = JSON.parse(json);
   if (!Array.isArray(arr)) throw new Error('Formato no válido');
-  guardar(arr);
-  return arr;
+  const validas = arr.map(sanearCaptura).filter(Boolean);
+  if (arr.length && !validas.length) throw new Error('El fichero no contiene capturas válidas');
+  guardar(validas);
+  return validas;
 }
 
 /* Spots favoritos */

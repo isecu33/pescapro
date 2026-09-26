@@ -8,7 +8,8 @@
        Fase2/3 ya lo cierran estructuralmente) tendria capacidad total de
        fetch/XHR hacia cualquier dominio y de ejecutar scripts inline.
        connect-src/img-src listan exactamente los hosts que la app usa de
-       verdad: las 3 APIs de Open-Meteo (fetch) y las teselas de mapa de
+       verdad: las 3 APIs de Open-Meteo y el buscador de lugares de
+       Nominatim (fetch, ver domain/api.js buscarLugar) y las teselas de mapa de
        OpenStreetMap/OpenSeaMap (imagenes, via Leaflet). style-src necesita
        'unsafe-inline' porque Ionic/Stencil inyecta estilos en los Shadow
        Roots de sus componentes en tiempo de ejecucion; verificar en Fase5
@@ -18,7 +19,7 @@
     script-src 'self';
     style-src 'self' 'unsafe-inline';
     img-src 'self' data: blob: https://tile.openstreetmap.org https://tiles.openseamap.org;
-    connect-src 'self' https://api.open-meteo.com https://marine-api.open-meteo.com https://geocoding-api.open-meteo.com;
+    connect-src 'self' https://api.open-meteo.com https://marine-api.open-meteo.com https://geocoding-api.open-meteo.com https://nominatim.openstreetmap.org;
     object-src 'none';
     base-uri 'self';
   " />

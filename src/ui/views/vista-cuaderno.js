@@ -393,12 +393,20 @@ function crearSelectorFotos(max) {
       add.type = 'button';
       add.className = 'pp-foto-add';
       add.setAttribute('aria-label', 'Añadir foto');
+      // Primer slot (sin fotos aun) mas grande: es la feature mas nueva del
+      // release y merece destacar de un vistazo, no solo tras 8 campos de
+      // texto (ver docs/ux-audit/06-cuaderno.md, item 4).
+      if (!fotos.length) {
+        add.style.gridColumn = 'span 2';
+        add.style.gridRow = 'span 2';
+      }
       if (procesando) {
         add.setAttribute('aria-disabled', 'true');
         add.appendChild(document.createElement('ion-spinner'));
       } else {
         const icoA = document.createElement('ion-icon');
         icoA.setAttribute('name', 'camera-outline');
+        if (!fotos.length) icoA.style.fontSize = '30px';
         const txt = document.createElement('span');
         txt.textContent = 'Añadir';
         add.append(icoA, txt);
@@ -484,6 +492,15 @@ function abrirModalCaptura(contenedor, st) {
   const h3 = document.createElement('h3');
   h3.textContent = 'Registrar captura';
   cuerpo.appendChild(h3);
+
+  // Aviso visible desde el principio del formulario: el selector de fotos
+  // (mas abajo) es la feature mas nueva del release y merece destacar de un
+  // vistazo, no solo tras 8 campos de texto (ver docs/ux-audit/06-cuaderno.md,
+  // item 4).
+  const ayudaFotosArriba = document.createElement('p');
+  ayudaFotosArriba.className = 'pp-nota';
+  ayudaFotosArriba.textContent = 'Puedes añadir hasta ' + MAX_FOTOS + ' fotos de la captura.';
+  cuerpo.appendChild(ayudaFotosArriba);
 
   const form = document.createElement('div');
   form.className = 'pp-form';

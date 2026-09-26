@@ -204,19 +204,23 @@ export function importar(codigo) {
     const ligas = listar();
     const liga = ligas.find(l => l.id === o.id);
     if (!liga) throw new Error('Ese resultado es de una competición que no tienes. Pide antes el código de invitación.');
+    // El nombre se normaliza UNA vez y se usa igual para comparar y para
+    // guardar: antes se buscaba por el nombre completo pero se guardaba
+    // recortado a 24, y un nombre largo se duplicaba en cada reimportacion.
+    const nombre = String(o.nombre).trim().slice(0, 24);
     const yo = liga.participantes.find(p => p.esYo);
-    if (yo && yo.nombre === o.nombre) throw new Error('Ese código es tuyo, no de un amigo');
+    if (yo && yo.nombre === nombre) throw new Error('Ese código es tuyo, no de un amigo');
     // filtra por si acaso al periodo, sanea formato y acota tamaño
     // (fix MEDIUM: sin CAPS_MAX un codigo ajeno podia inflar localStorage)
     const caps = (Array.isArray(o.caps) ? o.caps : [])
       .filter(c => Array.isArray(c) && dentroDelPeriodo(c[3], liga))
       .slice(0, CAPS_MAX)
       .map(c => [String(c[0]), c[1] != null ? Number(c[1]) : null, c[2] != null ? Number(c[2]) : null, c[3]]);
-    const previo = liga.participantes.find(p => !p.esYo && p.nombre === o.nombre);
+    const previo = liga.participantes.find(p => !p.esYo && p.nombre === nombre);
     if (previo) { previo.caps = caps; previo.act = Date.now(); }
-    else liga.participantes.push({ nombre: String(o.nombre).slice(0, 24), esYo: false, caps, act: Date.now() });
+    else liga.participantes.push({ nombre, esYo: false, caps, act: Date.now() });
     guardar(ligas);
-    return { tipo: 'res', liga: porId(liga.id), mensaje: 'Resultado de ' + o.nombre + ' añadido (' + caps.length + ' capturas)' };
+    return { tipo: 'res', liga: porId(liga.id), mensaje: 'Resultado de ' + nombre + ' añadido (' + caps.length + ' capturas)' };
   }
   throw new Error('Tipo de código desconocido');
 }

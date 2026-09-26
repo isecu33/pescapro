@@ -111,7 +111,9 @@ function esAmanecer(c) {
   const fecha = new Date(c.fecha);
   if (isNaN(fecha)) return false;
   try {
-    const times = SunCalc.getTimes(fecha, LAT_DEFAULT, LON_DEFAULT);
+    // Amanecer del lugar de la captura; sin coordenadas, el de por defecto.
+    const conSpot = c.spot && typeof c.spot.lat === 'number' && typeof c.spot.lon === 'number';
+    const times = SunCalc.getTimes(fecha, conSpot ? c.spot.lat : LAT_DEFAULT, conSpot ? c.spot.lon : LON_DEFAULT);
     const amanecer = times.sunrise;
     if (!amanecer || isNaN(amanecer.getTime())) {
       const h = fecha.getHours();

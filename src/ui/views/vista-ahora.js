@@ -233,6 +233,7 @@ function cardIndiceFull(idx, st) {
     const nombre = document.createElement('span');
     nombre.className = 'pp-factor-mini-nombre';
     nombre.textContent = NOMBRES_FACTOR[k] || k;
+    nombre.title = NOMBRES_FACTOR[k] || k;
     const barra = document.createElement('div');
     barra.className = 'pp-factor-mini-barra';
     const rel = document.createElement('div');

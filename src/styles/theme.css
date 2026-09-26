@@ -602,8 +602,8 @@ ion-tab-button[selected] {
   gap: 7px;
 }
 .pp-factor-mini-nombre {
-  flex: 0 0 52px;
-  font-size: 11px;
+  flex: 0 0 78px;
+  font-size: 10px;
   color: var(--pp-texto2);
   overflow: hidden;
   text-overflow: ellipsis;

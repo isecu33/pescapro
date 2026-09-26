@@ -128,6 +128,16 @@ export function buscarLugar(nombre, spot) {
   }));
 }
 
+/* Open-Meteo con timezone=auto devuelve las horas como "YYYY-MM-DDTHH:MM"
+   en hora local DEL SPOT, sin sufijo de zona. new Date(t) las interpretaria
+   en la zona del movil: con el movil en hora peninsular y un spot en
+   Canarias, mareas, amanecer e indice quedaban desplazados 1 h. */
+function instanteSpot(t, offsetSeg) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/.exec(t);
+  if (!m || typeof offsetSeg !== 'number') return new Date(t);
+  return new Date(Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], +m[5]) - offsetSeg * 1000);
+}
+
 /* Fusiona clima + marino en una serie horaria única indexada por Date */
 export function fusionar(clima, marino) {
   const h = clima.hourly, m = (marino && marino.hourly) || {};
@@ -139,7 +149,7 @@ export function fusionar(clima, marino) {
     const g = (arr) => (im != null && arr) ? arr[im] : null;
     return {
       iso: t,
-      fecha: new Date(t),
+      fecha: instanteSpot(t, clima.utc_offset_seconds),
       temp: h.temperature_2m ? h.temperature_2m[i] : null,
       lluvia: h.precipitation ? h.precipitation[i] : null,
       codigo: h.weather_code ? h.weather_code[i] : null,

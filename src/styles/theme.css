@@ -135,6 +135,7 @@ html, body {
 .pp-spot-nombre { font-weight: 700; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; letter-spacing: -0.01em; }
 .pp-spot-selector small { color: var(--pp-texto2); font-size: 11px; line-height: 1.2; }
 .pp-accion-btn { --color: var(--pp-texto2, rgba(255,255,255,0.54)); }
+.pp-header-acciones { padding-inline-end: 6px; }
 
 /* Banner de seguridad: persistente mientras dure el peligro (no es un
    toast que se autooculte) */

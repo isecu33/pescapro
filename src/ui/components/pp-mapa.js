@@ -32,6 +32,7 @@
 import L from 'leaflet';
 import leafletCss from 'leaflet/dist/leaflet.css?inline';
 import { util } from '../../domain/config.js';
+import { svg } from '../../domain/iconos.js';
 
 export function colorPorVelocidad(vel) {
   return vel < 0.15 ? '#666666' : vel < 0.35 ? '#cc6600' : vel < 0.6 ? '#ff7200' : '#e03131';
@@ -82,6 +83,91 @@ export class PpMapa extends HTMLElement {
     style.textContent = leafletCss + `
       :host { display: block; width: 100%; height: 100%; }
       .mapa { width: 100%; height: 100%; }
+
+      /* Marcadores propios sobre Leaflet: sin caja/borde por defecto,
+         tamano y alineacion explicitos -- el CSS del documento principal
+         no atraviesa el Shadow Root (ver comentario de cabecera), asi que
+         estas reglas tienen que vivir aqui, junto a leafletCss. */
+      .pp-spot-icon,
+      .pp-viento-icon,
+      .pp-fav-icon {
+        background: transparent;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .pp-pin {
+        width: 26px;
+        height: 26px;
+        color: var(--ion-color-primary, #ff7200);
+        filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.65));
+      }
+      .pp-pin svg { width: 100%; height: 100%; }
+      .pp-fav-pin {
+        width: 18px;
+        height: 18px;
+        color: var(--ion-color-warning, #ffac00);
+        filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.6));
+      }
+      .pp-fav-pin svg { width: 100%; height: 100%; }
+
+      /* El indicador de viento se ancla con offset respecto al pin del
+         spot (ver iconAnchor en pintarViento) para no solaparse con el --
+         antes se pintaban en el mismo punto exacto. */
+      .pp-viento-caja {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+      }
+      .pp-viento-caja svg {
+        width: 22px;
+        height: 22px;
+        color: var(--ion-color-primary, #ff7200);
+        filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.65));
+      }
+      .pp-viento-txt {
+        font-family: var(--pp-font, sans-serif);
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--ion-text-color, #f0f0f0);
+        background: rgba(8, 8, 8, 0.72);
+        border-radius: 8px;
+        padding: 1px 6px;
+        white-space: nowrap;
+      }
+
+      /* Controles nativos de Leaflet re-skineados con la paleta oscura/
+         naranja de theme.css (mismos tokens que .pp-mapa-controles) y
+         tamano tactil minimo de 44px. */
+      .leaflet-control-zoom {
+        border: 1px solid var(--ion-border-color, #242424) !important;
+        border-radius: var(--pp-radius-sm, 10px) !important;
+        overflow: hidden;
+        box-shadow: none !important;
+      }
+      .leaflet-control-zoom-in,
+      .leaflet-control-zoom-out {
+        width: 44px !important;
+        height: 44px !important;
+        line-height: 44px !important;
+        background: var(--pp-panel, #121212) !important;
+        color: var(--ion-text-color, #f0f0f0) !important;
+        border-color: var(--ion-border-color, #242424) !important;
+      }
+      .leaflet-control-zoom-in:hover,
+      .leaflet-control-zoom-out:hover {
+        background: var(--pp-panel2, #1a1a1a) !important;
+        color: var(--ion-color-primary, #ff7200) !important;
+      }
+      .leaflet-control-attribution {
+        background: rgba(18, 18, 18, 0.78) !important;
+        color: var(--pp-texto2, #888888) !important;
+      }
+      .leaflet-control-attribution a {
+        color: var(--ion-color-primary, #ff7200) !important;
+      }
     `;
     shadow.appendChild(style);
     this._div = document.createElement('div');
@@ -121,10 +207,14 @@ export class PpMapa extends HTMLElement {
   ponerSpot(spot) {
     if (!this._map) return;
     if (this._capaSpot) this._map.removeLayer(this._capaSpot);
+    const pin = document.createElement('div');
+    pin.className = 'pp-pin';
+    const icoSpot = svg('spot');
+    if (icoSpot) pin.appendChild(icoSpot);
     this._capaSpot = L.marker([spot.lat, spot.lon], {
       title: spot.nombre || 'Spot',
       icon: L.divIcon({
-        className: 'pp-spot-icon', html: '<div class="pp-pin">📍</div>',
+        className: 'pp-spot-icon', html: pin,
         iconSize: [30, 30], iconAnchor: [15, 28]
       })
     }).addTo(this._map);
@@ -135,8 +225,12 @@ export class PpMapa extends HTMLElement {
     if (!this._map) return;
     this._capaFavs.clearLayers();
     favs.forEach(f => {
+      const pin = document.createElement('div');
+      pin.className = 'pp-fav-pin';
+      const icoFav = svg('favorito');
+      if (icoFav) pin.appendChild(icoFav);
       L.marker([f.lat, f.lon], {
-        icon: L.divIcon({ className: 'pp-fav-icon', html: '⭐', iconSize: [22, 22] })
+        icon: L.divIcon({ className: 'pp-fav-icon', html: pin, iconSize: [22, 22] })
       }).addTo(this._capaFavs)
         .bindPopup(crearPopupFavorito(f, onIr));
     });
@@ -182,19 +276,32 @@ export class PpMapa extends HTMLElement {
       .addTo(this._capaFlechas);
   }
 
-  /* Flecha grande de viento en el spot (direccion meteorologica = de donde viene) */
+  /* Flecha grande de viento en el spot (direccion meteorologica = de donde
+     viene). Se ancla con un offset (iconAnchor negativo/mayor que el
+     tamano del icono) para que no se pinte encima del pin del spot --
+     ver .pp-viento-caja en el <style> del Shadow Root. */
   pintarViento(lat, lon, vel, dirDesde) {
     if (!this._map) return;
     if (this._capaViento) this._map.removeLayer(this._capaViento);
     if (vel == null || dirDesde == null) return;
     const hacia = (dirDesde + 180) % 360;
+    const caja = document.createElement('div');
+    caja.className = 'pp-viento-caja';
+    const icoViento = svg('viento');
+    if (icoViento) {
+      icoViento.style.transform = 'rotate(' + hacia + 'deg)';
+      caja.appendChild(icoViento);
+    }
+    const txt = document.createElement('div');
+    txt.className = 'pp-viento-txt';
+    txt.textContent = Math.round(vel) + ' km/h';
+    caja.appendChild(txt);
     this._capaViento = L.marker([lat, lon], {
       interactive: false,
       icon: L.divIcon({
         className: 'pp-viento-icon',
-        html: '<div class="pp-viento" style="transform:rotate(' + hacia + 'deg)">⬆</div>' +
-          '<div class="pp-viento-txt">' + Math.round(vel) + ' km/h</div>',
-        iconSize: [60, 60], iconAnchor: [30, 30]
+        html: caja,
+        iconSize: [60, 60], iconAnchor: [-16, 92]
       })
     }).addTo(this._map);
   }

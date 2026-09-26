@@ -99,6 +99,17 @@ export const WMO = {
   95:['Tormenta','⛈️'],96:['Tormenta con granizo','⛈️'],99:['Tormenta fuerte con granizo','⛈️']
 };
 
+/* HSL → hex: usado por colorIndice para el degradado del tramo 70-100
+   (segundo canal de hue+luminosidad, no solo variaciones de un mismo tono). */
+function hslAHex(h, s, l) {
+  s /= 100; l /= 100;
+  const k = n => (n + h / 30) % 12;
+  const a = s * Math.min(l, 1 - l);
+  const f = n => l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
+  const canal = x => Math.round(255 * x).toString(16).padStart(2, '0');
+  return '#' + canal(f(0)) + canal(f(8)) + canal(f(4));
+}
+
 /* Utilidades compartidas */
 export const util = {
   // Trapecio: 0 fuera de [a,d], 1 en [b,c], rampas lineales. Puntúa "lo óptimo".
@@ -124,7 +135,15 @@ export const util = {
   fmtFecha(d) { return d.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' }); },
   esMismoDia(a, b) { return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate(); },
   colorIndice(v) {
-    if (v >= 70) return '#ff9500';
+    // 70-100: antes un único naranja plano (#ff9500) para todo el tramo -- con
+    // datos reales (84-94) todas las barras/badges eran indistinguibles.
+    // Ahora hue + luminosidad suben juntos con el índice: naranja (#ff9500 en
+    // 70) hacia dorado (~#ffd83d en 100), separación perceptual real y no solo
+    // numérica en el rango donde más se usa.
+    if (v >= 70) {
+      const t = util.clamp((v - 70) / 30, 0, 1);
+      return hslAHex(35 + t * 13, 100, 50 + t * 12);
+    }
     if (v >= 50) return '#ff7200';
     if (v >= 35) return '#e05500';
     if (v >= 20) return '#c44000';

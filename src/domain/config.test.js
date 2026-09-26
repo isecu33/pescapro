@@ -40,6 +40,14 @@ describe('config: conversion 1:1 desde www/js/config.js', () => {
   it('util.colorIndice y util.etiquetaIndice son consistentes por umbral', () => {
     expect(util.etiquetaIndice(75)).toBe('Excelente');
     expect(util.etiquetaIndice(10)).toBe('Malo');
-    expect(util.colorIndice(75)).toBe('#ff9500');
+    expect(util.colorIndice(70)).toBe('#ff9500');
+  });
+
+  it('util.colorIndice degrada dentro del tramo 70-100 en vez de un naranja plano (fix ux-audit prevision)', () => {
+    // Antes de este fix, cualquier v>=70 devolvia el mismo '#ff9500' -- con
+    // datos reales (84-94) todas las barras/badges eran indistinguibles.
+    expect(util.colorIndice(84)).not.toBe(util.colorIndice(94));
+    expect(util.colorIndice(94)).not.toBe(util.colorIndice(70));
+    expect(util.colorIndice(100)).toBe('#ffd83d');
   });
 });

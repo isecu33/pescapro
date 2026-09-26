@@ -3,8 +3,10 @@
 
    Cambios respecto al original:
    - La tarjeta muestra la silueta SVG de la especie en vez del emoji `icono`
-   - El modal incluye foto real (bundleada, offline) y datos reglamentarios
-     de Galicia (reglamento.{tallaMin, pesoMin, cupo, veda, nota})
+   - El modal incluye datos reglamentarios de Galicia
+     (reglamento.{tallaMin, pesoMin, cupo, veda, nota}); el bloque de `foto`
+     se retiró (ver src/domain/especies.js) porque el asset era la misma
+     silueta de `imagen` en negro, no una fotografía real
    - Etiquetas de camposFicha sin emoji (usar texto puro)
 
    API: renderEspecies(contenedor, st) */
@@ -85,21 +87,6 @@ export function abrirModalEspecie(esp, st) {
   cientifico.textContent = '(' + esp.cientifico + ')';
   titulo.appendChild(cientifico);
   cuerpo.appendChild(titulo);
-
-  if (esp.foto) {
-    const fotoWrap = document.createElement('div');
-    fotoWrap.className = 'pp-esp-modal-foto';
-    const img = document.createElement('img');
-    img.src = esp.foto;
-    img.alt = esp.nombre;
-    img.onerror = () => { fotoWrap.style.display = 'none'; };
-    img.style.width = '100%';
-    img.style.borderRadius = '8px';
-    img.style.objectFit = 'cover';
-    img.style.maxHeight = '200px';
-    fotoWrap.appendChild(img);
-    cuerpo.appendChild(fotoWrap);
-  }
 
   const cabeceraTemporada = document.createElement('div');
   cabeceraTemporada.className = 'pp-campo';

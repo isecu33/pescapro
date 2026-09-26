@@ -5,7 +5,8 @@
 
    Campos añadidos respecto al original:
    - silhoueta: { vb, d } — viewBox y path SVG de la silueta (fill:currentColor)
-   - foto: ruta relativa al WebP bundleado (ver /public/img/especies/)
+   - foto: reservado para una fotografía real futura (hoy siempre `null`;
+     el PNG existente era la misma silueta de `imagen` en negro, no una foto)
    - reglamento: datos de Galicia (talla, cupo, veda). VERIFICAR con Consellería
      do Mar / Xunta de Galicia antes de pescar — la normativa cambia.
 
@@ -14,7 +15,7 @@
 */
 export const ESPECIES = [
   {
-    id: 'lubina', nombre: 'Lubina', cientifico: 'Dicentrarchus labrax', icono: '🐟', imagen: './iconos/svg/lubina.svg', foto: './iconos/png/lubina.png',
+    id: 'lubina', nombre: 'Lubina', cientifico: 'Dicentrarchus labrax', icono: '🐟', imagen: './iconos/svg/lubina.svg', foto: null,
     meses: [0.9, 0.85, 0.7, 0.6, 0.5, 0.45, 0.45, 0.5, 0.65, 0.85, 1.0, 1.0],
     sst: [8, 11, 18, 22],
     oleaje: [0.3, 0.8, 2.0, 3.2],
@@ -36,7 +37,7 @@ export const ESPECIES = [
     }
   },
   {
-    id: 'dorada', nombre: 'Dorada', cientifico: 'Sparus aurata', icono: '🐠', imagen: './iconos/svg/dorada.svg', foto: './iconos/png/dorada.png',
+    id: 'dorada', nombre: 'Dorada', cientifico: 'Sparus aurata', icono: '🐠', imagen: './iconos/svg/dorada.svg', foto: null,
     meses: [0.15, 0.15, 0.3, 0.5, 0.75, 0.9, 1.0, 1.0, 0.95, 0.8, 0.5, 0.2],
     sst: [13, 16, 24, 27],
     oleaje: [0, 0.2, 1.2, 2.2],
@@ -80,7 +81,7 @@ export const ESPECIES = [
     }
   },
   {
-    id: 'jurel', nombre: 'Jurel / Chicharro', cientifico: 'Trachurus trachurus', icono: '🐟', imagen: './iconos/svg/jurel-chicharro.svg', foto: './iconos/png/jurel-chicharro.png',
+    id: 'jurel', nombre: 'Jurel / Chicharro', cientifico: 'Trachurus trachurus', icono: '🐟', imagen: './iconos/svg/jurel-chicharro.svg', foto: null,
     meses: [0.3, 0.3, 0.5, 0.7, 0.9, 1.0, 1.0, 1.0, 0.95, 0.8, 0.5, 0.35],
     sst: [12, 14, 21, 24],
     oleaje: [0, 0.1, 1.0, 1.8],
@@ -102,7 +103,7 @@ export const ESPECIES = [
     }
   },
   {
-    id: 'caballa', nombre: 'Caballa / Verdel', cientifico: 'Scomber scombrus', icono: '🐟', imagen: './iconos/svg/caballa-verdel.svg', foto: './iconos/png/caballa-verdel.png',
+    id: 'caballa', nombre: 'Caballa / Verdel', cientifico: 'Scomber scombrus', icono: '🐟', imagen: './iconos/svg/caballa-verdel.svg', foto: null,
     meses: [0.2, 0.4, 0.9, 1.0, 1.0, 0.8, 0.5, 0.4, 0.4, 0.3, 0.2, 0.2],
     sst: [10, 12, 18, 21],
     oleaje: [0, 0.1, 1.2, 2.0],
@@ -124,7 +125,7 @@ export const ESPECIES = [
     }
   },
   {
-    id: 'lisa', nombre: 'Lisa / Muble', cientifico: 'Chelon labrosus', icono: '🐟', imagen: './iconos/svg/lisa-muble.svg', foto: './iconos/png/lisa-muble.png',
+    id: 'lisa', nombre: 'Lisa / Muble', cientifico: 'Chelon labrosus', icono: '🐟', imagen: './iconos/svg/lisa-muble.svg', foto: null,
     meses: [0.7, 0.7, 0.8, 0.9, 1.0, 1.0, 1.0, 1.0, 0.9, 0.8, 0.7, 0.7],
     sst: [8, 12, 24, 28],
     oleaje: [0, 0, 0.6, 1.2],
@@ -146,7 +147,7 @@ export const ESPECIES = [
     }
   },
   {
-    id: 'congrio', nombre: 'Congrio', cientifico: 'Conger conger', icono: '🐍', imagen: './iconos/svg/congrio.svg', foto: './iconos/png/congrio.png',
+    id: 'congrio', nombre: 'Congrio', cientifico: 'Conger conger', icono: '🐍', imagen: './iconos/svg/congrio.svg', foto: null,
     meses: [0.9, 0.9, 0.85, 0.8, 0.7, 0.6, 0.6, 0.6, 0.7, 0.8, 0.9, 0.95],
     sst: [8, 10, 18, 22],
     oleaje: [0, 0.2, 1.5, 2.5],
@@ -168,7 +169,7 @@ export const ESPECIES = [
     }
   },
   {
-    id: 'faneca', nombre: 'Faneca', cientifico: 'Trisopterus luscus', icono: '🐟', imagen: './iconos/svg/faneca.svg', foto: './iconos/png/faneca.png',
+    id: 'faneca', nombre: 'Faneca', cientifico: 'Trisopterus luscus', icono: '🐟', imagen: './iconos/svg/faneca.svg', foto: null,
     meses: [1.0, 1.0, 0.9, 0.7, 0.5, 0.35, 0.3, 0.3, 0.5, 0.8, 0.95, 1.0],
     sst: [8, 10, 16, 19],
     oleaje: [0.1, 0.3, 1.4, 2.4],
@@ -190,7 +191,7 @@ export const ESPECIES = [
     }
   },
   {
-    id: 'salmonete', nombre: 'Salmonete', cientifico: 'Mullus surmuletus', icono: '🐠', imagen: './iconos/svg/salmonete.svg', foto: './iconos/png/salmonete.png',
+    id: 'salmonete', nombre: 'Salmonete', cientifico: 'Mullus surmuletus', icono: '🐠', imagen: './iconos/svg/salmonete.svg', foto: null,
     meses: [0.3, 0.3, 0.4, 0.6, 0.8, 1.0, 1.0, 1.0, 0.9, 0.7, 0.5, 0.35],
     sst: [12, 15, 22, 25],
     oleaje: [0, 0.1, 0.9, 1.6],
@@ -212,7 +213,7 @@ export const ESPECIES = [
     }
   },
   {
-    id: 'calamar', nombre: 'Calamar', cientifico: 'Loligo vulgaris', icono: '🦑', imagen: './iconos/svg/calamar.svg', foto: './iconos/png/calamar.png',
+    id: 'calamar', nombre: 'Calamar', cientifico: 'Loligo vulgaris', icono: '🦑', imagen: './iconos/svg/calamar.svg', foto: null,
     meses: [0.9, 0.7, 0.5, 0.3, 0.15, 0.1, 0.15, 0.3, 0.7, 1.0, 1.0, 1.0],
     sst: [10, 12, 18, 20],
     oleaje: [0, 0, 0.5, 1.0],
@@ -234,7 +235,7 @@ export const ESPECIES = [
     }
   },
   {
-    id: 'sepia', nombre: 'Sepia / Choco', cientifico: 'Sepia officinalis', icono: '🦑', imagen: './iconos/svg/sepia.svg', foto: './iconos/png/sepia.png',
+    id: 'sepia', nombre: 'Sepia / Choco', cientifico: 'Sepia officinalis', icono: '🦑', imagen: './iconos/svg/sepia.svg', foto: null,
     meses: [0.5, 0.8, 1.0, 1.0, 0.8, 0.4, 0.2, 0.2, 0.4, 0.6, 0.6, 0.5],
     sst: [10, 12, 20, 23],
     oleaje: [0, 0, 0.6, 1.2],
@@ -256,7 +257,7 @@ export const ESPECIES = [
     }
   },
   {
-    id: 'pulpo', nombre: 'Pulpo', cientifico: 'Octopus vulgaris', icono: '🐙', imagen: './iconos/svg/pulpo.svg', foto: './iconos/png/pulpo.png',
+    id: 'pulpo', nombre: 'Pulpo', cientifico: 'Octopus vulgaris', icono: '🐙', imagen: './iconos/svg/pulpo.svg', foto: null,
     meses: [0.7, 0.6, 0.5, 0.4, 0.4, 0.5, 0.8, 1.0, 1.0, 1.0, 0.9, 0.8],
     sst: [10, 12, 20, 24],
     oleaje: [0, 0, 0.7, 1.3],

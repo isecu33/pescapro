@@ -80,6 +80,13 @@ export function crearApp(shell) {
     conectarUI();
     actualizarCabecera();
     mostrarVista(st.vista);
+    // Fix CRITICAL de auditoria (pantalla negra en arranque en frio): antes
+    // nada llamaba a renderVistaActiva() en este camino hasta que los datos
+    // resolvian (cache o refrescar()), dejando elCargando() -- ya escrito
+    // en vista-ahora.js -- como codigo muerto y la pantalla en negro varios
+    // segundos. Se pinta el estado de carga desde el primer instante; si
+    // hay cache se vuelve a renderizar de inmediato con datos reales.
+    renderVistaActiva();
 
     const cache = desdeCache(st.spot.lat, st.spot.lon);
     if (cache) {
@@ -156,10 +163,19 @@ export function crearApp(shell) {
 
   /* ---------- Navegacion ---------- */
 
+  // Fix CRITICAL de auditoria (tab-bar desincronizado): irA() es el unico
+  // sitio que toca st.vista, asi que tambien es el punto donde se
+  // reconcilia shell.vistaActiva -- sea cual sea el origen del evento
+  // pp-cambiar-vista (clic real en ion-tab-button, que ya deja
+  // shell.vistaActiva al dia antes de emitir, o un dispatch directo desde
+  // una vista que se salte el setter). Sin esto, shell._vistaActiva
+  // (chrome) y st.vista (contenido) podian quedar desincronizados y el
+  // tab bar dejaba de reaccionar a clics (ver docs/ux-audit/02-ahora.md).
   function irA(vista) {
     if (!VISTAS.includes(vista)) return;
     st.vista = vista;
     mostrarVista(vista);
+    if (shell.vistaActiva !== vista) shell.vistaActiva = vista;
     if (vista === 'mapa') iniciarMapa();
     renderVistaActiva();
   }
@@ -454,11 +470,17 @@ export function crearApp(shell) {
     }
   }
 
+  // Recuperado tras auditoria UX (quick win #3): confirmacion textual
+  // discreta de frescura tras refrescar, en segundos al principio para
+  // que el usuario vea progresar el dato justo tras pulsar "refrescar".
   function textoActualizado() {
     if (!st.datos || !st.datos.obtenido) return st.cargando ? 'cargando…' : 'sin datos';
     if (st.cargando) return 'actualizando…';
-    const min = Math.round((Date.now() - st.datos.obtenido) / 60000);
-    return min <= 1 ? 'ahora mismo' : 'hace ' + (min < 60 ? min + ' min' : Math.round(min / 60) + ' h');
+    const seg = Math.round((Date.now() - st.datos.obtenido) / 1000);
+    if (seg < 5) return 'actualizado ahora';
+    if (seg < 60) return 'actualizado hace ' + seg + 's';
+    const min = Math.round(seg / 60);
+    return 'actualizado hace ' + (min < 60 ? min + ' min' : Math.round(min / 60) + ' h');
   }
 
   /* ---------- Cableado inicial ---------- */

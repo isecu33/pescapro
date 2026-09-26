@@ -134,6 +134,7 @@ html, body {
 .pp-spot-textos { display: flex; flex-direction: column; min-width: 0; }
 .pp-spot-nombre { font-weight: 700; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; letter-spacing: -0.01em; }
 .pp-spot-selector small { color: var(--pp-texto2); font-size: 11px; line-height: 1.2; }
+.pp-spot-actualizado { color: var(--pp-texto2); font-size: 10px; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
 .pp-accion-btn { --color: var(--pp-texto2, rgba(255,255,255,0.54)); }
 
 /* Banner de seguridad: persistente mientras dure el peligro (no es un
@@ -602,8 +603,8 @@ ion-tab-button[selected] {
   gap: 7px;
 }
 .pp-factor-mini-nombre {
-  flex: 0 0 52px;
-  font-size: 11px;
+  flex: 0 0 78px;
+  font-size: 10px;
   color: var(--pp-texto2);
   overflow: hidden;
   text-overflow: ellipsis;

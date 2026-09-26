@@ -13,7 +13,7 @@
    - .contenido            -> elemento <main> donde montar la vista activa
    - .vistaActiva (get/set) -> id de la vista visible; el set dispara pp-cambiar-vista
    - .spot = {nombre}       -> texto del selector de spot
-   - .actualizado = string  -> no-op; el timestamp se retiró del header
+   - .actualizado = string  -> texto discreto bajo el nombre del spot (p.ej. "actualizado hace 2s")
    - .seguridad = {nivel, motivos} | null -> no-op; el banner ahora vive en cada vista (ver vista-ahora.js)
    - .refrescando = bool    -> anima el icono de refrescar
    - .esFavorito = bool     -> togglea el icono de estrella (filled vs outline)
@@ -96,7 +96,9 @@ export class PpAppShell extends HTMLElement {
     this._spotNombreEl = document.createElement('span');
     this._spotNombreEl.className = 'pp-spot-nombre';
     this._spotNombreEl.textContent = '—';
-    spotTextos.append(this._spotNombreEl);
+    this._actualizadoEl = document.createElement('span');
+    this._actualizadoEl.className = 'pp-spot-actualizado';
+    spotTextos.append(this._spotNombreEl, this._actualizadoEl);
     selector.appendChild(spotTextos);
 
     selector.addEventListener('click', () => this._emit('pp-cambiar-spot'));
@@ -426,7 +428,13 @@ export class PpAppShell extends HTMLElement {
     if (this._icoFavEl) this._icoFavEl.setAttribute('name', val ? 'star' : 'star-outline');
   }
 
-  set actualizado(_texto) { /* eliminado: timestamp no aporta info útil */ }
+  // Recuperado tras auditoria UX (quick win #3): antes era un no-op ("el
+  // timestamp no aporta info util"); ahora muestra un texto discreto de
+  // confirmacion de frescura bajo el nombre del spot, en vez del
+  // timestamp absoluto original.
+  set actualizado(texto) {
+    if (this._actualizadoEl) this._actualizadoEl.textContent = texto || '';
+  }
 
   set refrescando(activo) {
     this._icoRefEl.classList.toggle('girando', !!activo);

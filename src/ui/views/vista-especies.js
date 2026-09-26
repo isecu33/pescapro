@@ -55,6 +55,7 @@ function crearTarjeta(r, st) {
   const content = document.createElement('ion-card-content');
 
   const ico = espImgEl(r.especie, 'pp-esp-card-ico');
+  if (r.especie.siluetaFina) ico.classList.add('pp-esp-card-ico--fina');
 
   const nombre = document.createElement('div');
   nombre.className = 'pp-esp-card-nombre';

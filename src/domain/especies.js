@@ -7,6 +7,11 @@
    - silhoueta: { vb, d } — viewBox y path SVG de la silueta (fill:currentColor)
    - foto: reservado para una fotografía real futura (hoy siempre `null`;
      el PNG existente era la misma silueta de `imagen` en negro, no una foto)
+   - siluetaFina: true en especies cuyo SVG de `imagen` es muy alargado
+     (aspect ratio muy distinto al 4:3 de la tarjeta del grid) y por tanto
+     queda como una línea diminuta con `object-fit: contain`. Solo afecta al
+     grid (vista-especies.js, clase `.pp-esp-card-ico--fina`), no al icono
+     del modal/lista/cuaderno que comparten el mismo SVG.
    - reglamento: datos de Galicia (talla, cupo, veda). VERIFICAR con Consellería
      do Mar / Xunta de Galicia antes de pescar — la normativa cambia.
 
@@ -59,7 +64,7 @@ export const ESPECIES = [
     }
   },
   {
-    id: 'sargo', nombre: 'Sargo', cientifico: 'Diplodus sargus', icono: '🐡', imagen: './iconos/svg/sargo.svg', foto: null,
+    id: 'sargo', nombre: 'Sargo', cientifico: 'Diplodus sargus', icono: '🐡', imagen: './iconos/svg/sargo.svg', foto: null, siluetaFina: true,
     meses: [0.7, 0.8, 0.95, 1.0, 0.9, 0.7, 0.6, 0.6, 0.8, 0.95, 0.9, 0.75],
     sst: [10, 13, 21, 24],
     oleaje: [0.2, 0.5, 1.6, 2.6],
@@ -81,7 +86,7 @@ export const ESPECIES = [
     }
   },
   {
-    id: 'jurel', nombre: 'Jurel / Chicharro', cientifico: 'Trachurus trachurus', icono: '🐟', imagen: './iconos/svg/jurel-chicharro.svg', foto: null,
+    id: 'jurel', nombre: 'Jurel / Chicharro', cientifico: 'Trachurus trachurus', icono: '🐟', imagen: './iconos/svg/jurel-chicharro.svg', foto: null, siluetaFina: true,
     meses: [0.3, 0.3, 0.5, 0.7, 0.9, 1.0, 1.0, 1.0, 0.95, 0.8, 0.5, 0.35],
     sst: [12, 14, 21, 24],
     oleaje: [0, 0.1, 1.0, 1.8],
@@ -103,7 +108,7 @@ export const ESPECIES = [
     }
   },
   {
-    id: 'caballa', nombre: 'Caballa / Verdel', cientifico: 'Scomber scombrus', icono: '🐟', imagen: './iconos/svg/caballa-verdel.svg', foto: null,
+    id: 'caballa', nombre: 'Caballa / Verdel', cientifico: 'Scomber scombrus', icono: '🐟', imagen: './iconos/svg/caballa-verdel.svg', foto: null, siluetaFina: true,
     meses: [0.2, 0.4, 0.9, 1.0, 1.0, 0.8, 0.5, 0.4, 0.4, 0.3, 0.2, 0.2],
     sst: [10, 12, 18, 21],
     oleaje: [0, 0.1, 1.2, 2.0],
@@ -147,7 +152,7 @@ export const ESPECIES = [
     }
   },
   {
-    id: 'congrio', nombre: 'Congrio', cientifico: 'Conger conger', icono: '🐍', imagen: './iconos/svg/congrio.svg', foto: null,
+    id: 'congrio', nombre: 'Congrio', cientifico: 'Conger conger', icono: '🐍', imagen: './iconos/svg/congrio.svg', foto: null, siluetaFina: true,
     meses: [0.9, 0.9, 0.85, 0.8, 0.7, 0.6, 0.6, 0.6, 0.7, 0.8, 0.9, 0.95],
     sst: [8, 10, 18, 22],
     oleaje: [0, 0.2, 1.5, 2.5],

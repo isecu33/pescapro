@@ -1,13 +1,13 @@
-﻿/* PescaPro - Base de datos de especies del CantÃ¡brico / norte de EspaÃ±a.
-   PredicciÃ³n SIN IA: cada especie define reglas (temporada, temperatura del agua,
-   estado del mar, marea, momento del dÃ­a, luna) y su actividad se calcula
-   como media geomÃ©trica ponderada de esos factores (src/domain/indice.js).
+/* PescaPro - Base de datos de especies del Cantábrico / norte de España.
+   Predicción SIN IA: cada especie define reglas (temporada, temperatura del agua,
+   estado del mar, marea, momento del día, luna) y su actividad se calcula
+   como media geométrica ponderada de esos factores (src/domain/indice.js).
 
-   Campos aÃ±adidos respecto al original:
-   - silhoueta: { vb, d } â€” viewBox y path SVG de la silueta (fill:currentColor)
+   Campos añadidos respecto al original:
+   - silhoueta: { vb, d } — viewBox y path SVG de la silueta (fill:currentColor)
    - foto: ruta relativa al WebP bundleado (ver /public/img/especies/)
-   - reglamento: datos de Galicia (talla, cupo, veda). VERIFICAR con ConsellerÃ­a
-     do Mar / Xunta de Galicia antes de pescar â€” la normativa cambia.
+   - reglamento: datos de Galicia (talla, cupo, veda). VERIFICAR con Consellería
+     do Mar / Xunta de Galicia antes de pescar — la normativa cambia.
 
    Actividad = media geométrica de factores ponderados [0..1]:
    - modos: modalidades en las que es objetivo habitual
@@ -219,8 +219,8 @@ export const ESPECIES = [
     marea: { subiendo: 1.0, pleamar: 0.95, bajando: 0.7, bajamar: 0.5 },
     momento: { amanecer: 0.8, dia: 0.3, atardecer: 1.0, noche: 1.0 },
     luna: [1.0, 0.85, 0.7, 0.85],
-    zonas: 'Puertos y dÃ¡rsenas iluminadas, calas resguardadas con agua clara, praderas de algas',
-    tecnicas: 'Eging con jibioneras (egis 1.8â€“3.0), pesca a la encesa con luz',
+    zonas: 'Puertos y dársenas iluminadas, calas resguardadas con agua clara, praderas de algas',
+    tecnicas: 'Eging con jibioneras (egis 1.8–3.0), pesca a la encesa con luz',
     cebos: 'Egis naturales al atardecer, brillantes/glow de noche',
     modos: ['eging'],
     notas: 'Necesita agua CLARA y en calma. Tras temporales, espera 2-3 días a que aclare. Noches oscuras junto a luces de puerto son letales.',
@@ -267,10 +267,10 @@ export const ESPECIES = [
     tecnicas: 'Pulpera/cangrejera trabajada a fondo entre rocas',
     cebos: 'Pulperas blancas o con cangrejo',
     modos: ['eging'],
-    notas: 'IMPORTANTE: su pesca recreativa estÃ¡ muy regulada o vedada en varias comunidades del CantÃ¡brico. Consulta la normativa antes de pescarlo.',
+    notas: 'IMPORTANTE: su pesca recreativa está muy regulada o vedada en varias comunidades del Cantábrico. Consulta la normativa antes de pescarlo.',
     reglamento: {
       tallaMin: null, pesoMin: 1, cupo: null,
-      veda: 'Consultar â€” vedas frecuentes en Galicia',
+      veda: 'Consultar — vedas frecuentes en Galicia',
       nota: 'Galicia: peso mínimo 1 kg habitual; sujeto a vedas y cuotas por cofradías. VERIFICAR antes de pescar con Consellería do Mar.'
     },
     silhoueta: {

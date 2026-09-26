@@ -468,6 +468,7 @@ function abrirModalCaptura(contenedor, st) {
   const selEsp = document.createElement('ion-select');
   selEsp.setAttribute('label', 'Especie');
   selEsp.setAttribute('interface', 'action-sheet');
+  selEsp.setAttribute('cancel-text', 'Cancelar');
   ESPECIES.forEach(e => {
     const o = document.createElement('ion-select-option');
     o.value = e.id;
@@ -494,6 +495,7 @@ function abrirModalCaptura(contenedor, st) {
   const selModo = document.createElement('ion-select');
   selModo.setAttribute('label', 'Modalidad');
   selModo.setAttribute('interface', 'action-sheet');
+  selModo.setAttribute('cancel-text', 'Cancelar');
   Object.values(MODOS).forEach(m => {
     const o = document.createElement('ion-select-option');
     o.value = m.id;
@@ -508,6 +510,7 @@ function abrirModalCaptura(contenedor, st) {
   const selSpot = document.createElement('ion-select');
   selSpot.setAttribute('label', 'Spot');
   selSpot.setAttribute('interface', 'action-sheet');
+  selSpot.setAttribute('cancel-text', 'Cancelar');
   candidatos.forEach((s, i) => {
     const o = document.createElement('ion-select-option');
     o.value = String(i);

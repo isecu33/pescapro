@@ -84,7 +84,10 @@ describe('indice: conversion 1:1 desde www/js/indice.js', () => {
   });
 
   it('resumenDias() da un pico de indice y codigo WMO por cada dia disponible, y detecta avisos rojos', () => {
-    const datosT = generarDatos({ viento: 10, ola: 1.0, sst: 15, tormentaEn: 20 });
+    // La hora 12 del fixture es la hora actual (horasPasadas = 12): la
+    // tormenta cae hoy sea cual sea la hora a la que se ejecute el test.
+    // Antes era 20 (ahora + 8 h), que despues de las 16:00 caia manana.
+    const datosT = generarDatos({ viento: 10, ola: 1.0, sst: 15, tormentaEn: 12 });
     const ctxT = preparar(datosT);
     const resumen = resumenDias(ctxT, 'spinning');
     const dias = diasDisponibles(ctxT, 'spinning');
@@ -93,7 +96,6 @@ describe('indice: conversion 1:1 desde www/js/indice.js', () => {
       expect(r.max).toBeGreaterThanOrEqual(0);
       expect(r.max).toBeLessThanOrEqual(100);
     });
-    // tormentaEn:20 cae en el primer dia de la serie (index horario 20 ~ hoy)
     expect(resumen[0].aviso).toBe(true);
   });
 
